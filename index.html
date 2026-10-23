@@ -264,6 +264,10 @@
           <select id="adminSubstituteSelect"><option value="">-- اختر الموظف الإداري البديل --</option></select>
         </div>
 
+        <div class="checkbox-row" id="noCoverageRow" style="background:#fff8e8;border:1px solid #e6c56a;border-radius:8px;padding:10px;margin:10px 0;">
+          <input type="checkbox" id="noCoverageNeeded">
+          <label for="noCoverageNeeded" id="noCoverageLabel">أؤكد أنه لا توجد لدي حصص أثناء فترة الاستئذان، ولا أحتاج إلى معلم لتغطية الحصص.</label>
+        </div>
         <div class="checkbox-row" id="teacherConsentRow">
           <input type="checkbox" id="teacherConsent">
           <label for="teacherConsent">أتعهد بأن المعلم البديل <strong>موافق</strong> على تغطية/تبديل الحصة المذكورة أعلاه، وأتحمل مسؤولية صحة البيانات.</label>
@@ -595,7 +599,7 @@
         phone: String(e.phone || e.mobile || e.telephone || '').trim(),
         active: !(e.active === false || String(e.active).toLowerCase() === 'false' || String(e.active).trim() === '0')
       };
-    }).filter(e => e.name && (includeInactive || e.active) && (e.employeeId || e.personalId));
+    }).filter(e => e.name && (includeInactive || e.active));
   }
 
   function clearEmployeeLoadError_() {
@@ -732,10 +736,15 @@
 
   function updateCoverageMode() {
     const adminMode = isAdministrativeCadreSelected();
-    document.getElementById('classCoverageGroup')?.classList.toggle('hidden', adminMode);
-    document.getElementById('adminCoverageGroup')?.classList.toggle('hidden', !adminMode);
-    document.getElementById('teacherConsentRow')?.classList.toggle('hidden', adminMode);
-    document.getElementById('adminConsentRow')?.classList.toggle('hidden', !adminMode);
+    const noCoverage = Boolean(document.getElementById('noCoverageNeeded')?.checked);
+    const noCoverageLabel = document.getElementById('noCoverageLabel');
+    if (noCoverageLabel) noCoverageLabel.textContent = adminMode
+      ? 'أؤكد أنه لا توجد لدي أعمال إدارية تتطلب التغطية أثناء فترة الاستئذان، ولا أحتاج إلى موظف إداري بديل.'
+      : 'أؤكد أنه لا توجد لدي حصص أثناء فترة الاستئذان، ولا أحتاج إلى معلم لتغطية الحصص.';
+    document.getElementById('classCoverageGroup')?.classList.toggle('hidden', adminMode || noCoverage);
+    document.getElementById('adminCoverageGroup')?.classList.toggle('hidden', !adminMode || noCoverage);
+    document.getElementById('teacherConsentRow')?.classList.toggle('hidden', adminMode || noCoverage);
+    document.getElementById('adminConsentRow')?.classList.toggle('hidden', !adminMode || noCoverage);
     const title = document.getElementById('pdf-coverage-title');
     if (title) title.textContent = adminMode ? 'تغطية العمل الإداري:' : 'جدول تغطية الحصص:';
     const routingNote = document.getElementById('routingNote');
@@ -761,14 +770,16 @@
   }
 
   document.addEventListener('change', event => {
-    if (event.target && event.target.id === 'subjectSelect') updateCoverageMode();
+    if (event.target && (event.target.id === 'subjectSelect' || event.target.id === 'noCoverageNeeded')) updateCoverageMode();
   });
 
   async function verifyEmp() {
     const id = document.getElementById('empIdInput').value.trim();
     if(!id) return;
-    if (ALL_EMPLOYEES.length === 0) await loadAllEmployees();
-    if (ALL_EMPLOYEES.length === 0) return;
+    if (ALL_EMPLOYEES.length === 0) {
+      try { await loadAllEmployees(); }
+      catch (loadError) { console.error('تعذر تحميل قائمة الموظفين؛ ستتم محاولة التحقق المباشر:', loadError); }
+    }
 
     const normalizeLoginId = value => String(value == null ? '' : value)
       .replace(/[٠-٩]/g, d => String('٠١٢٣٤٥٦٧٨٩'.indexOf(d)))
@@ -798,6 +809,16 @@
       return;
     }
     currentEmp = emp;
+
+    // إعادة محاولة تحميل القائمة بعد التحقق المباشر؛ هذه القائمة هي مصدر أسماء البدلاء.
+    if (!ALL_EMPLOYEES.length) {
+      try { await loadAllEmployees(); }
+      catch (listError) { console.error('تعذر تحميل قائمة البدلاء:', listError); }
+    }
+    // ضمان وجود الموظف الحالي في القائمة إن أعاد الخادم التحقق منه فقط.
+    if (!ALL_EMPLOYEES.some(e => String(e.employeeId || '') === String(emp.employeeId || '') && e.name === emp.name)) {
+      ALL_EMPLOYEES.push({ ...emp, active: true });
+    }
 
     const job = String(emp.jobTitle || '').trim();
     const isCoordinator = job.includes('منسق') || job.includes('منسقة');
@@ -952,11 +973,12 @@
     }
 
     const adminMode = isAdministrativeCadreSelected();
+    const noCoverage = Boolean(document.getElementById('noCoverageNeeded')?.checked);
     let coverageArr = [];
     let adminCoverage = '';
     let adminSubstitute = '';
     let adminSubstituteEmpId = '';
-    if (adminMode) {
+    if (adminMode && !noCoverage) {
       const adminConsent = document.getElementById('adminConsent');
       const adminDetailsEl = document.getElementById('adminCoverageDetails');
       const adminSelect = document.getElementById('adminSubstituteSelect');
@@ -966,7 +988,7 @@
       if (!adminCoverage) return alert('يرجى كتابة الأعمال الإدارية المطلوب تغطيتها.');
       if (!adminSubstitute) return alert('يرجى اختيار الموظف الإداري البديل.');
       if (!adminConsent?.checked) return alert('يرجى تأكيد التنسيق مع الموظف الإداري البديل.');
-    } else {
+    } else if (!adminMode && !noCoverage) {
       if (!consentEl || !consentEl.checked) return alert('يجب الموافقة على التعهد قبل إرسال الطلب.');
       try {
         coverageArr = collectCoverageData();
@@ -1012,7 +1034,7 @@
         ? subjectSelect.value
         : 'إرسال مباشر للنائب الأكاديمي',
       coverageType: adminMode ? 'إداري' : 'حصص',
-      adminCoverage: adminCoverage,
+      adminCoverage: noCoverage && adminMode ? 'أفاد مقدم الطلب بأنه لا توجد أعمال إدارية تتطلب التغطية أثناء فترة الاستئذان.' : adminCoverage,
       adminSubstitute: adminSubstitute,
       adminSubstituteEmpId: adminSubstituteEmpId,
       permissionType: permissionType,
@@ -1020,10 +1042,13 @@
       exitTime: exitTime,
       returnTime: returnTime,
       reason: reasonEl.value.trim(),
-      coverage: adminMode ? ('تغطية العمل الإداري: ' + adminCoverage + ' | البديل: ' + adminSubstitute) : coverageText,
+      coverage: noCoverage
+        ? (adminMode ? 'لا توجد أعمال إدارية تتطلب التغطية أثناء فترة الاستئذان.' : 'لا توجد حصص لدى المعلم أثناء فترة الاستئذان؛ لا يحتاج إلى تغطية حصص.')
+        : (adminMode ? ('تغطية العمل الإداري: ' + adminCoverage + ' | البديل: ' + adminSubstitute) : coverageText),
       coverageDetails: JSON.stringify(coverageArr),
+      noCoverageNeeded: noCoverage,
       duration: duration,
-      consent: adminMode ? Boolean(document.getElementById('adminConsent')?.checked) : Boolean(consentEl?.checked)
+      consent: noCoverage ? true : (adminMode ? Boolean(document.getElementById('adminConsent')?.checked) : Boolean(consentEl?.checked))
     };
 
     const originalText = btn ? btn.innerText : 'إرسال الطلب';
@@ -1115,12 +1140,15 @@
       recipientName = `منسق مادة ${subject} (${coordInfo.name})`;
     }
 
+    const noCoverage = Boolean(document.getElementById('noCoverageNeeded')?.checked);
     const coverageArr = adminMode ? [] : collectCoverageData();
-    const coverageText = adminMode
-      ? ('تغطية العمل الإداري: ' + (document.getElementById('adminCoverageDetails')?.value || '') + '\nالبديل: ' + (document.getElementById('adminSubstituteSelect')?.value || ''))
-      : coverageArr.map(c =>
-      `• ${c.subject} - ${c.day} ${c.date} - الحصة ${c.period} - البديل: ${c.substituteTeacher}`
-    ).join('\n');
+    const coverageText = noCoverage
+      ? (adminMode ? 'أفاد مقدم الطلب بأنه لا توجد أعمال إدارية تتطلب التغطية أثناء فترة الاستئذان.' : 'أفاد المعلم بأنه لا توجد لديه حصص أثناء فترة الاستئذان ولا يحتاج إلى تغطية.')
+      : (adminMode
+        ? ('تغطية العمل الإداري: ' + (document.getElementById('adminCoverageDetails')?.value || '') + '\nالبديل: ' + (document.getElementById('adminSubstituteSelect')?.value || ''))
+        : coverageArr.map(c =>
+          `• ${c.subject} - ${c.day} ${c.date} - الحصة ${c.period} - البديل: ${c.substituteTeacher}`
+        ).join('\n'));
 
     const routeText = adminMode ? 'طلب إداري - إحالة مباشرة للنائب الإداري' : (sendDirectlyToVP ? 'إحالة مباشرة للنائب الأكاديمي' : `منسق مادة ${subject}`);
     const coverageLabel = adminMode ? 'تغطية العمل الإداري:' : 'تغطية الحصص:';
