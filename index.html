@@ -497,9 +497,9 @@
   </div>
 
 <script>
-  const API_URL =   
+  const API_URL =
   
- 'https://script.google.com/macros/s/AKfycbxGhFw28rYIQ_P2tANotzCaSXQQDAA-o9t0SxJ173dO6L8-r6RNTe7I9R0VD6CwYq-u/exec';
+ 'https://script.google.com/macros/s/AKfycbzav-D0I-r6ZT9aZVJJb3zyoEZdw_35ia6IR0C1giNv9-cfDGxF9ANe98A8alHWb4fF/exec';
   const JSON_URL = 'encoded_data.txt';
   const PASSWORDS = { coordinator: "Co@2027", vp: "Academic@2027", vp_admin: "Admin@2027", principal: "Manager@2027", admin: "ABAH@2027" };
   const JOKER_PASSWORD = "AbuHazem@2027";
@@ -521,32 +521,74 @@
   let currentTrackedData = null;
 
   async function loadAllEmployees() {
-    // مصدر الخادم أولاً حتى تنعكس الإضافة والتعديل والإيقاف فوراً؛ encoded_data.txt احتياطي فقط.
+    // 1) جرب قائمة الموظفين من Google Apps Script. إذا كانت فارغة، انتقل للمصدر الاحتياطي.
     try {
-      const fd = new URLSearchParams(); fd.append('action', 'getEmployees');
-      const apiRes = await fetch(API_URL, { method: 'POST', body: fd, headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, cache: 'no-store' });
-      const apiData = await apiRes.json();
-      if (apiData && apiData.success && Array.isArray(apiData.employees)) {
-        ALL_EMPLOYEES = apiData.employees.filter(e => e.active !== false && String(e.active).toLowerCase() !== 'false');
-        buildCoordinatorMap();
-        return ALL_EMPLOYEES;
+      const url = API_URL + (API_URL.includes('?') ? '&' : '?') + 'action=getEmployees&_=' + Date.now();
+      const apiRes = await fetch(url, { method: 'GET', cache: 'no-store' });
+      if (apiRes.ok) {
+        const apiData = await apiRes.json();
+        if (apiData && apiData.success && Array.isArray(apiData.employees) && apiData.employees.length > 0) {
+          ALL_EMPLOYEES = normalizeEmployeeList_(apiData.employees);
+          if (ALL_EMPLOYEES.length > 0) {
+            buildCoordinatorMap();
+            clearEmployeeLoadError_();
+            return ALL_EMPLOYEES;
+          }
+        }
       }
-    } catch (_) { /* fallback below */ }
+    } catch (_) { /* استخدم encoded_data.txt */ }
+
+    // 2) المصدر الاحتياطي: يقبل JSON مباشرًا أو Base64 يحتوي على JSON.
     try {
-      const res = await fetch(JSON_URL, { cache: 'no-store' });
+      const res = await fetch(JSON_URL + '?_=' + Date.now(), { cache: 'no-store' });
       if (!res.ok) throw new Error('HTTP ' + res.status);
-      const b64 = (await res.text()).replace(/\s/g, '');
-      const binary = window.atob(b64);
-      const bytes = Uint8Array.from(binary, ch => ch.charCodeAt(0));
-      const decoded = new TextDecoder('utf-8').decode(bytes);
-      ALL_EMPLOYEES = JSON.parse(decoded).filter(e => e.active !== false && String(e.active).toLowerCase() !== 'false');
+      const raw = (await res.text()).trim();
+      let parsed;
+      try {
+        parsed = JSON.parse(raw);
+      } catch (_) {
+        const b64 = raw.replace(/\s/g, '');
+        const binary = window.atob(b64);
+        const bytes = Uint8Array.from(binary, ch => ch.charCodeAt(0));
+        parsed = JSON.parse(new TextDecoder('utf-8').decode(bytes));
+      }
+      const sourceList = Array.isArray(parsed) ? parsed :
+        (Array.isArray(parsed.employees) ? parsed.employees :
+        (Array.isArray(parsed.data) ? parsed.data : []));
+      ALL_EMPLOYEES = normalizeEmployeeList_(sourceList);
+      if (!ALL_EMPLOYEES.length) throw new Error('لم يتم العثور على أسماء موظفين داخل الملف.');
       buildCoordinatorMap();
+      clearEmployeeLoadError_();
       return ALL_EMPLOYEES;
-    } catch(e) {
+    } catch (e) {
+      ALL_EMPLOYEES = [];
       const errorEl = document.getElementById('loginError');
-      if (errorEl) errorEl.innerText = 'تعذر تحميل بيانات الموظفين. تأكد من وجود encoded_data.txt أو تفعيل إجراء getEmployees في Apps Script.';
+      if (errorEl) errorEl.innerText = 'تعذر تحميل أسماء الموظفين. تحقق من ورقة Employees في Google Sheets أو من ملف encoded_data.txt في مستودع الموقع.';
+      console.error('Employee list loading failed:', e);
       return [];
     }
+  }
+
+  function normalizeEmployeeList_(list) {
+    if (!Array.isArray(list)) return [];
+    return list.map(e => {
+      e = e || {};
+      return {
+        ...e,
+        id: String(e.id || e.employeeId || e.empId || e.staffId || '').trim(),
+        name: String(e.name || e.fullName || e.employeeName || e.staffName || '').trim(),
+        jobTitle: String(e.jobTitle || e.job || e.title || e.position || e.roleName || '').trim(),
+        employeeId: String(e.employeeId || e.empId || e.staffId || e.workId || '').trim(),
+        personalId: String(e.personalId || e.qid || e.nationalId || e.nationalID || '').trim(),
+        phone: String(e.phone || e.mobile || e.telephone || '').trim(),
+        active: !(e.active === false || String(e.active).toLowerCase() === 'false' || String(e.active).trim() === '0')
+      };
+    }).filter(e => e.name && e.active && (e.employeeId || e.personalId));
+  }
+
+  function clearEmployeeLoadError_() {
+    const errorEl = document.getElementById('loginError');
+    if (errorEl && errorEl.innerText.includes('تحميل')) errorEl.innerText = '';
   }
 
   function normalizeArabic_(value) {
@@ -658,9 +700,12 @@
   }
 
   function isTeacherOrCoordinator(emp) {
-    const job = String(emp && emp.jobTitle || '').trim();
-    // استبعاد الكادر الإداري من قائمة بدلاء الحصص، وإبقاء المعلمين والمنسقين.
-    return /معلم|معلمة|مدرس|مدرسة|منسق|منسقة/i.test(job);
+    const job = normalizeArabic_(emp && emp.jobTitle || '');
+    // استبعاد المسمّيات الإدارية الصريحة، مع قبول المسميات التعليمية بالعربية والإنجليزية.
+    if (/مدير|نائب|سكرتير|اداري|اداريه|محاسب|امين مخزن|موظف استقبال/.test(job)) return false;
+    if (/معلم|معلمه|مدرس|مدرسه|منسق|منسقه|teacher|educator|instructor|coordinator/.test(job)) return true;
+    // بعض ملفات الموظفين لا تتضمن المسمى الوظيفي أو تستخدم مسمى غير معتاد؛ لا تحجب الاسم بسبب ذلك.
+    return !job;
   }
 
   function isAdministrativeCadreSelected() {
