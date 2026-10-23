@@ -1,0 +1,1525 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>نظام الاستئذان - مدرسة أحمد بن راشد المريخي</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <style>
+    :root { --primary: #8a1538; --primary-light: #a61b45; --gold: #d4af37; --bg: #0f172a; --card-bg: rgba(255, 255, 255, 0.98); }
+    * { box-sizing: border-box; font-family: 'Cairo', Tahoma, sans-serif; }
+    .flower-decor { position: fixed; inset: 0; overflow: hidden; pointer-events: none; z-index: 0; }
+    .flower-decor span { position: absolute; bottom: -70px; opacity: .62; font-size: clamp(22px, 3vw, 42px); animation: flowerFloat linear infinite; filter: drop-shadow(0 4px 8px rgba(255,255,255,.15)); }
+    .flower-decor span:nth-child(1) { left: 5%; animation-duration: 17s; animation-delay: -5s; }
+    .flower-decor span:nth-child(2) { left: 17%; animation-duration: 22s; animation-delay: -12s; }
+    .flower-decor span:nth-child(3) { left: 31%; animation-duration: 19s; animation-delay: -3s; }
+    .flower-decor span:nth-child(4) { left: 48%; animation-duration: 24s; animation-delay: -15s; }
+    .flower-decor span:nth-child(5) { left: 64%; animation-duration: 18s; animation-delay: -8s; }
+    .flower-decor span:nth-child(6) { left: 79%; animation-duration: 21s; animation-delay: -10s; }
+    .flower-decor span:nth-child(7) { left: 92%; animation-duration: 16s; animation-delay: -2s; }
+    @keyframes flowerFloat { 0% { transform: translateY(0) rotate(0deg); opacity: 0; } 12% { opacity: .65; } 85% { opacity: .55; } 100% { transform: translateY(-115vh) rotate(300deg); opacity: 0; } }
+    body { margin: 0; padding: 20px; background: linear-gradient(135deg, #1e1e2f 0%, #0f172a 100%); direction: rtl; color: #333; min-height: 100vh; display: flex; flex-direction: column; align-items: center; }
+    
+    .animated-wrapper { position: relative; z-index: 1; background: linear-gradient(270deg, var(--primary), var(--gold), #17a2b8, var(--primary-light)); background-size: 800% 800%; animation: gradientBorder 6s ease infinite; padding: 6px; border-radius: 20px; width: 100%; max-width: 650px; margin-bottom: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+    @keyframes gradientBorder { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+    
+    .card { background: var(--card-bg); border-radius: 14px; padding: 25px 20px; backdrop-filter: blur(10px); position: relative; overflow: hidden; }
+    .header-title { text-align: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 2px solid #f0f0f0; }
+    .header-title h1 { color: var(--primary); margin: 10px 0 5px 0; font-size: 1.4rem; font-weight: 800; }
+    .header-title p { color: #666; margin: 0; font-size: 0.95rem; font-weight: 600; }
+    
+    .school-logo-container { width: 100%; display: flex; justify-content: center; margin-bottom: 10px; }
+    .school-logo { width: 100%; max-width: 100%; height: auto; object-fit: contain; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.15)); }
+
+    .form-group { margin-bottom: 15px; }
+    label { display: block; margin-bottom: 8px; font-weight: 600; color: #444; font-size: 0.9rem; }
+    input, select, textarea { width: 100%; padding: 14px; border: 1px solid #ddd; border-radius: 10px; font-size: 1rem; font-family: 'Cairo', sans-serif; background: #f9f9f9; transition: all 0.3s ease; }
+    input:focus, select:focus, textarea:focus { border-color: var(--primary); background: white; box-shadow: 0 0 0 4px rgba(138, 21, 56, 0.1); outline: none; }
+    input:disabled, select:disabled { background: #eee; color: #888; }
+    
+    .btn { padding: 14px 20px; border: none; border-radius: 10px; cursor: pointer; font-weight: 800; font-size: 1rem; width: 100%; transition: all 0.3s ease; font-family: 'Cairo', sans-serif; }
+    .btn-primary { background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%); color: white; box-shadow: 0 4px 15px rgba(138, 21, 56, 0.3); }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(138, 21, 56, 0.4); }
+    .btn-wa { background: #25D366; color: white; margin-top: 10px; display: none; }
+    .btn-outline { background: transparent; border: 2px solid var(--primary); color: var(--primary); margin-top: 10px; }
+    .btn-danger { background: #dc3545; color: white; }
+    .btn-success { background: #28a745; color: white; }
+    .btn-sm { padding: 8px 12px; font-size: 0.85rem; width: auto; }
+    
+    .emp-info-box { background: #fff8f9; border: 1px solid #f5d6dc; border-radius: 10px; padding: 15px; margin-bottom: 20px; }
+    .emp-info-box p { margin: 5px 0; font-size: 0.95rem; color: #555; }
+    .emp-info-box strong { color: var(--primary); }
+    .balance-badge { display: inline-block; background: var(--primary); color: white; padding: 5px 12px; border-radius: 20px; font-size: 0.9rem; font-weight: bold; }
+    
+    .hidden { display: none !important; }
+    .row { display: flex; gap: 10px; flex-wrap: wrap; }
+    .row > * { flex: 1; min-width: 140px; }
+    
+    .admin-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-bottom: 20px; }
+    .stat-box { background: white; border-right: 5px solid var(--primary); padding: 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+    .stat-box h3 { margin: 0 0 10px 0; font-size: 0.9rem; color: #666; }
+    .stat-box .value { font-size: 2rem; font-weight: bold; color: var(--primary); }
+    
+    .secret-buttons { display: flex; gap: 10px; justify-content: center; margin-top: 20px; flex-wrap: wrap; }
+    .secret-btn { background: #e9ecef; color: #555; padding: 8px 15px; border-radius: 20px; border: none; cursor: pointer; font-family: 'Cairo'; font-weight: bold; transition: 0.3s; }
+    .secret-btn:hover { background: var(--primary); color: white; }
+    
+    .status-track { display: flex; justify-content: space-between; margin: 20px 0; position: relative; }
+    .status-track::before { content: ''; position: absolute; top: 15px; left: 10%; right: 10%; height: 4px; background: #e0e0e0; z-index: 1; }
+    .status-step { position: relative; z-index: 2; text-align: center; width: 22%; }
+    .status-circle { width: 30px; height: 30px; border-radius: 50%; background: #e0e0e0; color: white; display: flex; align-items: center; justify-content: center; margin: 0 auto 5px; font-size: 0.8rem; font-weight: bold; }
+    .status-step.active .status-circle { background: var(--primary); box-shadow: 0 0 10px rgba(138, 21, 56, 0.4); }
+    .status-step.rejected .status-circle { background: #dc3545; }
+    .status-step p { font-size: 0.75rem; margin: 0; font-weight: bold; color: #777; }
+    .status-step.active p { color: var(--primary); }
+    .status-step.rejected p { color: #dc3545; }
+    
+    table.data-table { width: 100%; border-collapse: collapse; text-align: center; font-size: 0.85rem; }
+    table.data-table th, table.data-table td { padding: 8px; border: 1px solid #ddd; }
+    table.data-table thead { background: #eef2f7; }
+    table.data-table tr:nth-child(even) { background: #f9f9f9; }
+    
+    .coverage-entry { background: #f8f9fa; border: 1px solid #e0e0e0; border-radius: 10px; padding: 12px; margin-bottom: 10px; }
+    .coverage-entry h4 { margin: 0 0 10px 0; color: var(--primary); font-size: 0.95rem; }
+    
+    .checkbox-row { display: flex; align-items: flex-start; gap: 8px; background: #fff8f9; padding: 12px; border-radius: 10px; border: 1px solid #f5d6dc; margin-bottom: 12px; }
+    .checkbox-row input[type="checkbox"] { width: 20px; height: 20px; margin-top: 2px; flex-shrink: 0; }
+    .checkbox-row label { margin: 0; font-size: 0.9rem; color: #444; }
+    
+    .tabs { display: flex; gap: 6px; margin-bottom: 15px; flex-wrap: wrap; }
+    .tab { padding: 8px 14px; border-radius: 8px; background: #eee; cursor: pointer; font-weight: bold; font-size: 0.85rem; }
+    .tab.active { background: var(--primary); color: white; }
+    
+    .employee-row { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; padding: 8px; border-bottom: 1px solid #eee; font-size: 0.85rem; }
+    .employee-row > span { flex: 1; min-width: 100px; }
+    
+    .error-msg { color: #dc3545; font-weight: bold; font-size: 0.9rem; text-align: center; margin-top: 10px; }
+    .success-msg { color: #28a745; font-weight: bold; font-size: 0.9rem; text-align: center; margin-top: 10px; }
+
+    /* قالب PDF: يبقى مخفياً خارج الالتقاط، ويُظهره كود التنزيل مؤقتاً */
+    #pdf-template {
+      box-sizing: border-box;
+      width: 210mm;
+      min-height: 297mm;
+      padding: 15mm;
+      background: #ffffff;
+      color: #222222;
+      font-family: 'Cairo', Tahoma, Arial, sans-serif;
+      direction: rtl;
+      text-align: right;
+      position: fixed;
+      left: -10000px;
+      top: 0;
+      z-index: 99999;
+      overflow: visible;
+    }
+    #pdf-template.pdf-capturing {
+      display: block !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+      left: 0 !important;
+      top: 0 !important;
+    }
+    #pdf-template, #pdf-template * {
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+    #pdf-template img { max-width: 100%; height: auto; }
+    .pdf-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid #8a1538; padding-bottom: 10px; margin-bottom: 20px; }
+    .pdf-header img { width: 80px; }
+    .pdf-title { text-align: center; background: #f0f0f0; padding: 10px; border-radius: 8px; color: #8a1538; margin-bottom: 20px; font-weight: bold; font-size: 1.2rem; }
+    .pdf-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+    .pdf-table th, .pdf-table td { border: 1px solid #999; padding: 10px; text-align: center; font-size: 0.9rem; }
+    .pdf-table th { background: #f8f9fa; color: #8a1538; font-weight: bold; }
+    .pdf-sig-container { display: flex; justify-content: space-between; margin-top: 30px; }
+    .pdf-sig-box { border: 1px solid #ccc; border-radius: 8px; width: 30%; padding: 10px; text-align: center; height: 120px; position: relative; }
+    .pdf-sig-title { font-weight: bold; color: #8a1538; margin-bottom: 5px; font-size: 0.9rem; }
+    .pdf-sig-img { max-width: 80%; max-height: 60px; position: absolute; bottom: 10px; left: 10%; }
+    .pdf-footer { text-align: center; font-size: 0.75rem; color: #777; border-top: 1px solid #ddd; padding-top: 10px; margin-top: 30px; }
+    .official-permission { width: 180mm; min-height: 267mm; margin: 0 auto; background:#fff; color:#111; font-family:Tahoma,Arial,sans-serif; font-size:12px; line-height:1.65; direction:rtl; }
+    .official-page { width:100%; box-sizing:border-box; padding:0; background:#fff; }
+    .official-page + .official-page { page-break-before:always; break-before:page; }
+    .official-head { display:grid; grid-template-columns:1fr 1fr; gap:8px; border-bottom:1px solid #777; padding-bottom:8px; margin-bottom:12px; align-items:center; }
+    .official-head .ar { text-align:right; } .official-head .en { text-align:left; direction:ltr; }
+    .official-head .motto { max-width:70px; max-height:65px; object-fit:contain; display:block; margin:0 auto 5px; }
+    .official-subject { border:1px solid #777; padding:7px 10px; margin:8px 0 12px; font-weight:bold; text-align:center; }
+    .official-line { margin:8px 0; }
+    .official-choice { width:100%; border-collapse:collapse; margin:8px 0 12px; table-layout:fixed; }
+    .official-choice th,.official-choice td,.official-coverage th,.official-coverage td { border:1px solid #777; padding:6px 4px; text-align:center; vertical-align:middle; }
+    .official-choice th,.official-coverage th { background:#f3f3f3; font-weight:bold; }
+    .official-coverage { width:100%; border-collapse:collapse; table-layout:fixed; margin:8px 0 12px; }
+    .official-coverage td { height:25px; overflow-wrap:anywhere; }
+    .official-rule { border-top:1px solid #777; margin:10px 0; }
+    .official-approval { display:grid; grid-template-columns:1fr; gap:7px; margin-top:12px; }
+    .official-approval-row { border-bottom:1px solid #999; padding:7px 0; min-height:26px; }
+    .official-electronic { color:#333; font-weight:bold; white-space:nowrap; }
+    .official-principal { margin-top:14px; text-align:left; min-height:95px; position:relative; padding-left:8px; }
+    .official-principal img { max-width:160px; max-height:70px; object-fit:contain; display:block; margin:0 0 0 auto; }
+    .official-notes { margin-top:14px; border-top:1px solid #888; padding-top:8px; }
+    .official-small { font-size:10px; }
+    .official-footer { margin-top:10px; text-align:center; font-size:9px; direction:ltr; }
+
+  </style>
+</head>
+<body>
+  <div class="flower-decor" aria-hidden="true"><span>🌸</span><span>🌼</span><span>🌷</span><span>✿</span><span>🌺</span><span>❀</span><span>🌻</span></div>
+
+  <div id="employeePortal" style="width: 100%; display: flex; flex-direction: column; align-items: center;">
+    <div class="animated-wrapper" id="loginCard">
+      <div class="card">
+        <div class="header-title">
+          <div class="school-logo-container"><img src="https://i.postimg.cc/tRm07wZF/MOTTO.png" alt="شعار المدرسة" class="school-logo"></div>
+          <h1>نظام الاستئذان</h1>
+          <p>مدرسة أحمد بن راشد المريخي الابتدائية للبنين</p>
+        </div>
+        <div class="form-group">
+          <label>أدخل رقمك الوظيفي أو الشخصي</label>
+          <input type="text" id="empIdInput" placeholder="مثال: 114945" style="text-align: center; font-size: 1.2rem; letter-spacing: 2px;">
+        </div>
+        <button class="btn btn-primary" onclick="verifyEmp()">تسجيل الدخول</button>
+        <button class="btn btn-outline" onclick="showTrackingScreen()">🔍 تتبع حالة طلب سابق</button>
+        <p id="loginError" class="error-msg"></p>
+      </div>
+    </div>
+
+    <div id="trackScreen" class="animated-wrapper hidden">
+      <div class="card">
+        <div class="header-title"><h1>تتبع حالة الطلب</h1></div>
+        <div class="form-group">
+          <label>أدخل رقم الطلب الخاص بك (مثال: REQ-1234)</label>
+          <input type="text" id="trackReqId" placeholder="REQ-...">
+        </div>
+        <button class="btn btn-primary" onclick="trackRequest()">بحث</button>
+        <button class="btn btn-outline" onclick="location.reload()">رجوع</button>
+        <div id="trackResult" class="hidden" style="margin-top:20px; background:#f8f9fa; padding:15px; border-radius:10px;">
+          <h3 style="color:var(--primary); margin-top:0; text-align:center;">حالة الطلب: <span id="trkStatusText"></span></h3>
+          <div class="status-track">
+            <div class="status-step" id="step1"><div class="status-circle">1</div><p>المعلم</p></div>
+            <div class="status-step" id="step2"><div class="status-circle">2</div><p>المنسق</p></div>
+            <div class="status-step" id="step3"><div class="status-circle">3</div><p>النائب</p></div>
+            <div class="status-step" id="step4"><div class="status-circle">4</div><p>المدير</p></div>
+          </div>
+          <p id="trkNote" style="text-align:center; font-weight:bold; margin-top:15px;"></p>
+          <button class="btn btn-primary hidden" id="trackPdfBtn" style="background:#17a2b8; margin-top:15px;" onclick="downloadPDFFromTrack()">🖼️ تحميل ورقة الإذن (JPG)</button>
+          <button class="btn btn-success hidden" id="trackOfficialPdfBtn" style="margin-top:10px;" onclick="downloadOfficialPermissionPDF()">📄 تحميل نموذج الإذن الرسمي (PDF)</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="formScreen" class="animated-wrapper hidden">
+      <div class="card">
+        <div class="header-title"><h1>طلب استئذان جديد</h1></div>
+        <div class="emp-info-box" id="empFullInfo"></div>
+
+        <div class="form-group" id="subjectGroup">
+          <label for="subjectSelect">المادة الدراسية (لتحديد منسق المادة)</label>
+          <select id="subjectSelect" required>
+            <option value="">-- اختر المادة --</option>
+            <option value="اللغة العربية">اللغة العربية</option>
+            <option value="اللغة الإنجليزية">اللغة الإنجليزية</option>
+            <option value="الرياضيات">الرياضيات</option>
+            <option value="العلوم">العلوم</option>
+            <option value="العلوم الاجتماعية">العلوم الاجتماعية</option>
+            <option value="الفنون البصرية">الفنون البصرية</option>
+            <option value="التربية الرياضية">التربية الرياضية</option>
+            <option value="تكنولوجيا المعلومات">تكنولوجيا المعلومات</option>
+            <option value="العلوم الشرعية">العلوم الشرعية</option>
+            <option value="أخرى">أخرى / لا تنطبق</option>
+            <option value="كادر إداري">كادر إداري</option>
+          </select>
+          <small id="routingNote" style="display:block;color:#52606d;margin-top:6px;">سيُرسل إشعار واتساب إلى منسق المادة المختار.</small>
+        </div>
+
+        <div class="form-group">
+          <label>نوع الإذن</label>
+          <select id="permType">
+            <option value="تأخر صباحي">تأخر صباحي</option>
+            <option value="إذن خروج وعودة">إذن خروج وعودة</option>
+            <option value="خروج مبكر">خروج مبكر</option>
+            <option value="ورشة تعليمية">ورشة تعليمية (لا يخصم)</option>
+            <option value="مهمة رسمية">مهمة رسمية (لا يخصم)</option>
+          </select>
+        </div>
+        <div class="form-group"><label>التاريخ</label><input type="date" id="permDate"></div>
+        <div class="row">
+          <div class="form-group"><label>وقت الخروج</label><input type="time" id="exitTime" onchange="calcDuration()"></div>
+          <div class="form-group"><label>وقت العودة</label><input type="time" id="returnTime" onchange="calcDuration()"></div>
+        </div>
+        <div class="form-group"><label>سبب الاستئذان</label><input type="text" id="reason" placeholder="اذكر السبب..."></div>
+
+        <div class="form-group" id="classCoverageGroup">
+          <label>تغطية الحصص (أضف حصة واحدة على الأقل)</label>
+          <div id="coverageEntries"></div>
+          <button type="button" class="btn btn-outline btn-sm" onclick="addCoverageEntry()" style="margin-top:8px;">➕ إضافة حصة تغطية</button>
+        </div>
+
+        <div class="form-group hidden" id="adminCoverageGroup">
+          <label for="adminCoverageDetails">تغطية العمل الإداري</label>
+          <textarea id="adminCoverageDetails" rows="3" placeholder="اكتب الأعمال الإدارية التي سيتولاها الموظف البديل أثناء فترة الاستئذان..."></textarea>
+          <label for="adminSubstituteSelect" style="margin-top:10px;">الموظف الإداري البديل</label>
+          <select id="adminSubstituteSelect"><option value="">-- اختر الموظف الإداري البديل --</option></select>
+        </div>
+
+        <div class="checkbox-row" id="teacherConsentRow">
+          <input type="checkbox" id="teacherConsent">
+          <label for="teacherConsent">أتعهد بأن المعلم البديل <strong>موافق</strong> على تغطية/تبديل الحصة المذكورة أعلاه، وأتحمل مسؤولية صحة البيانات.</label>
+        </div>
+        <div class="checkbox-row hidden" id="adminConsentRow">
+          <input type="checkbox" id="adminConsent">
+          <label for="adminConsent">أؤكد التنسيق مع الموظف الإداري البديل وتوضيح الأعمال الإدارية المطلوب تغطيتها.</label>
+        </div>
+
+        <button class="btn btn-primary" id="submitBtn" onclick="submitRequest()">إرسال الطلب</button>
+        <button class="btn btn-wa" id="waBtn" onclick="sendWhatsApp()">📱 إرسال إشعار واتساب للمنسق الصحيح</button>
+
+        <div id="successBox" class="hidden" style="text-align:center; margin-top:15px; background:#e8f5e9; padding:15px; border-radius:10px; border:1px solid #c8e6c9;">
+          <p style="color:#2e7d32; font-weight:bold; margin:0 0 5px 0;">✅ تم حفظ طلبك بنجاح!</p>
+          <p style="font-size:1.2rem; font-weight:bold; color:#1b5e20; margin:0;">رقم الطلب: <span id="displayReqId"></span></p>
+          <p style="font-size:0.8rem; color:#555; margin-top:5px;">احتفظ برقم الطلب لتتمكن من تتبعه لاحقاً.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="secret-buttons" id="secretButtons">
+    <button class="secret-btn" onclick="askPassword('coordinator')">المنسق</button>
+    <button class="secret-btn" onclick="askPassword('vp')">النائب الأكاديمي</button>
+    <button class="secret-btn" onclick="askPassword('vp_admin')">النائب الإداري</button>
+    <button class="secret-btn" onclick="askPassword('principal')">المدير</button>
+    <button class="secret-btn" onclick="askPassword('admin')" style="font-size: 0.8rem;">⚙️ إدارة</button>
+  </div>
+
+  <div id="approvalScreen" class="animated-wrapper hidden">
+    <div class="card">
+      <div class="header-title"><h1 id="approvalTitle">اعتماد الطلبات</h1></div>
+      <div id="searchBox">
+        <div class="form-group">
+          <label>أدخل رقم الطلب (مثال: REQ-1234)</label>
+          <input type="text" id="searchReqId" placeholder="REQ-...">
+          <button class="btn btn-primary" onclick="fetchRequest()" style="margin-top:10px;">بحث</button>
+        </div>
+      </div>
+      <div id="requestDetails" class="hidden" style="background:#f8f9fa; padding:15px; border-radius:8px; margin-top:20px;">
+        <h3 style="color:var(--primary); margin-top:0;">تفاصيل الطلب</h3>
+        <p><strong>الموظف:</strong> <span id="detName"></span></p>
+        <p><strong>المسمى:</strong> <span id="detJob"></span></p>
+        <p><strong>السبب:</strong> <span id="detReason"></span></p>
+        <p><strong>تغطية الحصص:</strong> <span id="detCoverage" style="color:#dc3545; white-space: pre-wrap;"></span></p>
+        <p><strong>الحالة:</strong> <span id="detStatus" class="balance-badge"></span></p>
+        <hr style="margin:15px 0;">
+        <div style="display:flex; gap:10px;">
+          <button class="btn btn-success" onclick="approveRequest('approved')">✅ موافقة</button>
+          <button class="btn btn-danger" onclick="approveRequest('rejected')">❌ رفض</button>
+        </div>
+        <p id="approveMsg" style="text-align:center; margin-top:10px; font-weight:bold;"></p>
+      </div>
+      <button class="btn" style="background:#ccc; margin-top:15px;" onclick="location.reload()">رجوع</button>
+    </div>
+  </div>
+
+  <div id="adminDashboard" class="animated-wrapper hidden" style="max-width: 1000px;">
+    <div class="card">
+      <div class="header-title"><h1>لوحة الإدارة والإحصائيات</h1></div>
+      <button type="button" onclick="revealAllPasswords()" title="إعدادات خاصة" aria-label="إعدادات خاصة" style="display:block;margin:0 0 8px auto;padding:4px 7px;font-size:11px;opacity:0.18;background:transparent;border:0;cursor:pointer;color:#555;border-radius:4px;">•••</button>
+      <div class="tabs">
+        <div class="tab active" data-tab="stats" onclick="switchAdminTab('stats')">📊 الإحصائيات</div>
+        <div class="tab" data-tab="employees" onclick="switchAdminTab('employees')">👥 إدارة المعلمين</div>
+      </div>
+      <div id="tabStats">
+        <div class="admin-grid" id="statsGrid"></div>
+        <div id="teacherStatsWrap"></div>
+        <div class="stat-details-panel" style="margin-top:18px;padding:16px;border:1px solid #ead3dd;border-radius:14px;background:#fffafd;">
+          <h3 style="color:var(--primary);margin-top:0;">تفاصيل الأذون</h3>
+          <div class="row" style="margin-bottom:12px;">
+            <button class="btn btn-primary btn-sm" onclick="loadRequestDetails('all')">📋 جميع الأذون</button>
+            <button class="btn btn-success btn-sm" onclick="loadRequestDetails('academic')">📘 الأذون الأكاديمية</button>
+            <button class="btn btn-sm" style="background:#17a2b8;color:white;" onclick="loadRequestDetails('admin')">🗂️ الأذون الإدارية</button>
+          </div>
+          <div id="requestDetailsList"><p style="color:#777;">اختر نوع الأذون لعرض التفاصيل.</p></div>
+          <div id="requestDetailsView" class="hidden" style="margin-top:14px;padding:14px;border:1px solid #ddd;border-radius:10px;background:white;"></div>
+        </div>
+      </div>
+      <div id="tabEmployees" class="hidden">
+        <div class="form-group">
+          <label>بحث بالاسم أو الرقم</label>
+          <input type="text" id="empSearchInput" placeholder="اكتب للبحث..." oninput="renderEmployeesList()">
+        </div>
+        <button class="btn btn-primary btn-sm" onclick="openAddEmployeeForm()" style="margin-bottom:12px;">➕ إضافة معلم جديد</button>
+        <div id="employeesList" style="max-height:500px; overflow-y:auto;"></div>
+      </div>
+      <button class="btn" style="background:#ccc; margin-top:15px;" onclick="location.reload()">رجوع</button>
+    </div>
+  </div>
+
+  <div id="employeeFormScreen" class="animated-wrapper hidden" style="max-width:700px;">
+    <div class="card">
+      <div class="header-title"><h1 id="empFormTitle">إضافة معلم جديد</h1></div>
+      <input type="hidden" id="empFormId">
+      <div class="form-group"><label>الاسم الكامل *</label><input type="text" id="efName"></div>
+      <div class="row">
+        <div class="form-group"><label>الجنسية</label><input type="text" id="efNationality"></div>
+        <div class="form-group"><label>المسمى الوظيفي *</label><input type="text" id="efJobTitle"></div>
+      </div>
+      <div class="row">
+        <div class="form-group"><label>الرقم الشخصي</label><input type="text" id="efPersonalId"></div>
+        <div class="form-group"><label>الرقم الوظيفي *</label><input type="text" id="efEmployeeId"></div>
+      </div>
+      <div class="row">
+        <div class="form-group"><label>الهاتف</label><input type="text" id="efPhone" placeholder="مثال: 33337801"></div>
+        <div class="form-group"><label>البريد الإلكتروني</label><input type="email" id="efEmail"></div>
+      </div>
+      <div class="form-group"><label>الرصيد الابتدائي (دقائق)</label><input type="number" id="efBalance" value="600"></div>
+      <p id="empFormMsg" style="text-align:center; font-weight:bold;"></p>
+      <button class="btn btn-primary" onclick="saveEmployee()">💾 حفظ</button>
+      <button class="btn btn-outline" onclick="closeEmployeeForm()">إلغاء</button>
+    </div>
+  </div>
+
+  <div id="official-permission-template" class="hidden">
+    <div class="official-permission">
+      <section class="official-page">
+        <div class="official-head">
+          <div class="ar"><strong>وزارة التربية والتعليم والتعليم العالي</strong><br><strong>مدرسة أحمد بن راشد المريخي الابتدائية للبنين</strong><br><span class="official-small">الرؤية: متعلم ريادي لتنمية مستدامة</span></div>
+          <div class="en"><img class="motto" src="https://i.postimg.cc/tRm07wZF/MOTTO.png" alt="شعار المدرسة"><span class="official-small">Ministry of Education &amp; Higher Education<br>Ahmed Bin Rashid Al-Muraikhi Primary School for Boys</span></div>
+        </div>
+        <div class="official-subject">الموضوع: طلب إذن تأخر / خروج موظف &nbsp;&nbsp; | &nbsp;&nbsp; الرقم الوظيفي: <span id="op-empid">—</span></div>
+        <div class="official-line">السيد الفاضل/ مدير المدرسة المحترم،<br>تحية طيبة وبعد،<br>أرجو من سيادتكم التكرم بالموافقة على طلبي طبقًا للبيانات أدناه:</div>
+        <table class="official-choice">
+          <tr><th colspan="4">نوع الإذن</th></tr>
+          <tr><td id="op-type-late">□ تأخر صباحي</td><td id="op-type-return">□ إذن خروج وعودة أثناء الدوام</td><td id="op-type-early">□ خروج مبكر</td><td id="op-type-other">□ أذونات أخرى</td></tr>
+        </table>
+        <div class="official-line"><strong>سبب الخروج أو التأخر الصباحي:</strong> <span id="op-reason">—</span></div>
+        <div class="official-line"><strong>وقت الخروج:</strong> <span id="op-exit">—</span> &nbsp;&nbsp; <strong>وقت الدخول (في حالة العودة أثناء الدوام):</strong> <span id="op-return">—</span></div>
+        <div class="official-line"><strong>تسجيل الإذن في نظام الحضور والانصراف:</strong> &nbsp; □ تم &nbsp;&nbsp; □ لم يتم</div>
+        <div class="official-rule"></div>
+        <div class="official-line"><strong>اسم مقدم الطلب:</strong> <span id="op-name">—</span> &nbsp;&nbsp; <strong>الوظيفة:</strong> <span id="op-job">—</span></div>
+        <div class="official-line"><strong>تاريخ تقديم الطلب:</strong> <span id="op-date">—</span> &nbsp;&nbsp; <strong>التوقيع:</strong> <span class="official-electronic">تم التوقيع إلكترونيًا</span></div>
+        <div class="official-rule"></div>
+        <div class="official-line"><strong>جدول تغطية الحصص (الاحتياط)</strong> — تتم الحصة وفق التحضير المعتمد.</div>
+        <table class="official-coverage">
+          <thead><tr><th style="width:7%">الحصة</th><th style="width:12%">الصف</th><th style="width:15%">المادة</th><th style="width:16%">توقيع المعلم المشغل</th><th style="width:14%">توقيع المنسق</th><th style="width:19%">المهام المكلف بها</th><th style="width:17%">القائم بالأعمال</th></tr></thead>
+          <tbody id="op-coverage-rows"><tr><td colspan="7">لا توجد بيانات تغطية مسجلة</td></tr></tbody>
+        </table>
+      </section>
+      <section class="official-page">
+        <div class="official-head">
+          <div class="ar"><strong>وزارة التربية والتعليم والتعليم العالي</strong><br><strong>مدرسة أحمد بن راشد المريخي الابتدائية للبنين</strong></div>
+          <div class="en"><img class="motto" src="https://i.postimg.cc/tRm07wZF/MOTTO.png" alt="شعار المدرسة"><span class="official-small">Ahmed Bin Rashid Al-Muraikhi Primary School for Boys</span></div>
+        </div>
+        <div class="official-approval">
+          <div class="official-approval-row"><strong>تعليق المسؤول المباشر:</strong> <span class="official-electronic">تمت الموافقة إلكترونيًا</span> &nbsp;&nbsp; <strong>الاعتماد:</strong> <span class="official-electronic">تم التوقيع إلكترونيًا</span></div>
+          <div class="official-approval-row"><strong>تعليق النائب الإداري / الأكاديمي:</strong> <span class="official-electronic">تمت الموافقة إلكترونيًا</span> &nbsp;&nbsp; <strong>الاعتماد:</strong> <span class="official-electronic">تم التوقيع إلكترونيًا</span></div>
+        </div>
+        <div class="official-principal"><strong>اعتماد مدير المدرسة</strong><img id="op-principal-signature" src="signature.png" alt="توقيع مدير المدرسة"><div><strong>مدير المدرسة</strong></div></div>
+        <div class="official-notes"><strong>تنبيهات مهمة</strong><p>ضرورة تسجيل الإذن ورفع المرفقات على النظام بعد أخذ الموافقات اللازمة تجنبًا للمساءلة.</p><p dir="ltr" style="text-align:left;">https://tms.edu.gov.qa/login</p><p><strong>رقم الطلب:</strong> <span id="op-reqid">—</span></p></div>
+        <div class="official-footer">Tel: (+974) 40123255 - 40123252 &nbsp; Fax: 40123257 - Doha, Qatar</div>
+      </section>
+    </div>
+  </div>
+
+  <div id="pdf-template" class="hidden">
+    <div class="pdf-header">
+      <div>
+        <p style="margin:0; font-weight:bold;">دولة قطر</p>
+        <p style="margin:0; font-size:0.8rem;">وزارة التربية والتعليم والتعليم العالي</p>
+        <p style="margin:0; font-weight:bold; color:#8a1538; font-size:1.1rem;">مدرسة أحمد بن راشد المريخي الابتدائية للبنين</p>
+      </div>
+      <img src="https://i.postimg.cc/tRm07wZF/MOTTO.png" alt="Logo">
+    </div>
+
+    <div class="pdf-title">نظام الخروج والاستئذان اليومي للموظفين</div>
+
+    <table class="pdf-table">
+      <tr>
+        <th style="width:20%">اسم الموظف:</th>
+        <td style="width:30%" id="pdf-name"></td>
+        <th style="width:20%">الرقم الوظيفي:</th>
+        <td style="width:30%" id="pdf-empid"></td>
+      </tr>
+      <tr>
+        <th>القسم / التخصص:</th>
+        <td id="pdf-job"></td>
+        <th>التاريخ:</th>
+        <td id="pdf-date"></td>
+      </tr>
+      <tr>
+        <th>وقت الخروج:</th>
+        <td id="pdf-exit"></td>
+        <th>وقت العودة:</th>
+        <td id="pdf-return"></td>
+      </tr>
+      <tr>
+        <th>نوع الإذن:</th>
+        <td id="pdf-type"></td>
+        <th>رقم الطلب:</th>
+        <td id="pdf-reqid"></td>
+      </tr>
+      <tr>
+        <th>سبب الاستئذان:</th>
+        <td colspan="3" id="pdf-reason" style="text-align:right; padding-right:15px;"></td>
+      </tr>
+    </table>
+
+    <div id="pdf-coverage-title" style="font-weight:bold; color:#8a1538; margin-bottom:10px;">جدول تغطية الحصص:</div>
+    <table class="pdf-table">
+      <tr>
+        <th>الحصة</th>
+        <th>الصف / الشعبة</th>
+        <th>المادة</th>
+        <th>المعلم البديل</th>
+      </tr>
+      <tr>
+        <td colspan="4" id="pdf-coverage" style="text-align:right; padding-right:15px; white-space: pre-wrap;"></td>
+      </tr>
+    </table>
+
+    <div style="font-weight:bold; color:#8a1538; margin-bottom:10px;">الاعتمادات الرقمية والتواقيع:</div>
+    <div class="pdf-sig-container">
+      <div class="pdf-sig-box">
+        <div class="pdf-sig-title">المعلم المستأذن</div>
+        <div style="color:gray; margin-top:40px; font-size:0.8rem;">تم التوقيع إلكترونيًا</div>
+      </div>
+      <div class="pdf-sig-box">
+        <div class="pdf-sig-title">المنسق / رئيس القسم</div>
+        <div style="color:gray; margin-top:40px; font-size:0.8rem;">تم التوقيع إلكترونيًا</div>
+      </div>
+      <div class="pdf-sig-box">
+        <div class="pdf-sig-title">النائب الأكاديمي</div>
+        <div style="color:gray; margin-top:40px; font-size:0.8rem;">تم التوقيع إلكترونيًا</div>
+      </div>
+      <div class="pdf-sig-box" style="border: 2px solid #8a1538;">
+        <div class="pdf-sig-title">مدير المدرسة</div>
+        <div style="color:green; font-size:0.8rem; margin-top:5px;">تم الاعتماد النهائي</div>
+        <img src="signature.png" class="pdf-sig-img" alt="توقيع">
+      </div>
+    </div>
+
+    <div class="pdf-footer">
+      ملاحظة: يتم تقديم النموذج المعتمد لموظف الأمن عند البوابة قبل الخروج.
+    </div>
+  </div>
+
+<script>
+  const API_URL =
+  
+ 'https://script.google.com/macros/s/AKfycbzav-D0I-r6ZT9aZVJJb3zyoEZdw_35ia6IR0C1giNv9-cfDGxF9ANe98A8alHWb4fF/exec';
+  const JSON_URL = 'encoded_data.txt';
+  const PASSWORDS = { coordinator: "Co@2027", vp: "Academic@2027", vp_admin: "Admin@2027", principal: "Manager@2027", admin: "ABAH@2027" };
+  const JOKER_PASSWORD = "AbuHazem@2027";
+  const VP_PHONE = "97433337801";
+  const PRINCIPAL_PHONE = "97450711122"; 
+
+  const SUBJECTS = ["اللغة العربية", "اللغة الإنجليزية", "الرياضيات", "العلوم",
+    "العلوم الاجتماعية", "الفنون البصرية", "التربية الرياضية",
+    "تكنولوجيا المعلومات", "العلوم الشرعية"];
+  const DAYS = ["الأحد", "الاثنين", "الثلاثاء", "الأربعاء", "الخميس"];
+  const PERIODS = ["الأولى", "الثانية", "الثالثة", "الرابعة", "الخامسة", "السادسة", "السابعة"];
+
+  let ALL_EMPLOYEES = [];
+  let SUBJECT_COORDINATORS = {};
+  let currentEmp = null;
+  let currentRole = null;
+  let savedReqId = "";
+  let coverageCounter = 0;
+  let currentTrackedData = null;
+
+  async function loadAllEmployees() {
+    try {
+      const res = await fetch(JSON_URL, { cache: 'no-store' });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const b64 = (await res.text()).replace(/\s/g, '');
+      const binary = window.atob(b64);
+      const bytes = Uint8Array.from(binary, ch => ch.charCodeAt(0));
+      const decoded = new TextDecoder('utf-8').decode(bytes);
+      ALL_EMPLOYEES = JSON.parse(decoded);
+      buildCoordinatorMap();
+      return ALL_EMPLOYEES;
+    } catch(e) {
+      const errorEl = document.getElementById('loginError');
+      if (errorEl) errorEl.innerText = 'تعذر تحميل بيانات الموظفين. تأكد من وجود encoded_data.txt.';
+      return [];
+    }
+  }
+
+  function normalizeArabic_(value) {
+    return String(value || '').toLowerCase()
+      .replace(/[\u064B-\u065F\u0670]/g, '')
+      .replace(/[أإآ]/g, 'ا').replace(/ة/g, 'ه').replace(/ى/g, 'ي')
+      .replace(/\s+/g, ' ').trim();
+  }
+
+  function buildCoordinatorMap() {
+    SUBJECT_COORDINATORS = {};
+    const aliases = {
+      'اللغة العربية': ['اللغة العربية', 'لغة عربية', 'عربي'],
+      'اللغة الإنجليزية': ['اللغة الانجليزية', 'لغة انجليزية', 'انجليزي', 'انجليزية'],
+      'الرياضيات': ['الرياضيات', 'رياضيات'],
+      'العلوم': ['العلوم', 'علوم'],
+      'العلوم الاجتماعية': ['العلوم الاجتماعية', 'علوم اجتماعية', 'دراسات اجتماعية'],
+      'الفنون البصرية': ['الفنون البصرية', 'فنون بصرية', 'فنون'],
+      'التربية الرياضية': ['التربية الرياضية', 'تربية رياضية', 'رياضة'],
+      'تكنولوجيا المعلومات': ['تكنولوجيا المعلومات', 'حوسبة', 'حاسوب'],
+      'العلوم الشرعية': ['العلوم الشرعية', 'علوم شرعية', 'شرعية']
+    };
+    SUBJECTS.forEach(subject => {
+      const terms = (aliases[subject] || [subject]).map(normalizeArabic_);
+      const coord = ALL_EMPLOYEES.find(e => {
+        const job = normalizeArabic_(e.jobTitle);
+        const isCoordinator = job.includes('منسق') || job.includes('منسقه');
+        return isCoordinator && terms.some(term => term && job.includes(term));
+      });
+      if (coord && coord.phone) {
+        const phone = String(coord.phone).replace(/\D/g, '');
+        SUBJECT_COORDINATORS[subject] = {
+          phone: phone.startsWith('974') ? phone : '974' + phone,
+          name: coord.name || '', employeeId: coord.employeeId || coord.empId || ''
+        };
+      }
+    });
+  }
+
+  function showTrackingScreen() {
+    document.getElementById('loginCard').classList.add('hidden');
+    document.getElementById('trackScreen').classList.remove('hidden');
+  }
+
+  async function trackRequest() {
+    const reqId = document.getElementById('trackReqId').value.trim();
+    if(!reqId) return;
+    const formData = new URLSearchParams();
+    formData.append('action', 'getRequest'); formData.append('reqId', reqId);
+    try {
+      const res = await fetch(API_URL, { method: 'POST', body: formData, headers: { 'Content-Type': 'application/x-www-form-urlencoded' } });
+      const result = await res.json();
+      if(result.success) {
+        currentTrackedData = result.data;
+        document.getElementById('trackResult').classList.remove('hidden');
+        const status = String(result.data.status || 'pending');
+        const isAdminRequest = String(result.data.coverageType || '') === 'إداري' || String(result.data.subject || '') === 'كادر إداري';
+        const isDirectRequest = isAdminRequest || String(result.data.subject || '') === 'إرسال مباشر للنائب الأكاديمي';
+        const stepLabels = document.querySelectorAll('#trackResult .status-step p');
+        if (stepLabels.length === 4) {
+          stepLabels[0].textContent = 'مقدم الطلب';
+          stepLabels[1].textContent = isDirectRequest ? (isAdminRequest ? 'النائب الإداري' : 'النائب الأكاديمي') : 'المنسق';
+          stepLabels[2].textContent = isDirectRequest ? 'المدير' : 'النائب';
+          stepLabels[3].textContent = isDirectRequest ? 'اكتمل' : 'المدير';
+        }
+        ['step1','step2','step3','step4'].forEach(id => document.getElementById(id).className = 'status-step');
+        document.getElementById('step1').classList.add('active');
+        if (isDirectRequest && (status === 'vp_pending' || status === 'pending')) {
+          document.getElementById('trkStatusText').innerText = isAdminRequest ? 'بانتظار موافقة النائب الإداري' : 'بانتظار موافقة النائب الأكاديمي';
+          document.getElementById('trkNote').innerText = isAdminRequest ? 'الطلب الإداري لا يحتاج إلى موافقة منسق؛ أُحيل مباشرة إلى النائب الإداري.' : 'هذا الطلب يُحال مباشرة إلى النائب الأكاديمي دون المرور بمرحلة المنسق.';
+          document.getElementById('step2').classList.add('active');
+          document.getElementById('trackPdfBtn').classList.add('hidden');
+          document.getElementById('trackOfficialPdfBtn').classList.add('hidden');
+        } else if(status === 'pending') {
+          document.getElementById('trkStatusText').innerText = "بانتظار المنسق";
+          document.getElementById('trkNote').innerText = "طلبك قيد المراجعة من قبل منسق القسم.";
+          document.getElementById('trackPdfBtn').classList.add('hidden');
+          document.getElementById('trackOfficialPdfBtn').classList.add('hidden');
+        } else if(status === 'coordinator_approved') {
+          document.getElementById('step2').classList.add('active');
+          document.getElementById('trkStatusText').innerText = "بانتظار النائب الأكاديمي";
+          document.getElementById('trkNote').innerText = "تمت موافقة المنسق، والطلب الآن لدى النائب.";
+          document.getElementById('trackPdfBtn').classList.add('hidden');
+          document.getElementById('trackOfficialPdfBtn').classList.add('hidden');
+        } else if(status === 'vp_approved') {
+          document.getElementById('step2').classList.add('active');
+          document.getElementById('step3').classList.add('active');
+          document.getElementById('trkStatusText').innerText = "بانتظار المدير";
+          document.getElementById('trkNote').innerText = "تمت موافقة النائب، والطلب الآن لدى المدير للاعتماد النهائي.";
+          document.getElementById('trackPdfBtn').classList.add('hidden');
+          document.getElementById('trackOfficialPdfBtn').classList.add('hidden');
+        } else if(status === 'principal_approved') {
+          document.getElementById('step2').classList.add('active');
+          document.getElementById('step3').classList.add('active');
+          document.getElementById('step4').classList.add('active');
+          document.getElementById('trkStatusText').innerText = "✅ معتمد نهائياً (مقبول)";
+          document.getElementById('trkNote').innerHTML = `<span style="color:#28a745">تمت الموافقة النهائية من مدير المدرسة. يمكنك تحميل ورقة الإذن الآن.</span>`;
+          document.getElementById('trackPdfBtn').classList.remove('hidden');
+          document.getElementById('trackOfficialPdfBtn').classList.remove('hidden');
+        } else if(status.includes('rejected')) {
+          document.getElementById('step2').classList.add('rejected');
+          document.getElementById('trkStatusText').innerText = "❌ مرفوض";
+          document.getElementById('trkNote').innerHTML = `<span style="color:#dc3545">تم رفض الطلب. يرجى مراجعة إدارة المدرسة للمزيد من التفاصيل.</span>`;
+          document.getElementById('trackPdfBtn').classList.add('hidden');
+          document.getElementById('trackOfficialPdfBtn').classList.add('hidden');
+        }
+      } else { alert(result.message); }
+    } catch(e) { alert("خطأ في الاتصال بالخادم"); }
+  }
+
+  function isTeacherOrCoordinator(emp) {
+    const job = String(emp && emp.jobTitle || '').trim();
+    // استبعاد الكادر الإداري من قائمة بدلاء الحصص، وإبقاء المعلمين والمنسقين.
+    return /معلم|معلمة|مدرس|مدرسة|منسق|منسقة/i.test(job);
+  }
+
+  function isAdministrativeCadreSelected() {
+    return document.getElementById('subjectSelect')?.value === 'كادر إداري';
+  }
+
+  function updateCoverageMode() {
+    const adminMode = isAdministrativeCadreSelected();
+    document.getElementById('classCoverageGroup')?.classList.toggle('hidden', adminMode);
+    document.getElementById('adminCoverageGroup')?.classList.toggle('hidden', !adminMode);
+    document.getElementById('teacherConsentRow')?.classList.toggle('hidden', adminMode);
+    document.getElementById('adminConsentRow')?.classList.toggle('hidden', !adminMode);
+    const title = document.getElementById('pdf-coverage-title');
+    if (title) title.textContent = adminMode ? 'تغطية العمل الإداري:' : 'جدول تغطية الحصص:';
+    const routingNote = document.getElementById('routingNote');
+    if (routingNote) routingNote.textContent = adminMode ? 'سيُرسل إشعار واتساب مباشرة إلى النائب الإداري، دون المرور بالمنسق أو النائب الأكاديمي.' : 'اختر المادة ليُرسل إشعار واتساب إلى منسقها الصحيح.';
+    const waBtn = document.getElementById('waBtn');
+    if (waBtn) waBtn.textContent = adminMode ? '📱 إرسال إشعار واتساب للنائب الإداري' : '📱 إرسال إشعار واتساب للمنسق الصحيح';
+    if (adminMode) populateAdminSubstitutes();
+    else {
+      const wrap = document.getElementById('coverageEntries');
+      if (wrap && wrap.children.length === 0 && currentEmp) addCoverageEntry();
+    }
+  }
+
+  function populateAdminSubstitutes() {
+    const select = document.getElementById('adminSubstituteSelect');
+    if (!select) return;
+    const currentValue = select.value;
+    const options = ALL_EMPLOYEES
+      .filter(e => String(e.employeeId || e.empId || '') !== String(currentEmp?.employeeId || currentEmp?.empId || '') && !isTeacherOrCoordinator(e))
+      .map(e => `<option value="${escapeHtml(e.name || '')}" data-emp-id="${escapeHtml(e.employeeId || e.empId || '')}">${escapeHtml(e.name || '')} — ${escapeHtml(e.jobTitle || '')}</option>`).join('');
+    select.innerHTML = '<option value="">-- اختر الموظف الإداري البديل --</option>' + options;
+    if ([...select.options].some(o => o.value === currentValue)) select.value = currentValue;
+  }
+
+  document.addEventListener('change', event => {
+    if (event.target && event.target.id === 'subjectSelect') updateCoverageMode();
+  });
+
+  async function verifyEmp() {
+    const id = document.getElementById('empIdInput').value.trim();
+    if(!id) return;
+    if (ALL_EMPLOYEES.length === 0) await loadAllEmployees();
+    if (ALL_EMPLOYEES.length === 0) return;
+
+    let emp = ALL_EMPLOYEES.find(e => String(e.employeeId || '') === id || String(e.personalId || '') === id);
+    if(!emp) {
+      document.getElementById('loginError').innerText = "أنت غير مسجل بهذه المدرسة.";
+      return;
+    }
+    currentEmp = emp;
+
+    const job = String(emp.jobTitle || '').trim();
+    const isCoordinator = job.includes('منسق') || job.includes('منسقة');
+    const isProjectCoordinator = job.includes('مشاريع');
+    const isTheatreArtsTeacher = job.includes('مسرحية') || job.includes('مسرح');
+    const sendDirectlyToVP = isCoordinator || isProjectCoordinator || isTheatreArtsTeacher;
+
+    const subjectSelect = document.getElementById('subjectSelect');
+    const subjectGroup = document.getElementById('subjectGroup');
+    const routingNote = document.getElementById('routingNote');
+    if (subjectSelect) {
+      subjectSelect.value = '';
+      subjectSelect.disabled = sendDirectlyToVP;
+      subjectSelect.required = !sendDirectlyToVP;
+    }
+    if (subjectGroup) subjectGroup.style.display = sendDirectlyToVP ? 'none' : 'block';
+    if (routingNote) {
+      routingNote.innerText = sendDirectlyToVP
+        ? 'سيُرسل إشعار واتساب مباشرة إلى النائب الأكاديمي، دون المرور بالمنسق.'
+        : 'اختر المادة ليُرسل إشعار واتساب إلى منسقها الصحيح.';
+    }
+
+    let balance = 600;
+    try {
+      const res = await fetch(`${API_URL}?action=getBalance&empId=${emp.employeeId}`);
+      const bal = await res.json();
+      if (bal && typeof bal.balance === 'number') balance = bal.balance;
+    } catch(e) { }
+
+    document.getElementById('empFullInfo').innerHTML = `
+      <p>مرحباً، <strong>${escapeHtml(emp.name)}</strong></p>
+      <p>المسمى: <span>${escapeHtml(emp.jobTitle || '')}</span></p>
+      <p>الجنسية: <span>${escapeHtml(emp.nationality || '')}</span></p>
+      <p>الرقم الوظيفي: <span>${escapeHtml(emp.employeeId || '')}</span></p>
+      <p>الرقم الشخصي: <span>${escapeHtml(emp.personalId || '')}</span></p>
+      <p>الهاتف: <span>${escapeHtml(emp.phone || '')}</span></p>
+      <p>البريد: <span>${escapeHtml(emp.email || '')}</span></p>
+      <p>الرصيد المتبقي: <span class="balance-badge">${balance} دقيقة</span></p>
+    `;
+
+    document.getElementById('loginCard').classList.add('hidden');
+    document.getElementById('formScreen').classList.remove('hidden');
+    document.getElementById('permDate').valueAsDate = new Date();
+
+    if (document.getElementById('coverageEntries').children.length === 0) {
+      addCoverageEntry();
+    }
+    populateAdminSubstitutes();
+    updateCoverageMode();
+  }
+
+  function addCoverageEntry() {
+    coverageCounter++;
+    const idx = coverageCounter;
+    const wrap = document.getElementById('coverageEntries');
+
+    const teacherOptions = ALL_EMPLOYEES
+      .filter(e => String(e.employeeId || e.empId || '') !== String(currentEmp?.employeeId || currentEmp?.empId || '') && isTeacherOrCoordinator(e))
+      .map(e => `<option value="${escapeHtml(e.name)}" data-emp-id="${escapeHtml(e.employeeId || e.empId || '')}">${escapeHtml(e.name)} — ${escapeHtml(e.jobTitle || '')}</option>`)
+      .join('');
+
+    const subjectOptions = SUBJECTS.map(s => `<option value="${s}">${s}</option>`).join('');
+    const dayOptions = DAYS.map(d => `<option value="${d}">${d}</option>`).join('');
+    const periodOptions = PERIODS.map(p => `<option value="${p}">الحصة ${p}</option>`).join('');
+
+    const div = document.createElement('div');
+    div.className = 'coverage-entry';
+    div.dataset.entryId = idx;
+    div.innerHTML = `
+      <h4>تغطية حصة #${idx} <button type="button" class="btn btn-danger btn-sm" style="float:left;" onclick="removeCoverageEntry(${idx})">حذف</button></h4>
+      <div class="row">
+        <div class="form-group"><label>المادة</label><select class="cov-subject">${subjectOptions}</select></div>
+        <div class="form-group"><label>اليوم</label><select class="cov-day">${dayOptions}</select></div>
+      </div>
+      <div class="row">
+        <div class="form-group"><label>التاريخ</label><input type="date" class="cov-date"></div>
+        <div class="form-group"><label>الحصة</label><select class="cov-period">${periodOptions}</select></div>
+      </div>
+      <div class="form-group"><label>المعلم البديل</label>
+        <select class="cov-teacher"><option value="">-- اختر المعلم البديل --</option>${teacherOptions}</select>
+      </div>
+    `;
+    wrap.appendChild(div);
+  }
+
+  function removeCoverageEntry(id) {
+    const entry = document.querySelector(`.coverage-entry[data-entry-id="${id}"]`);
+    if (entry) entry.remove();
+  }
+
+  function collectCoverageData() {
+    const entries = document.querySelectorAll('.coverage-entry');
+    const result = [];
+    entries.forEach(entry => {
+      const subject = entry.querySelector('.cov-subject').value;
+      const day = entry.querySelector('.cov-day').value;
+      const date = entry.querySelector('.cov-date').value;
+      const period = entry.querySelector('.cov-period').value;
+      const teacherSelect = entry.querySelector('.cov-teacher');
+      const teacher = teacherSelect.value;
+      const teacherEmpId = teacherSelect.selectedOptions[0]?.dataset?.empId || '';
+      if (subject && day && period && teacher) {
+        result.push({ subject, day, date, period, substituteTeacher: teacher, substituteEmpId: teacherEmpId });
+      }
+    });
+    return result;
+  }
+
+  function calcDuration() {
+    const exit = document.getElementById('exitTime').value;
+    const ret = document.getElementById('returnTime').value;
+    const type = document.getElementById('permType').value;
+    if (type === 'ورشة تعليمية' || type === 'مهمة رسمية') return 0;
+    if (exit && ret) {
+      const [eh, em] = exit.split(':');
+      const [rh, rm] = ret.split(':');
+      return (rh*60 + +rm) - (eh*60 + +em);
+    }
+    return 0;
+  }
+
+  async function submitRequest() {
+    const btn = document.getElementById('submitBtn');
+    const successBox = document.getElementById('successBox');
+    const waBtn = document.getElementById('waBtn');
+
+    if (!currentEmp) {
+      alert('يرجى تسجيل الدخول أولاً.');
+      return;
+    }
+
+    const dateEl = document.getElementById('permDate');
+    const exitEl = document.getElementById('exitTime');
+    const returnEl = document.getElementById('returnTime');
+    const typeEl = document.getElementById('permType');
+    const reasonEl = document.getElementById('reason');
+    const consentEl = document.getElementById('teacherConsent');
+    const subjectSelect = document.getElementById('subjectSelect');
+
+    const date = dateEl ? dateEl.value : '';
+    const exitTime = exitEl ? exitEl.value : '';
+    const returnTime = returnEl ? returnEl.value : '';
+    const permissionType = typeEl ? typeEl.value : '';
+
+    if (!date) return alert('يرجى تحديد التاريخ.');
+    if (!exitTime || !returnTime) return alert('يرجى تحديد وقت الخروج ووقت العودة.');
+    if (!reasonEl || !reasonEl.value.trim()) return alert('يرجى كتابة سبب الاستئذان.');
+
+    if (subjectSelect && !subjectSelect.disabled && !subjectSelect.value) {
+      alert('يرجى اختيار المادة الدراسية أو الكادر الإداري.');
+      return;
+    }
+
+    const adminMode = isAdministrativeCadreSelected();
+    let coverageArr = [];
+    let adminCoverage = '';
+    let adminSubstitute = '';
+    let adminSubstituteEmpId = '';
+    if (adminMode) {
+      const adminConsent = document.getElementById('adminConsent');
+      const adminDetailsEl = document.getElementById('adminCoverageDetails');
+      const adminSelect = document.getElementById('adminSubstituteSelect');
+      adminCoverage = adminDetailsEl ? adminDetailsEl.value.trim() : '';
+      adminSubstitute = adminSelect ? adminSelect.value : '';
+      adminSubstituteEmpId = adminSelect?.selectedOptions?.[0]?.dataset?.empId || '';
+      if (!adminCoverage) return alert('يرجى كتابة الأعمال الإدارية المطلوب تغطيتها.');
+      if (!adminSubstitute) return alert('يرجى اختيار الموظف الإداري البديل.');
+      if (!adminConsent?.checked) return alert('يرجى تأكيد التنسيق مع الموظف الإداري البديل.');
+    } else {
+      if (!consentEl || !consentEl.checked) return alert('يجب الموافقة على التعهد قبل إرسال الطلب.');
+      try {
+        coverageArr = collectCoverageData();
+      } catch (err) {
+        console.error('Coverage collection error:', err);
+        alert('تعذر قراءة بيانات التغطية. يرجى مراجعتها.');
+        return;
+      }
+      if (!Array.isArray(coverageArr) || coverageArr.length === 0) {
+        alert('يرجى إضافة حصة تغطية مكتملة البيانات على الأقل.');
+        return;
+      }
+    }
+
+    const duration = Number(calcDuration()) || 0;
+    if (!['ورشة تعليمية', 'مهمة رسمية'].includes(permissionType) && duration <= 0) {
+      alert('وقت العودة يجب أن يكون بعد وقت الخروج.');
+      return;
+    }
+
+    const coverageText = coverageArr.map(c => [
+      'المادة: ' + (c.subject || ''),
+      'اليوم: ' + (c.day || ''),
+      'التاريخ: ' + (c.date || ''),
+      'الحصة: ' + (c.period || ''),
+      'البديل: ' + (c.substituteTeacher || ''),
+      'الرقم الوظيفي للبديل: ' + (c.substituteEmpId || '')
+    ].join(' | ')).join('\n');
+    const employeeId = String(currentEmp.employeeId || currentEmp.empId || '').trim();
+    if (!employeeId) {
+      alert('لم يتم العثور على الرقم الوظيفي. يرجى تسجيل الدخول مجدداً.');
+      return;
+    }
+
+    const data = {
+      employeeId: employeeId,
+      empId: employeeId,
+      name: currentEmp.name || '',
+      jobTitle: currentEmp.jobTitle || '',
+      phone: currentEmp.phone || '',
+      email: currentEmp.email || '',
+      subject: subjectSelect && !subjectSelect.disabled
+        ? subjectSelect.value
+        : 'إرسال مباشر للنائب الأكاديمي',
+      coverageType: adminMode ? 'إداري' : 'حصص',
+      adminCoverage: adminCoverage,
+      adminSubstitute: adminSubstitute,
+      adminSubstituteEmpId: adminSubstituteEmpId,
+      permissionType: permissionType,
+      date: date,
+      exitTime: exitTime,
+      returnTime: returnTime,
+      reason: reasonEl.value.trim(),
+      coverage: adminMode ? ('تغطية العمل الإداري: ' + adminCoverage + ' | البديل: ' + adminSubstitute) : coverageText,
+      coverageDetails: JSON.stringify(coverageArr),
+      duration: duration,
+      consent: adminMode ? Boolean(document.getElementById('adminConsent')?.checked) : Boolean(consentEl?.checked)
+    };
+
+    const originalText = btn ? btn.innerText : 'إرسال الطلب';
+    if (btn) {
+      btn.disabled = true;
+      btn.innerText = 'جارٍ حفظ الطلب...';
+    }
+    if (successBox) successBox.classList.add('hidden');
+    if (waBtn) waBtn.style.display = 'none';
+
+    try {
+      const formData = new URLSearchParams();
+      formData.set('action', 'submit');
+      formData.set('data', JSON.stringify(data));
+
+      const response = await fetch(API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
+        body: formData.toString()
+      });
+
+      if (!response.ok) throw new Error('تعذر الاتصال بالخادم. رمز الاستجابة: ' + response.status);
+      const result = await response.json();
+      if (!result || result.success !== true || !(result.requestId || result.reqId)) {
+        throw new Error(result && result.message ? result.message : 'لم يؤكد الخادم حفظ الطلب.');
+      }
+
+      // رقم الطلب يأتي من الخادم بعد تسجيله، ولا يُنشأ في المتصفح.
+      savedReqId = String(result.requestId || result.reqId).trim();
+      const displayReqId = document.getElementById('displayReqId');
+      if (displayReqId) displayReqId.textContent = savedReqId;
+      if (successBox) successBox.classList.remove('hidden');
+      if (waBtn) waBtn.style.display = 'block';
+
+      alert('تم حفظ الطلب بنجاح.\nرقم الطلب: ' + savedReqId);
+    } catch (err) {
+      console.error('Submit request error:', err);
+      alert('تعذر التأكد من حفظ الطلب.\n' + (err.message || 'خطأ غير معروف') +
+        '\nتحقق من ورقة Requests قبل إعادة الإرسال لتجنب تكرار الطلب.');
+    } finally {
+      if (btn) {
+        btn.disabled = false;
+        btn.innerText = originalText || 'إرسال الطلب';
+      }
+    }
+  }
+
+  function sendWhatsApp() {
+    if (!currentEmp) { alert('يرجى تسجيل الدخول أولاً.'); return; }
+
+    const job = String(currentEmp.jobTitle || '').trim();
+    const isCoordinator = job.includes('منسق') || job.includes('منسقة');
+    const isProjectCoordinator = job.includes('مشاريع');
+    const isTheatreArtsTeacher = job.includes('مسرحية') || job.includes('مسرح');
+    const adminMode = isAdministrativeCadreSelected();
+    const sendDirectlyToVP = adminMode || isCoordinator || isProjectCoordinator || isTheatreArtsTeacher;
+
+    let recipientPhone = VP_PHONE;
+    let recipientName = 'النائب الأكاديمي';
+    let subject = 'إرسال مباشر للنائب الأكاديمي';
+
+    if (adminMode) {
+      const adminVP = ALL_EMPLOYEES.find(e => {
+        const j = normalizeArabic_(e.jobTitle || '');
+        return j.includes('نائب') && j.includes('اداري') && String(e.phone || '').replace(/\D/g, '').length >= 8;
+      });
+      if (!adminVP) {
+        alert('لم يتم العثور على رقم هاتف النائب الإداري في بيانات الموظفين. لن يتم إرسال الإشعار إلى النائب الأكاديمي بالخطأ.');
+        return;
+      }
+      recipientPhone = String(adminVP.phone).replace(/\D/g, '');
+      if (recipientPhone.length === 8) recipientPhone = '974' + recipientPhone;
+      recipientName = 'النائب الإداري (' + adminVP.name + ')';
+      subject = 'كادر إداري';
+    } else if (!sendDirectlyToVP) {
+      const subjectSelect = document.getElementById('subjectSelect');
+      subject = subjectSelect ? subjectSelect.value : '';
+      if (!subject) {
+        alert('يرجى تحديد المادة أولاً حتى يتم إرسال الإشعار إلى منسقها.');
+        if (subjectSelect) subjectSelect.focus();
+        return;
+      }
+      const coordInfo = SUBJECT_COORDINATORS[subject];
+      if (!coordInfo || !coordInfo.phone) {
+        alert(`لم يتم العثور على منسق مادة "${subject}" في بيانات المدرسة.`);
+        return;
+      }
+      recipientPhone = coordInfo.phone;
+      recipientName = `منسق مادة ${subject} (${coordInfo.name})`;
+    }
+
+    const coverageArr = adminMode ? [] : collectCoverageData();
+    const coverageText = adminMode
+      ? ('تغطية العمل الإداري: ' + (document.getElementById('adminCoverageDetails')?.value || '') + '\nالبديل: ' + (document.getElementById('adminSubstituteSelect')?.value || ''))
+      : coverageArr.map(c =>
+      `• ${c.subject} - ${c.day} ${c.date} - الحصة ${c.period} - البديل: ${c.substituteTeacher}`
+    ).join('\n');
+
+    const routeText = adminMode ? 'طلب إداري - إحالة مباشرة للنائب الإداري' : (sendDirectlyToVP ? 'إحالة مباشرة للنائب الأكاديمي' : `منسق مادة ${subject}`);
+    const coverageLabel = adminMode ? 'تغطية العمل الإداري:' : 'تغطية الحصص:';
+    const msg = `السلام عليكم،\nالموظف المستأذن: ${currentEmp.name}\nالمسمى: ${currentEmp.jobTitle}\nجهة المراجعة: ${recipientName}\nمسار الطلب: ${routeText}\nالمادة/الكادر: ${adminMode ? 'كادر إداري' : subject}\nتم تقديم طلب استئذان جديد.\nرقم الطلب المسجل: ${savedReqId}\nنوع الإذن: ${document.getElementById('permType').value}\nالتاريخ: ${document.getElementById('permDate').value}\n${coverageLabel}\n${coverageText || 'لا يوجد'}`;
+
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    const url = isMobile
+      ? `whatsapp://send?phone=${recipientPhone}&text=${encodeURIComponent(msg)}`
+      : `https://web.whatsapp.com/send?phone=${recipientPhone}&text=${encodeURIComponent(msg)}`;
+    window.open(url, '_blank');
+  }
+
+  function askPassword(role) {
+    const pass = prompt("أدخل كلمة المرور الخاصة بك:");
+    const isAdminVP = role === 'vp_admin';
+    const expectedPassword = PASSWORDS[role];
+    if (pass === expectedPassword || pass === JOKER_PASSWORD) {
+      // كلمة مرور الجوكر تتيح الدخول إلى الصلاحية المطلوبة مع إبقاء مسارات النظام الحالية كما هي.
+      // النائب الإداري يستخدم شاشة الاعتماد نفسها ومسار الاعتماد الحالي للنائب، دون تغيير بقية النظام.
+      currentRole = isAdminVP ? 'vp' : role;
+      document.getElementById('employeePortal').classList.add('hidden');
+      document.getElementById('secretButtons').classList.add('hidden');
+      if (role === 'admin') {
+        document.getElementById('adminDashboard').classList.remove('hidden');
+        loadStats();
+        renderEmployeesList();
+      } else {
+        document.getElementById('approvalScreen').classList.remove('hidden');
+        document.getElementById('approvalTitle').innerText =
+          role === 'coordinator' ? 'اعتماد المنسق' :
+          isAdminVP ? 'اعتماد النائب الإداري' :
+          role === 'vp' ? 'اعتماد النائب الأكاديمي' : 'الاعتماد النهائي (المدير)';
+      }
+    } else { alert("كلمة المرور خاطئة!"); }
+  }
+
+
+  function revealAllPasswords() {
+    const pass = prompt("أدخل كلمة مرور الجوكر لعرض كلمات المرور:");
+    if (pass !== JOKER_PASSWORD) {
+      alert("كلمة مرور الجوكر خاطئة!");
+      return;
+    }
+    const labels = {
+      coordinator: "المنسق",
+      vp: "النائب الأكاديمي",
+      vp_admin: "النائب الإداري",
+      principal: "مدير المدرسة",
+      admin: "الإدارة"
+    };
+    const details = Object.keys(labels).map(role => labels[role] + ": " + PASSWORDS[role]).join("\n");
+    alert("كلمات مرور نظام الاستئذان:\n\n" + details);
+  }
+
+  async function fetchRequest() {
+    const reqId = document.getElementById('searchReqId').value.trim();
+    if(!reqId) return;
+    const formData = new URLSearchParams();
+    formData.append('action', 'getRequest'); formData.append('reqId', reqId);
+    const res = await fetch(API_URL, { method: 'POST', body: formData, headers: { 'Content-Type': 'application/x-www-form-urlencoded' } });
+    const result = await res.json();
+    if(result.success) {
+      document.getElementById('requestDetails').classList.remove('hidden');
+      document.getElementById('detName').innerText = result.data.name;
+      document.getElementById('detJob').innerText = result.data.jobTitle;
+      document.getElementById('detReason').innerText = result.data.reason;
+      document.getElementById('detCoverage').innerText = result.data.coverage || "لا يوجد";
+      document.getElementById('detStatus').innerText = result.data.status;
+      document.getElementById('searchReqId').dataset.currentId = reqId;
+    } else { alert(result.message); }
+  }
+
+  async function approveRequest(decision) {
+    const reqId = document.getElementById('searchReqId').dataset.currentId;
+    if(!reqId) return;
+    const formData = new URLSearchParams();
+    formData.append('action', 'updateStatus'); formData.append('reqId', reqId);
+    formData.append('role', currentRole); formData.append('decision', decision);
+    document.getElementById('approveMsg').innerText = "جاري الحفظ...";
+    const res = await fetch(API_URL, { method: 'POST', body: formData, headers: { 'Content-Type': 'application/x-www-form-urlencoded' } });
+    const result = await res.json();
+    if(result.success) {
+      document.getElementById('approveMsg').innerText = `✅ تم تسجيل القرار: ${result.newStatus}`;
+      document.getElementById('approveMsg').style.color = "#28a745";
+      if (currentRole === 'coordinator' && decision === 'approved') {
+        sendAutoWhatsApp(VP_PHONE, reqId, "النائب الأكاديمي", "المنسق");
+      } else if (currentRole === 'vp' && decision === 'approved') {
+        let approvingRoleName = 'النائب الأكاديمي';
+        try {
+          const check = new URLSearchParams(); check.append('action', 'getRequest'); check.append('reqId', reqId);
+          const checkRes = await fetch(API_URL, { method: 'POST', body: check, headers: { 'Content-Type': 'application/x-www-form-urlencoded' } });
+          const checkData = await checkRes.json();
+          if (checkData.success && (String(checkData.data.coverageType || '') === 'إداري' || String(checkData.data.subject || '') === 'كادر إداري')) approvingRoleName = 'النائب الإداري';
+        } catch (_) {}
+        sendAutoWhatsApp(PRINCIPAL_PHONE, reqId, "مدير المدرسة", approvingRoleName);
+      }
+    }
+  }
+
+  function sendAutoWhatsApp(phone, reqId, nextRole, currentRoleName) {
+    const msg = `السلام عليكم،\nأنا (${currentRoleName}).\nتم اعتماد طلب الاستئذان رقم: ${reqId}.\nيرجى الدخول للنظام واتخاذ الإجراء اللازم.`;
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    const url = isMobile ? `whatsapp://send?phone=${phone}&text=${encodeURIComponent(msg)}` : `https://web.whatsapp.com/send?phone=${phone}&text=${encodeURIComponent(msg)}`;
+    window.open(url, '_blank');
+  }
+
+  function switchAdminTab(tab) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelector(`.tab[data-tab="${tab}"]`).classList.add('active');
+    document.getElementById('tabStats').classList.toggle('hidden', tab !== 'stats');
+    document.getElementById('tabEmployees').classList.toggle('hidden', tab !== 'employees');
+  }
+
+  async function loadStats() {
+    const grid = document.getElementById('statsGrid');
+    grid.innerHTML = '<p>جاري تحميل الإحصائيات...</p>';
+    document.getElementById('teacherStatsWrap').innerHTML = '';
+    try {
+      const formData = new URLSearchParams();
+      formData.append('action', 'getStats');
+      const res = await fetch(API_URL, { method: 'POST', body: formData, headers: { 'Content-Type': 'application/x-www-form-urlencoded' } });
+      const result = await res.json();
+      if (!result.success) throw new Error(result.message || 'تعذر تحميل الإحصائيات');
+
+      grid.innerHTML = `
+        <button type="button" class="stat-box" style="text-align:right;cursor:pointer;border:0;border-right:5px solid var(--primary)" onclick="loadRequestDetails('all')"><h3>إجمالي الطلبات — اضغط للتفاصيل</h3><div class="value">${Number(result.total || 0)}</div></button>
+        <button type="button" class="stat-box" style="text-align:right;cursor:pointer;border:0;border-right:5px solid #28a745" onclick="loadRequestDetails('academic')"><h3>أكاديمي — اضغط للتفاصيل</h3><div class="value">${Number(result.academic || 0)}</div></button>
+        <button type="button" class="stat-box" style="text-align:right;cursor:pointer;border:0;border-right:5px solid #17a2b8" onclick="loadRequestDetails('admin')"><h3>إداري — اضغط للتفاصيل</h3><div class="value">${Number(result.admin || 0)}</div></button>
+      `;
+    } catch (e) {
+      grid.innerHTML = `<p style="color:#b00020;">تعذر تحميل الإحصائيات: ${escapeHtml(e.message || String(e))}</p>`;
+    }
+  }
+
+  async function loadRequestDetails(kind) {
+    const list = document.getElementById('requestDetailsList');
+    const view = document.getElementById('requestDetailsView');
+    view.classList.add('hidden');
+    list.innerHTML = '<p>جاري تحميل الأذون...</p>';
+    try {
+      const fd = new URLSearchParams(); fd.append('action', 'getRequests');
+      const response = await fetch(API_URL, { method: 'POST', body: fd, headers: { 'Content-Type': 'application/x-www-form-urlencoded' } });
+      const result = await response.json();
+      if (!result.success) throw new Error(result.message || 'تعذر تحميل الأذون');
+      const requests = (result.requests || []).filter(d => {
+        const isAdmin = String(d.coverageType || '') === 'إداري' || String(d.subject || '') === 'كادر إداري' || !/معلم|معلمة|مدرس|مدرسة|منسق|منسقة/.test(String(d.jobTitle || ''));
+        return kind === 'all' || (kind === 'admin' ? isAdmin : !isAdmin);
+      });
+      if (!requests.length) { list.innerHTML = '<p>لا توجد أذون في هذه الفئة.</p>'; return; }
+      list.innerHTML = `<div style="overflow-x:auto"><table class="data-table"><thead><tr><th>رقم الطلب</th><th>الموظف</th><th>التصنيف</th><th>التاريخ</th><th>الحالة</th><th>الإجراء</th></tr></thead><tbody>${requests.map((d,i) => {
+        const isAdmin = String(d.coverageType || '') === 'إداري' || String(d.subject || '') === 'كادر إداري' || !/معلم|معلمة|مدرس|مدرسة|منسق|منسقة/.test(String(d.jobTitle || ''));
+        const packed = encodeURIComponent(JSON.stringify(d));
+        return `<tr><td>${escapeHtml(d.requestId || d.reqId || '')}</td><td>${escapeHtml(d.name || '')}</td><td>${isAdmin ? 'إداري' : 'أكاديمي'}</td><td>${escapeHtml(d.date || '')}</td><td>${escapeHtml(d.status || '')}</td><td><button class="btn btn-primary btn-sm" onclick="showAdminRequestDetails('${packed}')">التفاصيل</button> <button class="btn btn-sm" style="background:#17a2b8;color:white" onclick="downloadAdminRequestImage('${packed}')">تحميل JPG</button></td></tr>`;
+      }).join('')}</tbody></table></div>`;
+    } catch (e) { list.innerHTML = `<p class="error-msg">${escapeHtml(e.message || String(e))}</p>`; }
+  }
+
+  function showAdminRequestDetails(packed) {
+    let d; try { d = JSON.parse(decodeURIComponent(packed)); } catch (_) { return alert('تعذر قراءة تفاصيل الطلب.'); }
+    currentTrackedData = d;
+    const isAdmin = String(d.coverageType || '') === 'إداري' || String(d.subject || '') === 'كادر إداري';
+    const fields = [
+      ['رقم الطلب', d.requestId || d.reqId], ['اسم الموظف', d.name], ['الرقم الوظيفي', d.employeeId || d.empId], ['المسمى الوظيفي', d.jobTitle],
+      ['التصنيف', isAdmin ? 'إداري' : 'أكاديمي'], ['المادة/الكادر', d.subject], ['نوع الإذن', d.permissionType || d.type], ['التاريخ', d.date],
+      ['وقت الخروج', d.exitTime || d.exit], ['وقت العودة', d.returnTime || d.return], ['السبب', d.reason], ['الحالة', d.status],
+      ['تغطية الحصص', d.coverage], ['تغطية العمل الإداري', d.adminCoverage], ['البديل الإداري', d.adminSubstitute],
+      ['حالة المنسق', d.coordinatorStatus], ['حالة النائب', d.vpStatus], ['حالة المدير', d.principalStatus]
+    ];
+    const view = document.getElementById('requestDetailsView');
+    view.innerHTML = `<h4 style="color:var(--primary)">تفاصيل الطلب ${escapeHtml(d.requestId || d.reqId || '')}</h4><div class="admin-grid">${fields.map(([label,value]) => `<div class="stat-box" style="border-right-color:#d4af37"><h3>${escapeHtml(label)}</h3><div style="font-size:.95rem;white-space:pre-wrap;overflow-wrap:anywhere">${escapeHtml(value || '—')}</div></div>`).join('')}</div><button class="btn btn-primary btn-sm" onclick="downloadPDFFromTrack()">🖼️ تحميل صورة الإذن JPG</button>`;
+    view.classList.remove('hidden'); view.scrollIntoView({behavior:'smooth',block:'nearest'});
+  }
+
+  function downloadAdminRequestImage(packed) {
+    try { currentTrackedData = JSON.parse(decodeURIComponent(packed)); downloadPDFFromTrack(); }
+    catch (_) { alert('تعذر تجهيز صورة الإذن.'); }
+  }
+
+  function renderEmployeesList() {
+    const query = (document.getElementById('empSearchInput')?.value || '').trim().toLowerCase();
+    const list = document.getElementById('employeesList');
+    const filtered = ALL_EMPLOYEES.filter(e => {
+      if (!query) return true;
+      return (e.name || '').toLowerCase().includes(query) ||
+             String(e.employeeId || '').includes(query) ||
+             String(e.personalId || '').includes(query) ||
+             (e.jobTitle || '').toLowerCase().includes(query);
+    });
+    if (filtered.length === 0) {
+      list.innerHTML = '<p style="text-align:center;color:#888;">لا يوجد نتائج.</p>';
+      return;
+    }
+    list.innerHTML = filtered.map(e => `
+      <div class="employee-row">
+        <span><strong>${escapeHtml(e.name)}</strong></span>
+        <span>${escapeHtml(e.jobTitle || '')}</span>
+        <span>وظيفي: ${escapeHtml(e.employeeId || '')}</span>
+        <span>هاتف: ${escapeHtml(e.phone || '')}</span>
+        <button class="btn btn-primary btn-sm" onclick="openEditEmployeeForm('${escapeHtml(e.id)}')">تعديل</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteEmployee('${escapeHtml(e.id)}','${escapeHtml(e.name)}')">حذف</button>
+      </div>
+    `).join('');
+  }
+
+  function openAddEmployeeForm() {
+    document.getElementById('empFormTitle').innerText = 'إضافة معلم جديد';
+    document.getElementById('empFormId').value = '';
+    ['efName','efNationality','efJobTitle','efPersonalId','efEmployeeId','efPhone','efEmail'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('efBalance').value = 600;
+    document.getElementById('empFormMsg').innerText = '';
+    document.getElementById('adminDashboard').classList.add('hidden');
+    document.getElementById('employeeFormScreen').classList.remove('hidden');
+  }
+
+  function openEditEmployeeForm(id) {
+    const emp = ALL_EMPLOYEES.find(e => String(e.id) === String(id));
+    if (!emp) return;
+    document.getElementById('empFormTitle').innerText = 'تعديل بيانات معلم';
+    document.getElementById('empFormId').value = emp.id;
+    document.getElementById('efName').value = emp.name || '';
+    document.getElementById('efNationality').value = emp.nationality || '';
+    document.getElementById('efJobTitle').value = emp.jobTitle || '';
+    document.getElementById('efPersonalId').value = emp.personalId || '';
+    document.getElementById('efEmployeeId').value = emp.employeeId || '';
+    document.getElementById('efPhone').value = emp.phone || '';
+    document.getElementById('efEmail').value = emp.email || '';
+    document.getElementById('efBalance').value = 600;
+    document.getElementById('empFormMsg').innerText = '';
+    document.getElementById('adminDashboard').classList.add('hidden');
+    document.getElementById('employeeFormScreen').classList.remove('hidden');
+  }
+
+  function closeEmployeeForm() {
+    document.getElementById('employeeFormScreen').classList.add('hidden');
+    document.getElementById('adminDashboard').classList.remove('hidden');
+  }
+
+  async function saveEmployee() {
+    const id = document.getElementById('empFormId').value;
+    const name = document.getElementById('efName').value.trim();
+    const jobTitle = document.getElementById('efJobTitle').value.trim();
+    const employeeId = document.getElementById('efEmployeeId').value.trim();
+    if (!name || !jobTitle || !employeeId) {
+      document.getElementById('empFormMsg').innerText = 'الاسم والمسمى والرقم الوظيفي مطلوبة.';
+      document.getElementById('empFormMsg').style.color = '#dc3545';
+      return;
+    }
+    const payload = {
+      id: id || '',
+      name, jobTitle, employeeId,
+      nationality: document.getElementById('efNationality').value.trim(),
+      personalId: document.getElementById('efPersonalId').value.trim(),
+      phone: document.getElementById('efPhone').value.trim(),
+      email: document.getElementById('efEmail').value.trim(),
+      balance: Number(document.getElementById('efBalance').value) || 600
+    };
+    const action = id ? 'updateEmployee' : 'addEmployee';
+    document.getElementById('empFormMsg').innerText = 'جاري الحفظ...';
+    document.getElementById('empFormMsg').style.color = '#555';
+    try {
+      const formData = new URLSearchParams();
+      formData.append('action', action);
+      formData.append('data', JSON.stringify(payload));
+      const res = await fetch(API_URL, { method: 'POST', body: formData, headers: { 'Content-Type': 'application/x-www-form-urlencoded' } });
+      const result = await res.json();
+      if (result.success) {
+        document.getElementById('empFormMsg').innerText = '✅ تم الحفظ بنجاح.';
+        document.getElementById('empFormMsg').style.color = '#28a745';
+        setTimeout(() => closeEmployeeForm(), 1500);
+      } else {
+        throw new Error(result.message || 'فشل الحفظ');
+      }
+    } catch(e) {
+      document.getElementById('empFormMsg').innerText = '❌ ' + (e.message || 'خطأ');
+      document.getElementById('empFormMsg').style.color = '#dc3545';
+    }
+  }
+
+  async function deleteEmployee(id, name) {
+    if (!confirm(`هل أنت متأكد من حذف "${name}"؟`)) return;
+    try {
+      const formData = new URLSearchParams();
+      formData.append('action', 'deleteEmployee');
+      formData.append('data', JSON.stringify({ id }));
+      const res = await fetch(API_URL, { method: 'POST', body: formData, headers: { 'Content-Type': 'application/x-www-form-urlencoded' } });
+      const result = await res.json();
+      if (result.success) {
+        alert('✅ تم الحذف.');
+        ALL_EMPLOYEES = ALL_EMPLOYEES.filter(e => String(e.id) !== String(id));
+        renderEmployeesList();
+      } else {
+        alert('❌ ' + (result.message || 'فشل الحذف'));
+      }
+    } catch(e) {
+      alert('❌ خطأ في الاتصال');
+    }
+  }
+
+  function loadHtml2CanvasLibrary() {
+    return new Promise((resolve, reject) => {
+      if (typeof html2canvas !== 'undefined') return resolve();
+      const script = document.createElement('script');
+      script.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
+      script.onload = () => typeof html2canvas !== 'undefined' ? resolve() : reject(new Error('المكتبة لم تُعرّف بعد التحميل'));
+      script.onerror = reject;
+      document.head.appendChild(script);
+    });
+  }
+
+  async function downloadPDFFromTrack() {
+    const data = currentTrackedData;
+    if (!data) { alert('لا توجد بيانات طلب جاهزة للتصدير.'); return; }
+    if (typeof html2canvas === 'undefined') {
+      try { await loadHtml2CanvasLibrary(); } catch (e) { alert('تعذر تحميل مكتبة التصوير. تحقق من اتصال الإنترنت أو اسمح بتحميل cdnjs.cloudflare.com ثم حدّث الصفحة.'); return; }
+    }
+    const source = document.getElementById('pdf-template');
+    if (!source) { alert('لم يتم العثور على قالب ورقة الإذن.'); return; }
+
+    const setText = (id, value) => {
+      const el = document.getElementById(id);
+      if (el) el.textContent = value === null || value === undefined || value === '' ? '—' : String(value);
+    };
+    const formatDate = value => {
+      if (!value) return '—';
+      const s = String(value);
+      const m = s.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+      if (m) return `${m[3]}/${m[2]}/${m[1]}`;
+      const d = new Date(value);
+      return isNaN(d.getTime()) ? s : d.toLocaleDateString('ar-QA');
+    };
+
+    setText('pdf-name', data.name);
+    setText('pdf-empid', data.employeeId || data.empId);
+    setText('pdf-job', data.jobTitle);
+    setText('pdf-date', formatDate(data.date));
+    setText('pdf-exit', data.exitTime || data.exit);
+    setText('pdf-return', data.returnTime || data.return);
+    setText('pdf-type', data.permissionType || data.type);
+    setText('pdf-reqid', data.requestId || data.reqId);
+    setText('pdf-reason', data.reason);
+
+    let coverage = String(data.coverage || '');
+    const adminMode = String(data.coverageType || '') === 'إداري' || String(data.subject || '') === 'كادر إداري';
+    const title = document.getElementById('pdf-coverage-title');
+    if (title) title.textContent = adminMode ? 'تغطية العمل الإداري:' : 'جدول تغطية الحصص:';
+    if (adminMode) {
+      coverage = 'الأعمال الإدارية: ' + (data.adminCoverage || coverage || '—') + '\nالموظف الإداري البديل: ' + (data.adminSubstitute || '—');
+    } else if (!coverage && data.coverageDetails) {
+      try {
+        const items = typeof data.coverageDetails === 'string' ? JSON.parse(data.coverageDetails) : data.coverageDetails;
+        if (Array.isArray(items)) coverage = items.map(c => `المادة: ${c.subject || '—'} | اليوم: ${c.day || '—'} | التاريخ: ${c.date || '—'} | الحصة: ${c.period || '—'} | البديل: ${c.substituteTeacher || '—'}`).join('\n');
+      } catch (_) {}
+    }
+    setText('pdf-coverage', coverage || 'لا توجد بيانات تغطية مسجلة.');
+
+    // أنشئ نسخة مستقلة داخل حاوية مرئية للتصوير؛ هذا يمنع التقاط القالب المخفي كورقة بيضاء.
+    const stage = document.createElement('div');
+    stage.style.cssText = 'position:fixed;left:0;top:0;width:794px;z-index:2147483647;background:#fff;overflow:visible;';
+    const clone = source.cloneNode(true);
+    clone.id = 'pdf-template-export';
+    clone.classList.remove('hidden', 'pdf-capturing');
+    clone.style.cssText = 'display:block!important;visibility:visible!important;opacity:1!important;position:relative!important;left:0!important;top:0!important;width:794px!important;min-height:1123px!important;height:auto!important;padding:42px!important;margin:0!important;background:#fff!important;color:#222!important;transform:none!important;filter:none!important;overflow:visible!important;box-sizing:border-box!important;';
+    stage.appendChild(clone);
+    document.body.appendChild(stage);
+
+    try {
+      if (document.fonts && document.fonts.ready) await document.fonts.ready;
+      await Promise.all(Array.from(clone.querySelectorAll('img')).map(img => {
+        if (img.complete && img.naturalWidth > 0) return Promise.resolve();
+        return new Promise(resolve => { img.onload = resolve; img.onerror = resolve; setTimeout(resolve, 4000); });
+      }));
+      await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+      const canvas = await html2canvas(clone, {
+        scale: 2, useCORS: true, allowTaint: false, backgroundColor: '#ffffff',
+        logging: false, width: 794, windowWidth: 1000, scrollX: 0, scrollY: 0
+      });
+      if (!canvas || canvas.width < 100 || canvas.height < 100) throw new Error('الصورة الناتجة فارغة أو صغيرة جداً.');
+      const blob = await new Promise((resolve, reject) => canvas.toBlob(b => b ? resolve(b) : reject(new Error('تعذر تحويل الورقة إلى JPG.')), 'image/jpeg', 0.95));
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      const safeId = String(data.requestId || data.reqId || 'request').replace(/[^\w-]/g, '_');
+      a.href = url;
+      a.download = `استئذان_${safeId}.jpg`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 15000);
+    } catch (err) {
+      console.error('JPG export error:', err);
+      alert('تعذر حفظ صورة ورقة الإذن: ' + (err.message || 'خطأ غير معروف'));
+    } finally {
+      stage.remove();
+    }
+  }
+
+  async function downloadOfficialPermissionPDF() {
+    const data = currentTrackedData;
+    if (!data) { alert('لا توجد بيانات طلب جاهزة للتصدير.'); return; }
+    if (String(data.status || '') !== 'principal_approved') {
+      alert('لا يمكن تنزيل نموذج الإذن الرسمي إلا بعد الاعتماد النهائي من مدير المدرسة.');
+      return;
+    }
+    if (typeof html2pdf === 'undefined') {
+      await new Promise((resolve, reject) => {
+        const script = document.createElement('script');
+        script.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js';
+        script.onload = () => typeof html2pdf !== 'undefined' ? resolve() : reject(new Error('تعذر تحميل مكتبة PDF'));
+        script.onerror = () => reject(new Error('تعذر تحميل مكتبة PDF'));
+        document.head.appendChild(script);
+      }).catch(() => { alert('تعذر تحميل مكتبة إنشاء PDF. تحقق من اتصال الإنترنت ثم أعد المحاولة.'); throw new Error('html2pdf unavailable'); });
+    }
+    const source = document.getElementById('official-permission-template');
+    if (!source) { alert('تعذر العثور على نموذج الإذن الرسمي.'); return; }
+    const set = (id, value) => { const el = document.getElementById(id); if (el) el.textContent = value == null || value === '' ? '—' : String(value); };
+    const fmtDate = value => {
+      if (!value) return '—';
+      const str = String(value); const m = str.match(/^(\d{4})-(\d{2})-(\d{2})/);
+      if (m) return `${m[3]}/${m[2]}/${m[1]}`;
+      const d = new Date(value); return Number.isNaN(d.getTime()) ? str : d.toLocaleDateString('ar-QA');
+    };
+    set('op-empid', data.employeeId || data.empId);
+    set('op-name', data.name);
+    set('op-job', data.jobTitle);
+    set('op-date', fmtDate(data.date || data.createdAt || data.timestamp));
+    set('op-exit', data.exitTime || data.exit);
+    set('op-return', data.returnTime || data.return);
+    set('op-reason', data.reason);
+    set('op-reqid', data.requestId || data.reqId);
+    const type = String(data.permissionType || data.type || '').trim();
+    const typeMap = [
+      ['op-type-late', /تأخر|صباح/i], ['op-type-return', /عودة|خروج وعودة/i],
+      ['op-type-early', /مبكر/i], ['op-type-other', /أخرى|ورشة|مهمة|رسمي/i]
+    ];
+    typeMap.forEach(([id, re]) => { const el = document.getElementById(id); if (el) el.textContent = (re.test(type) ? '☑ ' : '□ ') + el.textContent.replace(/^[□☑]\s*/, ''); });
+    const tbody = document.getElementById('op-coverage-rows');
+    const adminMode = String(data.coverageType || '') === 'إداري' || String(data.subject || '') === 'كادر إداري';
+    let rows = [];
+    if (!adminMode && data.coverageDetails) {
+      try { const arr = typeof data.coverageDetails === 'string' ? JSON.parse(data.coverageDetails) : data.coverageDetails; if (Array.isArray(arr)) rows = arr; } catch (_) {}
+    }
+    if (rows.length) {
+      tbody.innerHTML = rows.slice(0, 8).map(c => `<tr><td>${escapeHtml(c.period || '—')}</td><td>${escapeHtml(c.class || c.grade || c.day || '—')}</td><td>${escapeHtml(c.subject || data.subject || '—')}</td><td>تم التوقيع إلكترونيًا</td><td>تم التوقيع إلكترونيًا</td><td>${escapeHtml(c.task || c.duty || '—')}</td><td>${escapeHtml(c.substituteTeacher || c.substitute || data.adminSubstitute || '—')}</td></tr>`).join('');
+    } else if (adminMode) {
+      tbody.innerHTML = `<tr><td>—</td><td>—</td><td>إداري</td><td>تم التوقيع إلكترونيًا</td><td>تم التوقيع إلكترونيًا</td><td>${escapeHtml(data.adminCoverage || data.coverage || '—')}</td><td>${escapeHtml(data.adminSubstitute || '—')}</td></tr>`;
+    } else {
+      tbody.innerHTML = `<tr><td colspan="7">${escapeHtml(data.coverage || 'لا توجد بيانات تغطية مسجلة')}</td></tr>`;
+    }
+    const stage = document.createElement('div');
+    stage.style.cssText = 'position:fixed;left:-12000px;top:0;width:190mm;background:#fff;z-index:-1;';
+    const clone = source.cloneNode(true);
+    clone.id = 'official-permission-export';
+    clone.classList.remove('hidden');
+    clone.style.cssText = 'display:block!important;position:relative!important;left:auto!important;top:auto!important;width:190mm!important;min-height:0!important;padding:5mm!important;margin:0!important;background:#fff!important;color:#111!important;overflow:visible!important;';
+    stage.appendChild(clone); document.body.appendChild(stage);
+    try {
+      await Promise.all(Array.from(clone.querySelectorAll('img')).map(img => {
+        if (img.complete && img.naturalWidth) return Promise.resolve();
+        return new Promise(resolve => { img.onload = resolve; img.onerror = resolve; setTimeout(resolve, 3500); });
+      }));
+      const safeId = String(data.requestId || data.reqId || 'request').replace(/[^\w-]/g, '_');
+      await html2pdf().set({
+        margin: [8, 8, 8, 8], filename: `نموذج_إذن_${safeId}.pdf`,
+        image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2, useCORS: true, allowTaint: false, backgroundColor: '#ffffff', logging: false },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+        pagebreak: { mode: ['css', 'legacy'], before: '.official-page + .official-page' }
+      }).from(clone.querySelector('.official-permission')).save();
+    } catch (e) {
+      console.error('Official permission PDF error:', e);
+      alert('تعذر إنشاء ملف PDF: ' + (e.message || 'خطأ غير معروف'));
+    } finally { stage.remove(); }
+  }
+
+  function escapeHtml(v) {
+    return String(v == null ? '' : v).replace(/[&<>"']/g, ch => ({
+      '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+    }[ch]));
+  }
+
+  Object.assign(window, {
+    showTrackingScreen, trackRequest, verifyEmp, calcDuration, submitRequest,
+    sendWhatsApp, askPassword, revealAllPasswords, fetchRequest, approveRequest, sendAutoWhatsApp,
+    loadStats, addCoverageEntry, removeCoverageEntry, switchAdminTab,
+    renderEmployeesList, openAddEmployeeForm, openEditEmployeeForm, closeEmployeeForm,
+    saveEmployee, deleteEmployee, downloadPDFFromTrack, downloadOfficialPermissionPDF
+  });
+
+  loadAllEmployees();
+
+  window.addEventListener('error', e => { console.error('Error:', e.error || e.message); });
+  window.addEventListener('unhandledrejection', e => { console.error('Async error:', e.reason); });
+</script>
+</body>
+</html>
