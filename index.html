@@ -501,7 +501,7 @@
 <script>
   const API_URL =
   
- 'https://script.google.com/macros/s/AKfycbxgV20kmYYZfHjJ3TRR7OXBBcgiXZ-s9o5w2eDgGv-rZnqkzE-9O6oRfTVXhNtW1cWW/exec';
+ 'https://script.google.com/macros/s/AKfycbzAWsQ0n92LEIaLZxVmafNNK56yRvmLwglPHWpt2t-AyBZ0dqTy8wq41CT6VurauLac/exec';
   const JSON_URL = 'encoded_data.txt';
   const PASSWORDS = { coordinator: "Co@2027", vp: "Academic@2027", vp_admin: "Admin@2027", principal: "Manager@2027", admin: "ABAH@2027" };
   const JOKER_PASSWORD = "AbuHazem@2027";
@@ -770,9 +770,31 @@
     if (ALL_EMPLOYEES.length === 0) await loadAllEmployees();
     if (ALL_EMPLOYEES.length === 0) return;
 
-    let emp = ALL_EMPLOYEES.find(e => String(e.employeeId || '') === id || String(e.personalId || '') === id);
+    const normalizeLoginId = value => String(value == null ? '' : value)
+      .replace(/[٠-٩]/g, d => String('٠١٢٣٤٥٦٧٨٩'.indexOf(d)))
+      .replace(/[۰-۹]/g, d => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(d)))
+      .replace(/[\s\-–—_]/g, '').trim();
+
+    let emp = ALL_EMPLOYEES.find(e =>
+      normalizeLoginId(e.employeeId) === normalizeLoginId(id) ||
+      normalizeLoginId(e.personalId) === normalizeLoginId(id)
+    );
+
+    // التحقق من الخادم مباشرة أيضًا: يسمح بالرقم الشخصي دون كشف أرقام الموظفين الشخصية في القائمة العامة.
+    if (!emp) {
+      try {
+        const verifyUrl = API_URL + (API_URL.includes('?') ? '&' : '?') +
+          'action=verifyEmployee&id=' + encodeURIComponent(id) + '&_=' + Date.now();
+        const verifyResponse = await fetch(verifyUrl, { method: 'GET', cache: 'no-store' });
+        const verifyData = await verifyResponse.json();
+        if (verifyData && verifyData.success && verifyData.employee) emp = verifyData.employee;
+      } catch (verifyError) {
+        console.error('Server-side employee verification failed:', verifyError);
+      }
+    }
+
     if(!emp) {
-      document.getElementById('loginError').innerText = "أنت غير مسجل بهذه المدرسة.";
+      document.getElementById('loginError').innerText = "أنت غير مسجل بهذه المدرسة، أو تعذر مطابقة الرقم. تحقق من الرقم وحاول مجددًا.";
       return;
     }
     currentEmp = emp;
