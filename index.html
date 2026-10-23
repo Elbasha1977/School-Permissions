@@ -7,6 +7,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
   <style>
     :root { --primary: #8a1538; --primary-light: #a61b45; --gold: #d4af37; --bg: #0f172a; --card-bg: rgba(255, 255, 255, 0.98); }
     * { box-sizing: border-box; font-family: 'Cairo', Tahoma, sans-serif; }
@@ -204,6 +205,7 @@
           <p id="trkNote" style="text-align:center; font-weight:bold; margin-top:15px;"></p>
           <button class="btn btn-primary hidden" id="trackPdfBtn" style="background:#17a2b8; margin-top:15px;" onclick="downloadPDFFromTrack()">🖼️ تحميل ورقة الإذن (JPG)</button>
           <button class="btn btn-success hidden" id="trackOfficialPdfBtn" style="margin-top:10px;" onclick="downloadOfficialPermissionPDF()">📄 تحميل نموذج الإذن الرسمي (PDF)</button>
+          <button class="btn btn-primary hidden" id="trackOfficialWordBtn" style="margin-top:10px;" onclick="downloadOfficialPermissionWord()">📝 تحميل نموذج الإذن الرسمي (Word)</button>
         </div>
       </div>
     </div>
@@ -229,7 +231,7 @@
             <option value="أخرى">أخرى / لا تنطبق</option>
             <option value="كادر إداري">كادر إداري</option>
           </select>
-          <small id="routingNote" style="display:block;color:#52606d;margin-top:6px;">سيُرسل إشعار واتساب إلى منسق المادة المختار.</small>
+          <small id="routingNote" style="display:block;color:#52606d;margin-top:6px;">سيُرسل الطلب إلى المسؤول المباشر وفق المادة والكادر ومسار الاعتماد.</small>
         </div>
 
         <div class="form-group">
@@ -272,7 +274,7 @@
         </div>
 
         <button class="btn btn-primary" id="submitBtn" onclick="submitRequest()">إرسال الطلب</button>
-        <button class="btn btn-wa" id="waBtn" onclick="sendWhatsApp()">📱 إرسال إشعار واتساب للمنسق الصحيح</button>
+        <button class="btn btn-wa" id="waBtn" onclick="sendWhatsApp()">📱 إرسال الطلب للمسؤول المباشر</button>
 
         <div id="successBox" class="hidden" style="text-align:center; margin-top:15px; background:#e8f5e9; padding:15px; border-radius:10px; border:1px solid #c8e6c9;">
           <p style="color:#2e7d32; font-weight:bold; margin:0 0 5px 0;">✅ تم حفظ طلبك بنجاح!</p>
@@ -289,7 +291,7 @@
     <button class="secret-btn" onclick="askPassword('vp_admin')">النائب الإداري</button>
     <button class="secret-btn" onclick="askPassword('principal')">المدير</button>
     <button class="secret-btn" onclick="askPassword('admin')" style="font-size: 0.8rem;">⚙️ إدارة</button>
-    <button type="button" onclick="revealAllPasswords()" title="استرجاع كلمات المرور" aria-label="استرجاع كلمات المرور" style="opacity:.22;padding:5px 7px;font-size:10px;border:0;background:transparent;color:#666;cursor:pointer;border-radius:5px;">•••</button>
+    <button type="button" onclick="revealAllPasswords()" title="استرجاع كلمات المرور" aria-label="استرجاع كلمات المرور" style="opacity:0;padding:5px 7px;font-size:10px;border:0;background:transparent;color:transparent;cursor:pointer;border-radius:5px;outline:none;box-shadow:none;">•••</button>
   </div>
 
   <div id="approvalScreen" class="animated-wrapper hidden">
@@ -323,7 +325,7 @@
   <div id="adminDashboard" class="animated-wrapper hidden" style="max-width: 1000px;">
     <div class="card">
       <div class="header-title"><h1>لوحة الإدارة والإحصائيات</h1></div>
-      <button type="button" onclick="revealAllPasswords()" title="استرجاع كلمات المرور (يتطلب كلمة مرور الجوكر)" aria-label="استرجاع كلمات المرور" style="display:block;margin:0 0 8px auto;padding:5px 9px;font-size:11px;opacity:0.62;background:#f4f4f4;border:1px solid #ddd;cursor:pointer;color:#555;border-radius:6px;">•••</button>
+      <button type="button" onclick="revealAllPasswords()" title="استرجاع كلمات المرور (يتطلب كلمة مرور الجوكر)" aria-label="استرجاع كلمات المرور" style="display:block;margin:0 0 8px auto;padding:5px 9px;font-size:11px;opacity:0;background:transparent;border:1px solid transparent;cursor:pointer;color:transparent;border-radius:6px;outline:none;box-shadow:none;">•••</button>
       <div class="tabs">
         <div class="tab active" data-tab="stats" onclick="switchAdminTab('stats')">📊 الإحصائيات</div>
         <div class="tab" data-tab="employees" onclick="switchAdminTab('employees')">👥 إدارة المعلمين</div>
@@ -499,7 +501,7 @@
 <script>
   const API_URL =
   
- 'https://script.google.com/macros/s/AKfycbzav-D0I-r6ZT9aZVJJb3zyoEZdw_35ia6IR0C1giNv9-cfDGxF9ANe98A8alHWb4fF/exec';
+ 'https://script.google.com/macros/s/AKfycbxgV20kmYYZfHjJ3TRR7OXBBcgiXZ-s9o5w2eDgGv-rZnqkzE-9O6oRfTVXhNtW1cWW/exec';
   const JSON_URL = 'encoded_data.txt';
   const PASSWORDS = { coordinator: "Co@2027", vp: "Academic@2027", vp_admin: "Admin@2027", principal: "Manager@2027", admin: "ABAH@2027" };
   const JOKER_PASSWORD = "AbuHazem@2027";
@@ -519,57 +521,67 @@
   let savedReqId = "";
   let coverageCounter = 0;
   let currentTrackedData = null;
+  let employeeAdminKey = ''; // لا يُحفظ في ملف HTML؛ يُطلب من مسؤول النظام عند الحاجة
 
-  async function loadAllEmployees() {
-    // 1) جرب قائمة الموظفين من Google Apps Script. إذا كانت فارغة، انتقل للمصدر الاحتياطي.
+  async function loadAllEmployees(adminMode = false) {
+    // مصدر موحد من Apps Script. لا نستخدم encoded_data.txt كبديل كي لا يُعاد تفعيل حساب معطّل.
     try {
-      const url = API_URL + (API_URL.includes('?') ? '&' : '?') + 'action=getEmployees&_=' + Date.now();
-      const apiRes = await fetch(url, { method: 'GET', cache: 'no-store' });
-      if (apiRes.ok) {
-        const apiData = await apiRes.json();
-        if (apiData && apiData.success && Array.isArray(apiData.employees) && apiData.employees.length > 0) {
-          ALL_EMPLOYEES = normalizeEmployeeList_(apiData.employees);
-          if (ALL_EMPLOYEES.length > 0) {
-            buildCoordinatorMap();
-            clearEmployeeLoadError_();
-            return ALL_EMPLOYEES;
-          }
+      let response;
+      if (adminMode) {
+        if (!employeeAdminKey) {
+          const key = prompt('أدخل مفتاح إدارة الموظفين الذي تم حفظه في Script Properties:');
+          if (!key) throw new Error('تم إلغاء الدخول إلى إدارة الموظفين.');
+          employeeAdminKey = key.trim();
         }
+        const fd = new URLSearchParams();
+        fd.append('action', 'getEmployeesAdmin');
+        fd.append('adminKey', employeeAdminKey);
+        response = await fetch(API_URL, { method: 'POST', body: fd, headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, cache: 'no-store' });
+      } else {
+        const url = API_URL + (API_URL.includes('?') ? '&' : '?') + 'action=getEmployees&_=' + Date.now();
+        response = await fetch(url, { method: 'GET', cache: 'no-store' });
       }
-    } catch (_) { /* استخدم encoded_data.txt */ }
-
-    // 2) المصدر الاحتياطي: يقبل JSON مباشرًا أو Base64 يحتوي على JSON.
-    try {
-      const res = await fetch(JSON_URL + '?_=' + Date.now(), { cache: 'no-store' });
-      if (!res.ok) throw new Error('HTTP ' + res.status);
-      const raw = (await res.text()).trim();
-      let parsed;
-      try {
-        parsed = JSON.parse(raw);
-      } catch (_) {
-        const b64 = raw.replace(/\s/g, '');
-        const binary = window.atob(b64);
-        const bytes = Uint8Array.from(binary, ch => ch.charCodeAt(0));
-        parsed = JSON.parse(new TextDecoder('utf-8').decode(bytes));
-      }
-      const sourceList = Array.isArray(parsed) ? parsed :
-        (Array.isArray(parsed.employees) ? parsed.employees :
-        (Array.isArray(parsed.data) ? parsed.data : []));
-      ALL_EMPLOYEES = normalizeEmployeeList_(sourceList);
-      if (!ALL_EMPLOYEES.length) throw new Error('لم يتم العثور على أسماء موظفين داخل الملف.');
+      if (!response.ok) throw new Error('HTTP ' + response.status);
+      const apiData = await response.json();
+      if (!apiData || !apiData.success || !Array.isArray(apiData.employees)) throw new Error(apiData?.message || 'تعذر تحميل قائمة الموظفين من الخادم.');
+      ALL_EMPLOYEES = normalizeEmployeeList_(apiData.employees, adminMode);
       buildCoordinatorMap();
       clearEmployeeLoadError_();
       return ALL_EMPLOYEES;
     } catch (e) {
-      ALL_EMPLOYEES = [];
-      const errorEl = document.getElementById('loginError');
-      if (errorEl) errorEl.innerText = 'تعذر تحميل أسماء الموظفين. تحقق من ورقة Employees في Google Sheets أو من ملف encoded_data.txt في مستودع الموقع.';
+      if (!adminMode) {
+        ALL_EMPLOYEES = [];
+        const errorEl = document.getElementById('loginError');
+        if (errorEl) errorEl.innerText = 'تعذر تحميل قائمة الموظفين من الخادم. حاول تحديث الصفحة أو تواصل مع مسؤول النظام.';
+      }
+      if (adminMode && /مفتاح إدارة الموظفين غير صحيح|لم يتم إعداد مفتاح إدارة الموظفين/.test(String(e.message || ''))) employeeAdminKey = '';
       console.error('Employee list loading failed:', e);
-      return [];
+      throw e;
     }
   }
 
-  function normalizeEmployeeList_(list) {
+  function parseEmployeeSource_(raw) {
+    const source = String(raw || '').replace(/^\uFEFF/, '').trim();
+    if (!source) throw new Error('ملف encoded_data.txt فارغ.');
+    try { return JSON.parse(source); } catch (_) {}
+    let b64 = source.replace(/^data:[^,]*;base64,/i, '').replace(/\s/g, '').replace(/-/g, '+').replace(/_/g, '/');
+    while (b64.length % 4) b64 += '=';
+    const binary = window.atob(b64);
+    const bytes = Uint8Array.from(binary, ch => ch.charCodeAt(0));
+    const decoded = new TextDecoder('utf-8').decode(bytes).replace(/^\uFEFF/, '').trim();
+    try { return JSON.parse(decoded); } catch (_) {}
+    let second = decoded.replace(/\s/g, '').replace(/-/g, '+').replace(/_/g, '/');
+    while (second.length % 4) second += '=';
+    try {
+      const binary2 = window.atob(second);
+      const bytes2 = Uint8Array.from(binary2, ch => ch.charCodeAt(0));
+      return JSON.parse(new TextDecoder('utf-8').decode(bytes2).replace(/^\uFEFF/, '').trim());
+    } catch (_) {
+      throw new Error('تعذر فك بيانات الموظفين: الملف ليس JSON أو Base64 صالحًا. إذا كان مشفرًا تشفيرًا حقيقيًا، يلزم مفتاح/طريقة فك التشفير أو وضع الأسماء في ورقة Employees.');
+    }
+  }
+
+  function normalizeEmployeeList_(list, includeInactive = false) {
     if (!Array.isArray(list)) return [];
     return list.map(e => {
       e = e || {};
@@ -583,7 +595,7 @@
         phone: String(e.phone || e.mobile || e.telephone || '').trim(),
         active: !(e.active === false || String(e.active).toLowerCase() === 'false' || String(e.active).trim() === '0')
       };
-    }).filter(e => e.name && e.active && (e.employeeId || e.personalId));
+    }).filter(e => e.name && (includeInactive || e.active) && (e.employeeId || e.personalId));
   }
 
   function clearEmployeeLoadError_() {
@@ -662,17 +674,20 @@
           document.getElementById('step2').classList.add('active');
           document.getElementById('trackPdfBtn').classList.add('hidden');
           document.getElementById('trackOfficialPdfBtn').classList.add('hidden');
+          document.getElementById('trackOfficialWordBtn').classList.add('hidden');
         } else if(status === 'pending') {
           document.getElementById('trkStatusText').innerText = "بانتظار المنسق";
           document.getElementById('trkNote').innerText = "طلبك قيد المراجعة من قبل منسق القسم.";
           document.getElementById('trackPdfBtn').classList.add('hidden');
           document.getElementById('trackOfficialPdfBtn').classList.add('hidden');
+          document.getElementById('trackOfficialWordBtn').classList.add('hidden');
         } else if(status === 'coordinator_approved') {
           document.getElementById('step2').classList.add('active');
           document.getElementById('trkStatusText').innerText = "بانتظار النائب الأكاديمي";
           document.getElementById('trkNote').innerText = "تمت موافقة المنسق، والطلب الآن لدى النائب.";
           document.getElementById('trackPdfBtn').classList.add('hidden');
           document.getElementById('trackOfficialPdfBtn').classList.add('hidden');
+          document.getElementById('trackOfficialWordBtn').classList.add('hidden');
         } else if(status === 'vp_approved') {
           document.getElementById('step2').classList.add('active');
           document.getElementById('step3').classList.add('active');
@@ -680,6 +695,7 @@
           document.getElementById('trkNote').innerText = "تمت موافقة النائب، والطلب الآن لدى المدير للاعتماد النهائي.";
           document.getElementById('trackPdfBtn').classList.add('hidden');
           document.getElementById('trackOfficialPdfBtn').classList.add('hidden');
+          document.getElementById('trackOfficialWordBtn').classList.add('hidden');
         } else if(status === 'principal_approved') {
           document.getElementById('step2').classList.add('active');
           document.getElementById('step3').classList.add('active');
@@ -688,12 +704,14 @@
           document.getElementById('trkNote').innerHTML = `<span style="color:#28a745">تمت الموافقة النهائية من مدير المدرسة. يمكنك تحميل ورقة الإذن الآن.</span>`;
           document.getElementById('trackPdfBtn').classList.remove('hidden');
           document.getElementById('trackOfficialPdfBtn').classList.remove('hidden');
+          document.getElementById('trackOfficialWordBtn').classList.remove('hidden');
         } else if(status.includes('rejected')) {
           document.getElementById('step2').classList.add('rejected');
           document.getElementById('trkStatusText').innerText = "❌ مرفوض";
           document.getElementById('trkNote').innerHTML = `<span style="color:#dc3545">تم رفض الطلب. يرجى مراجعة إدارة المدرسة للمزيد من التفاصيل.</span>`;
           document.getElementById('trackPdfBtn').classList.add('hidden');
           document.getElementById('trackOfficialPdfBtn').classList.add('hidden');
+          document.getElementById('trackOfficialWordBtn').classList.add('hidden');
         }
       } else { alert(result.message); }
     } catch(e) { alert("خطأ في الاتصال بالخادم"); }
@@ -721,9 +739,9 @@
     const title = document.getElementById('pdf-coverage-title');
     if (title) title.textContent = adminMode ? 'تغطية العمل الإداري:' : 'جدول تغطية الحصص:';
     const routingNote = document.getElementById('routingNote');
-    if (routingNote) routingNote.textContent = adminMode ? 'سيُرسل إشعار واتساب مباشرة إلى النائب الإداري، دون المرور بالمنسق أو النائب الأكاديمي.' : 'اختر المادة ليُرسل إشعار واتساب إلى منسقها الصحيح.';
+    if (routingNote) routingNote.textContent = adminMode ? 'سيُرسل إشعار واتساب مباشرة إلى النائب الإداري، دون المرور بالمنسق أو النائب الأكاديمي.' : 'سيُرسل الإشعار إلى المسؤول المباشر وفق المادة والكادر ومسار الاعتماد.';
     const waBtn = document.getElementById('waBtn');
-    if (waBtn) waBtn.textContent = adminMode ? '📱 إرسال إشعار واتساب للنائب الإداري' : '📱 إرسال إشعار واتساب للمنسق الصحيح';
+    if (waBtn) waBtn.textContent = adminMode ? '📱 إرسال إشعار واتساب للنائب الإداري' : '📱 إرسال الطلب للمسؤول المباشر';
     if (adminMode) populateAdminSubstitutes();
     else {
       const wrap = document.getElementById('coverageEntries');
@@ -776,8 +794,8 @@
     if (subjectGroup) subjectGroup.style.display = sendDirectlyToVP ? 'none' : 'block';
     if (routingNote) {
       routingNote.innerText = sendDirectlyToVP
-        ? 'سيُرسل إشعار واتساب مباشرة إلى النائب الأكاديمي، دون المرور بالمنسق.'
-        : 'اختر المادة ليُرسل إشعار واتساب إلى منسقها الصحيح.';
+        ? 'سيُرسل الطلب إلى المسؤول المباشر وفق مسار الاعتماد المعتمد.'
+        : 'سيُرسل الإشعار إلى المسؤول المباشر وفق المادة والكادر ومسار الاعتماد.';
     }
 
     let balance = 600;
@@ -1106,6 +1124,7 @@
       if (role === 'admin') {
         document.getElementById('adminDashboard').classList.remove('hidden');
         loadStats();
+        // يُطلب مفتاح الخادم عند فتح تبويب إدارة الموظفين، وليس عند الدخول للإحصائيات.
         renderEmployeesList();
       } else {
         document.getElementById('approvalScreen').classList.remove('hidden');
@@ -1165,33 +1184,55 @@
     if(result.success) {
       document.getElementById('approveMsg').innerText = `✅ تم تسجيل القرار: ${result.newStatus}`;
       document.getElementById('approveMsg').style.color = "#28a745";
-      if (currentRole === 'coordinator' && decision === 'approved') {
-        sendAutoWhatsApp(VP_PHONE, reqId, "النائب الأكاديمي", "المنسق");
-      } else if (currentRole === 'vp' && decision === 'approved') {
-        let approvingRoleName = 'النائب الأكاديمي';
+      if ((currentRole === 'coordinator' || currentRole === 'vp') && decision === 'approved') {
+        let requestData = null;
         try {
-          const check = new URLSearchParams(); check.append('action', 'getRequest'); check.append('reqId', reqId);
+          const check = new URLSearchParams();
+          check.append('action', 'getRequest'); check.append('reqId', reqId);
           const checkRes = await fetch(API_URL, { method: 'POST', body: check, headers: { 'Content-Type': 'application/x-www-form-urlencoded' } });
           const checkData = await checkRes.json();
-          if (checkData.success && (String(checkData.data.coverageType || '') === 'إداري' || String(checkData.data.subject || '') === 'كادر إداري')) approvingRoleName = 'النائب الإداري';
-        } catch (_) {}
-        sendAutoWhatsApp(PRINCIPAL_PHONE, reqId, "مدير المدرسة", approvingRoleName);
+          if (checkData && checkData.success) requestData = checkData.data || null;
+        } catch (e) { console.warn('تعذر جلب تفاصيل الطلب لإشعار واتساب:', e); }
+        if (currentRole === 'coordinator') {
+          sendAutoWhatsApp(VP_PHONE, reqId, 'النائب الأكاديمي', 'المنسق', requestData, result.newStatus);
+        } else {
+          const isAdminRequest = requestData && (String(requestData.coverageType || '') === 'إداري' || String(requestData.subject || '') === 'كادر إداري');
+          const approvingRoleName = isAdminRequest ? 'النائب الإداري' : 'النائب الأكاديمي';
+          sendAutoWhatsApp(PRINCIPAL_PHONE, reqId, 'مدير المدرسة', approvingRoleName, requestData, result.newStatus);
+        }
       }
     }
   }
 
-  function sendAutoWhatsApp(phone, reqId, nextRole, currentRoleName) {
-    const msg = `السلام عليكم،\nأنا (${currentRoleName}).\nتم اعتماد طلب الاستئذان رقم: ${reqId}.\nيرجى الدخول للنظام واتخاذ الإجراء اللازم.`;
+  function sendAutoWhatsApp(phone, reqId, nextRole, currentRoleName, data, status) {
+    data = data || {};
+    let coverageText = data.coverage || data.adminCoverage || 'لا توجد تفاصيل تغطية مسجلة.';
+    try {
+      const details = typeof data.coverageDetails === 'string' ? JSON.parse(data.coverageDetails) : data.coverageDetails;
+      if (Array.isArray(details) && details.length) {
+        coverageText = details.map((c, i) =>
+          `${i + 1}) المادة: ${c.subject || '—'} | اليوم: ${c.day || '—'} | التاريخ: ${c.date || '—'} | الحصة: ${c.period || '—'} | الصف: ${c.class || c.grade || '—'} | المعلم البديل: ${c.substituteTeacher || c.substitute || '—'}`
+        ).join('\n');
+      }
+    } catch (_) {}
+    const isAdminRequest = String(data.coverageType || '') === 'إداري' || String(data.subject || '') === 'كادر إداري';
+    const msg = `السلام عليكم ورحمة الله وبركاته،\n\nإلى/ ${nextRole} المحترم،\nأفيدكم بأنه تم اعتماد طلب الاستئذان وإحالته إلى حضرتكم لاتخاذ الإجراء التالي.\n\n**بيانات الطلب:**\n• رقم الطلب: ${reqId}\n• مقدم الطلب: ${data.name || 'غير متاح'}\n• المسمى الوظيفي: ${data.jobTitle || 'غير متاح'}\n• الرقم الوظيفي: ${data.employeeId || data.empId || 'غير متاح'}\n• نوع الإذن: ${data.permissionType || data.type || 'غير متاح'}\n• التاريخ: ${data.date || 'غير متاح'}\n• وقت الخروج: ${data.exitTime || data.exit || 'غير محدد'}\n• وقت العودة: ${data.returnTime || data.return || 'غير محدد'}\n• سبب الاستئذان: ${data.reason || 'غير مدخل'}\n• المادة/الكادر: ${isAdminRequest ? 'كادر إداري' : (data.subject || 'غير محدد')}\n• تفاصيل التغطية:\n${coverageText}\n\nحالة الطلب بعد الاعتماد: ${status || data.status || 'تم الاعتماد'}\nيرجى الاطلاع على التفاصيل أعلاه ومتابعة الطلب عبر نظام الاستئذان.\n\nشاكرين تعاونكم.`;
     const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
     const url = isMobile ? `whatsapp://send?phone=${phone}&text=${encodeURIComponent(msg)}` : `https://web.whatsapp.com/send?phone=${phone}&text=${encodeURIComponent(msg)}`;
     window.open(url, '_blank');
   }
 
-  function switchAdminTab(tab) {
+  async function switchAdminTab(tab) {
     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
     document.querySelector(`.tab[data-tab="${tab}"]`).classList.add('active');
     document.getElementById('tabStats').classList.toggle('hidden', tab !== 'stats');
     document.getElementById('tabEmployees').classList.toggle('hidden', tab !== 'employees');
+    if (tab === 'employees') {
+      const list = document.getElementById('employeesList');
+      list.innerHTML = '<p>جاري التحقق من صلاحية إدارة الموظفين...</p>';
+      try { await loadAllEmployees(true); renderEmployeesList(); }
+      catch (e) { list.innerHTML = `<p class="error-msg">${escapeHtml(e.message || 'تعذر تحميل قائمة الموظفين.')}</p>`; }
+    }
   }
 
   async function loadStats() {
@@ -1279,8 +1320,9 @@
         <span>${escapeHtml(e.jobTitle || '')}</span>
         <span>وظيفي: ${escapeHtml(e.employeeId || '')}</span>
         <span>هاتف: ${escapeHtml(e.phone || '')}</span>
+        <span style="font-weight:bold;color:${e.active ? '#218838' : '#b00020'}">${e.active ? 'نشط' : 'موقوف'}</span>
         <button class="btn btn-primary btn-sm" onclick="openEditEmployeeForm('${escapeHtml(e.id)}')">تعديل</button>
-        <button class="btn btn-danger btn-sm" onclick="deleteEmployee('${escapeHtml(e.id)}','${escapeHtml(e.name)}')">حذف</button>
+        ${e.active ? `<button class="btn btn-danger btn-sm" onclick="deleteEmployee('${escapeHtml(e.id)}','${escapeHtml(e.name)}')">إيقاف الحساب</button>` : ''}
       </div>
     `).join('');
   }
@@ -1307,7 +1349,7 @@
     document.getElementById('efEmployeeId').value = emp.employeeId || '';
     document.getElementById('efPhone').value = emp.phone || '';
     document.getElementById('efEmail').value = emp.email || '';
-    document.getElementById('efBalance').value = 600;
+    document.getElementById('efBalance').value = Number(emp.balance || 600);
     document.getElementById('empFormMsg').innerText = '';
     document.getElementById('adminDashboard').classList.add('hidden');
     document.getElementById('employeeFormScreen').classList.remove('hidden');
@@ -1342,20 +1384,24 @@
     document.getElementById('empFormMsg').style.color = '#555';
     try {
       const formData = new URLSearchParams();
+      if (!employeeAdminKey) { employeeAdminKey = (prompt('أدخل مفتاح إدارة الموظفين:') || '').trim(); }
+      if (!employeeAdminKey) throw new Error('يلزم إدخال مفتاح إدارة الموظفين.');
       formData.append('action', action);
+      formData.append('adminKey', employeeAdminKey);
       formData.append('data', JSON.stringify(payload));
       const res = await fetch(API_URL, { method: 'POST', body: formData, headers: { 'Content-Type': 'application/x-www-form-urlencoded' } });
       const result = await res.json();
       if (result.success) {
         document.getElementById('empFormMsg').innerText = '✅ تم الحفظ بنجاح.';
         document.getElementById('empFormMsg').style.color = '#28a745';
-        await loadAllEmployees();
+        await loadAllEmployees(true);
         renderEmployeesList();
         setTimeout(() => closeEmployeeForm(), 1000);
       } else {
-        throw new Error(result.message || 'فشل الحفظ');
+        throw new Error(String(result.message || '').includes('الإجراء غير معروف') ? 'خادم Google Apps Script ما زال على نسخة قديمة. افتح Deploy > Manage deployments، ثم Edit > New version > Deploy مع الحفاظ على رابط النشر الحالي.' : (result.message || 'فشل الحفظ'));
       }
     } catch(e) {
+      if (/مفتاح إدارة الموظفين غير صحيح|لم يتم إعداد مفتاح إدارة الموظفين/.test(String(e.message || ''))) employeeAdminKey = '';
       document.getElementById('empFormMsg').innerText = '❌ ' + (e.message || 'خطأ');
       document.getElementById('empFormMsg').style.color = '#dc3545';
     }
@@ -1365,19 +1411,22 @@
     if (!confirm(`هل أنت متأكد من حذف "${name}"؟`)) return;
     try {
       const formData = new URLSearchParams();
+      if (!employeeAdminKey) { employeeAdminKey = (prompt('أدخل مفتاح إدارة الموظفين:') || '').trim(); }
+      if (!employeeAdminKey) throw new Error('يلزم إدخال مفتاح إدارة الموظفين.');
       formData.append('action', 'deleteEmployee');
+      formData.append('adminKey', employeeAdminKey);
       formData.append('data', JSON.stringify({ id }));
       const res = await fetch(API_URL, { method: 'POST', body: formData, headers: { 'Content-Type': 'application/x-www-form-urlencoded' } });
       const result = await res.json();
       if (result.success) {
         alert('✅ تم إيقاف حساب الموظف ومنعه من تسجيل الدخول، مع الاحتفاظ بسجلاته.');
-        await loadAllEmployees();
+        await loadAllEmployees(true);
         renderEmployeesList();
       } else {
-        alert('❌ ' + (result.message || 'فشل الحذف'));
+        alert('❌ ' + (String(result.message || '').includes('الإجراء غير معروف') ? 'خادم Google Apps Script ما زال على نسخة قديمة. أعد نشر آخر نسخة من Manage deployments > Edit > New version > Deploy.' : (result.message || 'فشل الحذف')));
       }
     } catch(e) {
-      alert('❌ خطأ في الاتصال');
+      alert('❌ ' + (e.message || 'خطأ في الاتصال'));
     }
   }
 
@@ -1478,6 +1527,94 @@
     }
   }
 
+  // إنشاء ملف Word انطلاقًا من نموذج Model.docx الموجود في مستودع GitHub.
+  async function downloadOfficialPermissionWord() {
+    const data = currentTrackedData;
+    if (!data) { alert('لا توجد بيانات طلب جاهزة للتصدير.'); return; }
+    if (String(data.status || '') !== 'principal_approved') {
+      alert('لا يمكن تنزيل نموذج الإذن الرسمي إلا بعد الاعتماد النهائي من مدير المدرسة.'); return;
+    }
+    if (typeof JSZip === 'undefined') {
+      await new Promise((resolve, reject) => {
+        const script = document.createElement('script');
+        script.src = 'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js';
+        script.onload = () => typeof JSZip !== 'undefined' ? resolve() : reject(new Error('JSZip غير متاح'));
+        script.onerror = () => reject(new Error('تعذر تحميل مكتبة Word'));
+        document.head.appendChild(script);
+      }).catch(e => { alert(e.message); throw e; });
+    }
+    const modelUrl = 'https://raw.githubusercontent.com/Elbasha1977/School-Permissions/main/Model.docx';
+    try {
+      const response = await fetch(modelUrl, {cache:'no-store'});
+      if (!response.ok) throw new Error('تعذر تحميل Model.docx من GitHub (' + response.status + ').');
+      const zip = await JSZip.loadAsync(await response.arrayBuffer());
+      const docFile = zip.file('word/document.xml');
+      if (!docFile) throw new Error('الملف الذي تم تحميله ليس نموذج Word صالحًا.');
+      const xmlText = await docFile.async('string');
+      const xml = new DOMParser().parseFromString(xmlText, 'application/xml');
+      if (xml.querySelector('parsererror')) throw new Error('تعذر قراءة محتويات نموذج Word.');
+      const W = 'http://schemas.openxmlformats.org/wordprocessingml/2006/main';
+      const allText = el => Array.from(el.getElementsByTagNameNS(W, 't')).map(n => n.textContent || '').join('');
+      const setText = (el, value) => {
+        const ts = Array.from(el.getElementsByTagNameNS(W, 't'));
+        if (ts.length) { ts[0].textContent = String(value == null ? '' : value); ts[0].setAttributeNS('http://www.w3.org/XML/1998/namespace','xml:space','preserve'); ts.slice(1).forEach(t => t.textContent = ''); }
+        else {
+          const p = el.localName === 'p' ? el : el.getElementsByTagNameNS(W,'p')[0];
+          if (!p) return;
+          const r = xml.createElementNS(W,'w:r'); const t = xml.createElementNS(W,'w:t');
+          t.setAttributeNS('http://www.w3.org/XML/1998/namespace','xml:space','preserve'); t.textContent = String(value == null ? '' : value); r.appendChild(t); p.appendChild(r);
+        }
+      };
+      const paras = Array.from(xml.getElementsByTagNameNS(W,'p'));
+      const replacePara = (test, value) => { const p = paras.find(x => test(allText(x))); if (p) setText(p,value); };
+      const clean = v => String(v == null || v === '' ? '—' : v);
+      const date = (() => { const v=String(data.date || data.createdAt || ''); const m=v.match(/^(\d{4})-(\d{2})-(\d{2})/); return m ? `${m[3]}/${m[2]}/${m[1]}` : clean(v); })();
+      const type = String(data.permissionType || data.type || '');
+      replacePara(t => t.includes('سبب الخروج أو التأخر الصباحي'), 'سبب الخروج أو التأخر الصباحي: ' + clean(data.reason));
+      replacePara(t => t.includes('وقت الخروج:') && t.includes('وقت الدخول'), 'وقت الخروج: ' + clean(data.exitTime || data.exit) + '     وقت الدخول (في حالة العودة أثناء الدوام): ' + clean(data.returnTime || data.return));
+      replacePara(t => t.includes('اسم مقد') && t.includes('الوظيف'), 'اسم مقدم الطلب: ' + clean(data.name) + '    الوظيفة: ' + clean(data.jobTitle));
+      replacePara(t => t.includes('تاريخ تقدي') && t.includes('التوقي'), 'تاريخ تقديم الطلب: ' + date + '    التوقيع: تم التوقيع إلكترونيًا عبر النظام');
+      replacePara(t => t.includes('تعليق المسؤول المباشر'), 'تعليق المسؤول المباشر: تمت الموافقة إلكترونيًا    الاعتماد: تمت الموافقة');
+      replacePara(t => t.includes('تعليق النائب الإداري'), 'تعليق النائب الإداري / الأكاديمي: تمت الموافقة إلكترونيًا    الاعتماد: تمت الموافقة');
+      replacePara(t => t.includes('اعتماد مدير المدرسة') && t.length < 80, 'اعتماد مدير المدرسة: تمت الموافقة النهائية إلكترونيًا');
+      // الرقم الوظيفي في أول جدول.
+      const tables = Array.from(xml.getElementsByTagNameNS(W,'tbl'));
+      if (tables[0]) {
+        const cells = Array.from(tables[0].getElementsByTagNameNS(W,'tc'));
+        if (cells[0]) setText(cells[0], 'الموضوع: طلب إذن تأخر/ خروج موظف      الرقم الوظيفي: ' + clean(data.employeeId || data.empId));
+      }
+      // علامة نوع الإذن في صف الاختيارات.
+      if (tables[1]) {
+        const rows = Array.from(tables[1].getElementsByTagNameNS(W,'tr'));
+        const cells = rows[1] ? Array.from(rows[1].getElementsByTagNameNS(W,'tc')) : [];
+        const patterns = [/تأخر|صباح/, /خروج وعودة|عودة/, /خروج مبكر|مبكر/, /أذونات أخرى|أخرى|ورشة|مهمة|رسمي/];
+        cells.forEach((cell,i) => { const original=allText(cell).trim(); setText(cell, ((patterns[i] && patterns[i].test(type)) ? '√ ' : '') + original); });
+      }
+      // تعبئة جدول التغطية بالبيانات المسجلة في الطلب (حتى 8 صفوف).
+      if (tables[2]) {
+        const rows = Array.from(tables[2].getElementsByTagNameNS(W,'tr'));
+        let coverage=[];
+        try { coverage = typeof data.coverageDetails === 'string' ? JSON.parse(data.coverageDetails || '[]') : (data.coverageDetails || []); } catch(_) { coverage=[]; }
+        const adminMode = String(data.coverageType || '') === 'إداري' || String(data.subject || '') === 'كادر إداري';
+        if (adminMode) coverage = [{period:'—', class:'إداري', operatingTeacher:data.name, task:data.adminCoverage || data.coverage, substituteTeacher:data.adminSubstitute}];
+        for (let i=1; i<rows.length && i<=8; i++) {
+          const c=coverage[i-1] || {}; const cells=Array.from(rows[i].getElementsByTagNameNS(W,'tc'));
+          const vals=[c.period || '', c.class || c.grade || c.day || '', c.operatingTeacher || c.teacher || c.teacherName || '', c.period ? 'تم التوقيع إلكترونيًا' : '', c.period ? 'تم التوقيع إلكترونيًا' : '', c.task || c.duty || '', c.substituteTeacher || c.substitute || ''];
+          cells.forEach((cell,j)=>{ if (vals[j] !== undefined) setText(cell, vals[j]); });
+        }
+      }
+      const serializer = new XMLSerializer();
+      zip.file('word/document.xml', serializer.serializeToString(xml));
+      const blob = await zip.generateAsync({type:'blob', mimeType:'application/vnd.openxmlformats-officedocument.wordprocessingml.document'});
+      const url=URL.createObjectURL(blob); const a=document.createElement('a');
+      const safeId=String(data.requestId || data.reqId || 'request').replace(/[^\w-]/g,'_');
+      a.href=url; a.download=`نموذج_إذن_${safeId}.docx`; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(url),15000);
+    } catch(e) {
+      console.error('Word template export error:',e);
+      alert('تعذر إنشاء ملف Word من نموذج Model.docx: ' + (e.message || 'خطأ غير معروف') + '\nتأكد أن الملف متاح للعامة وأن إعدادات GitHub تسمح بتحميله من الموقع.');
+    }
+  }
+
   async function downloadOfficialPermissionPDF() {
     const data = currentTrackedData;
     if (!data) { alert('لا توجد بيانات طلب جاهزة للتصدير.'); return; }
@@ -1569,7 +1706,7 @@
     sendWhatsApp, askPassword, revealAllPasswords, fetchRequest, approveRequest, sendAutoWhatsApp,
     loadStats, addCoverageEntry, removeCoverageEntry, switchAdminTab,
     renderEmployeesList, openAddEmployeeForm, openEditEmployeeForm, closeEmployeeForm,
-    saveEmployee, deleteEmployee, downloadPDFFromTrack, downloadOfficialPermissionPDF
+    saveEmployee, deleteEmployee, downloadPDFFromTrack, downloadOfficialPermissionPDF, downloadOfficialPermissionWord
   });
 
   loadAllEmployees();
