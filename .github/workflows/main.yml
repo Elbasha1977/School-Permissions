@@ -1,4 +1,5 @@
-name: Build and Deploy Secure System
+
+name: Build and Deploy Staff Permissions
 
 on:
   push:
@@ -9,43 +10,93 @@ on:
 permissions:
   contents: write
 
+concurrency:
+  group: staff-permissions-deploy
+  cancel-in-progress: true
+
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
-      - name: Decode and Prepare Files
+      - name: Merge Four HTML Parts
+        shell: bash
+        env:
+          PART_1: ${{ secrets.INDEX_PART_1 }}
+          PART_2: ${{ secrets.INDEX_PART_2 }}
+          PART_3: ${{ secrets.INDEX_PART_3 }}
+          PART_4: ${{ secrets.INDEX_PART_4 }}
         run: |
-          # 1. فك تشفير الأجزاء الأربعة
-          echo -n "${{ secrets.INDEX_PART_1 }}" | base64 --decode > p1.html
-          echo -n "${{ secrets.INDEX_PART_2 }}" | base64 --decode > p2.html
-          echo -n "${{ secrets.INDEX_PART_3 }}" | base64 --decode > p3.html
-          echo -n "${{ secrets.INDEX_PART_4 }}" | base64 --decode > p4.html
-          
-          # 2. دمج الأجزاء الأربعة بالترتيب
-          cat p1.html p2.html p3.html p4.html > index.html
-          rm p1.html p2.html p3.html p4.html
-          
-          # 3. فك تشفير ملف الأسماء
-          echo -n "${{ secrets.STUDENTS_PART_1 }}" | base64 --decode > data.json
-          
-          # 4. إعادة تشفير الأسماء بدون فواصل أسطر
-          base64 -w 0 data.json > encoded_data.txt
-          
-          # 5. حذف الملف الأصلي
-          rm data.json
-          
-          # 6. التحقق من نجاح الدمج
-          echo "=== حجم index.html ==="
-          wc -c index.html
-          echo "=== آخر 3 أسطر من index.html ==="
-          tail -n 3 index.html
+          set -euo pipefail
+
+          for name in PART_1 PART_2 PART_3 PART_4; do
+            if [ -z "${!name}" ]; then
+              echo "::error::Missing GitHub Secret: INDEX_${name#PART_}"
+              exit 1
+            fi
+          done
+
+          mkdir -p public
+
+          printf '%s' "$PART_1" | base64 --decode > public/part1.html
+          printf '%s' "$PART_2" | base64 --decode > public/part2.html
+          printf '%s' "$PART_3" | base64 --decode > public/part3.html
+          printf '%s' "$PART_4" | base64 --decode > public/part4.html
+
+          cat public/part1.html \
+              public/part2.html \
+              public/part3.html \
+              public/part4.html > public/index.html
+
+          rm public/part1.html public/part2.html \
+             public/part3.html public/part4.html
+
+          test -s public/index.html
+
+          echo "HTML merged successfully."
+          echo "HTML size:"
+          wc -c < public/index.html
+
+      - name: Verify Required HTML Content
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if ! grep -qi '<html' public/index.html; then
+            echo "::error::Merged file does not contain an HTML document."
+            exit 1
+          fi
+
+          if ! grep -qi '</html>' public/index.html; then
+            echo "::error::Merged HTML document appears incomplete."
+            exit 1
+          fi
+
+          echo "HTML validation passed."
+
+      - name: Prepare Published Site
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          # Preserve any existing non-sensitive static assets.
+          # Do not publish employee data or encoded_data.txt.
+          if [ -f logo.png ]; then
+            cp logo.png public/logo.png
+          fi
+
+          touch public/.nojekyll
+
+          echo "Files prepared for publication:"
+          find public -maxdepth 2 -type f -printf '%P\n'
 
       - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v3
+        uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./
+          publish_dir: ./public
           publish_branch: gh-pages
+          force_orphan: false
