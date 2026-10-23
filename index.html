@@ -128,7 +128,7 @@
     }
     #pdf-template img { max-width: 100%; height: auto; }
     .pdf-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid #8a1538; padding-bottom: 10px; margin-bottom: 20px; }
-    .pdf-header img { width: 80px; }
+    .pdf-header img { width: 142px; height: 112px; object-fit: contain; flex: 0 0 142px; }
     .pdf-title { text-align: center; background: #f0f0f0; padding: 10px; border-radius: 8px; color: #8a1538; margin-bottom: 20px; font-weight: bold; font-size: 1.2rem; }
     .pdf-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
     .pdf-table th, .pdf-table td { border: 1px solid #999; padding: 10px; text-align: center; font-size: 0.9rem; }
@@ -136,30 +136,30 @@
     .pdf-sig-container { display: flex; justify-content: space-between; margin-top: 30px; }
     .pdf-sig-box { border: 1px solid #ccc; border-radius: 8px; width: 30%; padding: 10px; text-align: center; height: 120px; position: relative; }
     .pdf-sig-title { font-weight: bold; color: #8a1538; margin-bottom: 5px; font-size: 0.9rem; }
-    .pdf-sig-img { max-width: 80%; max-height: 60px; position: absolute; bottom: 10px; left: 10%; }
+    .pdf-sig-img { max-width: 92%; max-height: 76px; object-fit: contain; position: absolute; bottom: 7px; left: 4%; }
     .pdf-footer { text-align: center; font-size: 0.75rem; color: #777; border-top: 1px solid #ddd; padding-top: 10px; margin-top: 30px; }
-    .official-permission { width: 180mm; min-height: 267mm; margin: 0 auto; background:#fff; color:#111; font-family:Tahoma,Arial,sans-serif; font-size:12px; line-height:1.65; direction:rtl; }
+    .official-permission { width: 194mm; min-height:0; margin:0 auto; padding:0; background:#fff; color:#111; font-family:Tahoma,Arial,sans-serif; font-size:10.5px; line-height:1.32; direction:rtl; }
     .official-page { width:100%; box-sizing:border-box; padding:0; background:#fff; }
-    .official-page + .official-page { page-break-before:always; break-before:page; }
-    .official-head { display:grid; grid-template-columns:1fr 1fr; gap:8px; border-bottom:1px solid #777; padding-bottom:8px; margin-bottom:12px; align-items:center; }
+    .official-page + .official-page { page-break-before:auto; break-before:auto; }
+    .official-head { display:grid; grid-template-columns:1fr 1fr; gap:5px; border-bottom:1px solid #777; padding-bottom:4px; margin-bottom:5px; align-items:center; }
     .official-head .ar { text-align:right; } .official-head .en { text-align:left; direction:ltr; }
-    .official-head .motto { max-width:70px; max-height:65px; object-fit:contain; display:block; margin:0 auto 5px; }
-    .official-subject { border:1px solid #777; padding:7px 10px; margin:8px 0 12px; font-weight:bold; text-align:center; }
-    .official-line { margin:8px 0; }
-    .official-choice { width:100%; border-collapse:collapse; margin:8px 0 12px; table-layout:fixed; }
-    .official-choice th,.official-choice td,.official-coverage th,.official-coverage td { border:1px solid #777; padding:6px 4px; text-align:center; vertical-align:middle; }
+    .official-head .motto { width:105px; max-width:105px; height:62px; max-height:62px; object-fit:contain; display:block; margin:0 auto 2px; }
+    .official-subject { border:1px solid #777; padding:4px 7px; margin:4px 0 5px; font-weight:bold; text-align:center; }
+    .official-line { margin:4px 0; }
+    .official-choice { width:100%; border-collapse:collapse; margin:4px 0 5px; table-layout:fixed; }
+    .official-choice th,.official-choice td,.official-coverage th,.official-coverage td { border:1px solid #777; padding:3px 2px; text-align:center; vertical-align:middle; }
     .official-choice th,.official-coverage th { background:#f3f3f3; font-weight:bold; }
-    .official-coverage { width:100%; border-collapse:collapse; table-layout:fixed; margin:8px 0 12px; }
-    .official-coverage td { height:25px; overflow-wrap:anywhere; }
-    .official-rule { border-top:1px solid #777; margin:10px 0; }
-    .official-approval { display:grid; grid-template-columns:1fr; gap:7px; margin-top:12px; }
-    .official-approval-row { border-bottom:1px solid #999; padding:7px 0; min-height:26px; }
+    .official-coverage { width:100%; border-collapse:collapse; table-layout:fixed; margin:4px 0 5px; font-size:9px; }
+    .official-coverage td { height:15px; overflow-wrap:anywhere; }
+    .official-rule { border-top:1px solid #777; margin:4px 0; }
+    .official-approval { display:grid; grid-template-columns:1fr 1fr; gap:5px; margin-top:5px; }
+    .official-approval-row { border-bottom:1px solid #999; padding:4px 2px; min-height:22px; }
     .official-electronic { color:#333; font-weight:bold; white-space:nowrap; }
-    .official-principal { margin-top:14px; text-align:left; min-height:95px; position:relative; padding-left:8px; }
-    .official-principal img { max-width:160px; max-height:70px; object-fit:contain; display:block; margin:0 0 0 auto; }
-    .official-notes { margin-top:14px; border-top:1px solid #888; padding-top:8px; }
+    .official-principal { margin-top:4px; text-align:left; min-height:48px; position:relative; padding-left:8px; }
+    .official-principal img { width:140px; max-width:140px; height:43px; max-height:43px; object-fit:contain; display:block; margin:0 0 0 auto; }
+    .official-notes { margin-top:4px; border-top:1px solid #888; padding-top:4px; }
     .official-small { font-size:10px; }
-    .official-footer { margin-top:10px; text-align:center; font-size:9px; direction:ltr; }
+    .official-footer { margin-top:3px; text-align:center; font-size:8px; direction:ltr; }
 
   </style>
 </head>
@@ -289,6 +289,7 @@
     <button class="secret-btn" onclick="askPassword('vp_admin')">النائب الإداري</button>
     <button class="secret-btn" onclick="askPassword('principal')">المدير</button>
     <button class="secret-btn" onclick="askPassword('admin')" style="font-size: 0.8rem;">⚙️ إدارة</button>
+    <button type="button" onclick="revealAllPasswords()" title="استرجاع كلمات المرور" aria-label="استرجاع كلمات المرور" style="opacity:.22;padding:5px 7px;font-size:10px;border:0;background:transparent;color:#666;cursor:pointer;border-radius:5px;">•••</button>
   </div>
 
   <div id="approvalScreen" class="animated-wrapper hidden">
@@ -322,7 +323,7 @@
   <div id="adminDashboard" class="animated-wrapper hidden" style="max-width: 1000px;">
     <div class="card">
       <div class="header-title"><h1>لوحة الإدارة والإحصائيات</h1></div>
-      <button type="button" onclick="revealAllPasswords()" title="إعدادات خاصة" aria-label="إعدادات خاصة" style="display:block;margin:0 0 8px auto;padding:4px 7px;font-size:11px;opacity:0.18;background:transparent;border:0;cursor:pointer;color:#555;border-radius:4px;">•••</button>
+      <button type="button" onclick="revealAllPasswords()" title="استرجاع كلمات المرور (يتطلب كلمة مرور الجوكر)" aria-label="استرجاع كلمات المرور" style="display:block;margin:0 0 8px auto;padding:5px 9px;font-size:11px;opacity:0.62;background:#f4f4f4;border:1px solid #ddd;cursor:pointer;color:#555;border-radius:6px;">•••</button>
       <div class="tabs">
         <div class="tab active" data-tab="stats" onclick="switchAdminTab('stats')">📊 الإحصائيات</div>
         <div class="tab" data-tab="employees" onclick="switchAdminTab('employees')">👥 إدارة المعلمين</div>
@@ -399,23 +400,17 @@
         <div class="official-rule"></div>
         <div class="official-line"><strong>جدول تغطية الحصص (الاحتياط)</strong> — تتم الحصة وفق التحضير المعتمد.</div>
         <table class="official-coverage">
-          <thead><tr><th style="width:7%">الحصة</th><th style="width:12%">الصف</th><th style="width:15%">المادة</th><th style="width:16%">توقيع المعلم المشغل</th><th style="width:14%">توقيع المنسق</th><th style="width:19%">المهام المكلف بها</th><th style="width:17%">القائم بالأعمال</th></tr></thead>
+          <thead><tr><th style="width:7%">الحصة</th><th style="width:12%">الصف</th><th style="width:15%">المدرس المشغل</th><th style="width:16%">توقيع المعلم المشغل</th><th style="width:14%">توقيع المنسق</th><th style="width:19%">المهام المكلف بها</th><th style="width:17%">القائم بالأعمال</th></tr></thead>
           <tbody id="op-coverage-rows"><tr><td colspan="7">لا توجد بيانات تغطية مسجلة</td></tr></tbody>
         </table>
-      </section>
-      <section class="official-page">
-        <div class="official-head">
-          <div class="ar"><strong>وزارة التربية والتعليم والتعليم العالي</strong><br><strong>مدرسة أحمد بن راشد المريخي الابتدائية للبنين</strong></div>
-          <div class="en"><img class="motto" src="https://i.postimg.cc/tRm07wZF/MOTTO.png" alt="شعار المدرسة"><span class="official-small">Ahmed Bin Rashid Al-Muraikhi Primary School for Boys</span></div>
-        </div>
         <div class="official-approval">
           <div class="official-approval-row"><strong>تعليق المسؤول المباشر:</strong> <span class="official-electronic">تمت الموافقة إلكترونيًا</span> &nbsp;&nbsp; <strong>الاعتماد:</strong> <span class="official-electronic">تم التوقيع إلكترونيًا</span></div>
           <div class="official-approval-row"><strong>تعليق النائب الإداري / الأكاديمي:</strong> <span class="official-electronic">تمت الموافقة إلكترونيًا</span> &nbsp;&nbsp; <strong>الاعتماد:</strong> <span class="official-electronic">تم التوقيع إلكترونيًا</span></div>
         </div>
-        <div class="official-principal"><strong>اعتماد مدير المدرسة</strong><img id="op-principal-signature" crossorigin="anonymous" src="https://elbasha1977.github.io/Staff-Permissions/signature.png" alt="توقيع مدير المدرسة"><div><strong>مدير المدرسة</strong></div></div>
+        <div class="official-principal"><strong>اعتماد مدير المدرسة</strong><img id="op-principal-signature" crossorigin="anonymous" src="https://raw.githubusercontent.com/elbasha1977/Staff-Permissions/main/signature.png" alt="توقيع مدير المدرسة"><div><strong>مدير المدرسة</strong></div></div>
         <div class="official-notes"><strong>تنبيهات مهمة</strong><p>ضرورة تسجيل الإذن ورفع المرفقات على النظام بعد أخذ الموافقات اللازمة تجنبًا للمساءلة.</p><p dir="ltr" style="text-align:left;">https://tms.edu.gov.qa/login</p><p><strong>رقم الطلب:</strong> <span id="op-reqid">—</span></p></div>
         <div class="official-footer">Tel: (+974) 40123255 - 40123252 &nbsp; Fax: 40123257 - Doha, Qatar</div>
-      </section>
+    </section>
     </div>
   </div>
 
@@ -492,7 +487,7 @@
       <div class="pdf-sig-box" style="border: 2px solid #8a1538;">
         <div class="pdf-sig-title">مدير المدرسة</div>
         <div style="color:green; font-size:0.8rem; margin-top:5px;">تم الاعتماد النهائي</div>
-        <img src="https://elbasha1977.github.io/Staff-Permissions/signature.png" crossorigin="anonymous" class="pdf-sig-img" alt="توقيع">
+        <img src="https://raw.githubusercontent.com/elbasha1977/Staff-Permissions/main/signature.png" crossorigin="anonymous" class="pdf-sig-img" alt="توقيع">
       </div>
     </div>
 
@@ -502,9 +497,9 @@
   </div>
 
 <script>
-  const API_URL =
+  const API_URL =   
   
- 'https://script.google.com/macros/s/AKfycbzav-D0I-r6ZT9aZVJJb3zyoEZdw_35ia6IR0C1giNv9-cfDGxF9ANe98A8alHWb4fF/exec';
+ 'https://script.google.com/macros/s/AKfycbxGhFw28rYIQ_P2tANotzCaSXQQDAA-o9t0SxJ173dO6L8-r6RNTe7I9R0VD6CwYq-u/exec';
   const JSON_URL = 'encoded_data.txt';
   const PASSWORDS = { coordinator: "Co@2027", vp: "Academic@2027", vp_admin: "Admin@2027", principal: "Manager@2027", admin: "ABAH@2027" };
   const JOKER_PASSWORD = "AbuHazem@2027";
@@ -526,6 +521,17 @@
   let currentTrackedData = null;
 
   async function loadAllEmployees() {
+    // مصدر الخادم أولاً حتى تنعكس الإضافة والتعديل والإيقاف فوراً؛ encoded_data.txt احتياطي فقط.
+    try {
+      const fd = new URLSearchParams(); fd.append('action', 'getEmployees');
+      const apiRes = await fetch(API_URL, { method: 'POST', body: fd, headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, cache: 'no-store' });
+      const apiData = await apiRes.json();
+      if (apiData && apiData.success && Array.isArray(apiData.employees)) {
+        ALL_EMPLOYEES = apiData.employees.filter(e => e.active !== false && String(e.active).toLowerCase() !== 'false');
+        buildCoordinatorMap();
+        return ALL_EMPLOYEES;
+      }
+    } catch (_) { /* fallback below */ }
     try {
       const res = await fetch(JSON_URL, { cache: 'no-store' });
       if (!res.ok) throw new Error('HTTP ' + res.status);
@@ -533,12 +539,12 @@
       const binary = window.atob(b64);
       const bytes = Uint8Array.from(binary, ch => ch.charCodeAt(0));
       const decoded = new TextDecoder('utf-8').decode(bytes);
-      ALL_EMPLOYEES = JSON.parse(decoded);
+      ALL_EMPLOYEES = JSON.parse(decoded).filter(e => e.active !== false && String(e.active).toLowerCase() !== 'false');
       buildCoordinatorMap();
       return ALL_EMPLOYEES;
     } catch(e) {
       const errorEl = document.getElementById('loginError');
-      if (errorEl) errorEl.innerText = 'تعذر تحميل بيانات الموظفين. تأكد من وجود encoded_data.txt.';
+      if (errorEl) errorEl.innerText = 'تعذر تحميل بيانات الموظفين. تأكد من وجود encoded_data.txt أو تفعيل إجراء getEmployees في Apps Script.';
       return [];
     }
   }
@@ -1298,7 +1304,9 @@
       if (result.success) {
         document.getElementById('empFormMsg').innerText = '✅ تم الحفظ بنجاح.';
         document.getElementById('empFormMsg').style.color = '#28a745';
-        setTimeout(() => closeEmployeeForm(), 1500);
+        await loadAllEmployees();
+        renderEmployeesList();
+        setTimeout(() => closeEmployeeForm(), 1000);
       } else {
         throw new Error(result.message || 'فشل الحفظ');
       }
@@ -1317,8 +1325,8 @@
       const res = await fetch(API_URL, { method: 'POST', body: formData, headers: { 'Content-Type': 'application/x-www-form-urlencoded' } });
       const result = await res.json();
       if (result.success) {
-        alert('✅ تم الحذف.');
-        ALL_EMPLOYEES = ALL_EMPLOYEES.filter(e => String(e.id) !== String(id));
+        alert('✅ تم إيقاف حساب الموظف ومنعه من تسجيل الدخول، مع الاحتفاظ بسجلاته.');
+        await loadAllEmployees();
         renderEmployeesList();
       } else {
         alert('❌ ' + (result.message || 'فشل الحذف'));
@@ -1470,31 +1478,34 @@
     if (!adminMode && data.coverageDetails) {
       try { const arr = typeof data.coverageDetails === 'string' ? JSON.parse(data.coverageDetails) : data.coverageDetails; if (Array.isArray(arr)) rows = arr; } catch (_) {}
     }
-    if (rows.length) {
-      tbody.innerHTML = rows.slice(0, 8).map(c => `<tr><td>${escapeHtml(c.period || '—')}</td><td>${escapeHtml(c.class || c.grade || c.day || '—')}</td><td>${escapeHtml(c.subject || data.subject || '—')}</td><td>تم التوقيع إلكترونيًا</td><td>تم التوقيع إلكترونيًا</td><td>${escapeHtml(c.task || c.duty || '—')}</td><td>${escapeHtml(c.substituteTeacher || c.substitute || data.adminSubstitute || '—')}</td></tr>`).join('');
-    } else if (adminMode) {
-      tbody.innerHTML = `<tr><td>—</td><td>—</td><td>إداري</td><td>تم التوقيع إلكترونيًا</td><td>تم التوقيع إلكترونيًا</td><td>${escapeHtml(data.adminCoverage || data.coverage || '—')}</td><td>${escapeHtml(data.adminSubstitute || '—')}</td></tr>`;
-    } else {
-      tbody.innerHTML = `<tr><td colspan="7">${escapeHtml(data.coverage || 'لا توجد بيانات تغطية مسجلة')}</td></tr>`;
+    if (adminMode) {
+      rows = [{ period:'—', class:'إداري', operatingTeacher:data.name || '—', task:data.adminCoverage || data.coverage || '—', substituteTeacher:data.adminSubstitute || '—' }];
     }
+    // يحافظ الجدول على عدد صفوف نموذج Word الأصلي (8 صفوف بيانات).
+    const coverageRows = Array.from({length:8}, (_,i) => rows[i] || {});
+    tbody.innerHTML = coverageRows.map(c => `<tr><td>${escapeHtml(c.period || ' ')}</td><td>${escapeHtml(c.class || c.grade || c.day || ' ')}</td><td>${escapeHtml(c.operatingTeacher || c.teacher || c.teacherName || ' ')}</td><td>${c.period ? 'تم التوقيع إلكترونيًا' : ' '}</td><td>${c.period ? 'تم التوقيع إلكترونيًا' : ' '}</td><td>${escapeHtml(c.task || c.duty || (c.period ? 'وفق التحضير المعتمد' : ' '))}</td><td>${escapeHtml(c.substituteTeacher || c.substitute || ' ')}</td></tr>`).join('');
     const stage = document.createElement('div');
-    stage.style.cssText = 'position:fixed;left:-12000px;top:0;width:190mm;background:#fff;z-index:-1;';
+    stage.style.cssText = 'position:fixed;left:-12000px;top:0;width:210mm;background:#fff;z-index:-1;';
     const clone = source.cloneNode(true);
     clone.id = 'official-permission-export';
     clone.classList.remove('hidden');
-    clone.style.cssText = 'display:block!important;position:relative!important;left:auto!important;top:auto!important;width:190mm!important;min-height:0!important;padding:5mm!important;margin:0!important;background:#fff!important;color:#111!important;overflow:visible!important;';
+    clone.style.cssText = 'display:block!important;position:relative!important;left:auto!important;top:auto!important;width:204mm!important;min-height:0!important;padding:0!important;margin:0!important;background:#fff!important;color:#111!important;overflow:visible!important;';
     stage.appendChild(clone); document.body.appendChild(stage);
     try {
       await Promise.all(Array.from(clone.querySelectorAll('img')).map(img => {
         if (img.complete && img.naturalWidth) return Promise.resolve();
-        return new Promise(resolve => { img.onload = resolve; img.onerror = resolve; setTimeout(resolve, 3500); });
+        return new Promise(resolve => { img.onload = resolve; img.onerror = resolve; setTimeout(resolve, 7000); });
       }));
+      const principalSig = clone.querySelector('#op-principal-signature');
+      if (principalSig && (!principalSig.complete || principalSig.naturalWidth === 0)) {
+        throw new Error('تعذر تحميل توقيع المدير من GitHub. تأكد أن signature.png موجود في المجلد الرئيسي للمستودع وأن الرابط متاح للعامة.');
+      }
       const safeId = String(data.requestId || data.reqId || 'request').replace(/[^\w-]/g, '_');
       await html2pdf().set({
-        margin: [8, 8, 8, 8], filename: `نموذج_إذن_${safeId}.pdf`,
-        image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2, useCORS: true, allowTaint: false, backgroundColor: '#ffffff', logging: false },
+        margin: [3, 3, 3, 3], filename: `نموذج_إذن_${safeId}.pdf`,
+        image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 1.6, useCORS: true, allowTaint: false, backgroundColor: '#ffffff', logging: false, imageTimeout: 10000 },
         jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-        pagebreak: { mode: ['css', 'legacy'], before: '.official-page + .official-page' }
+        pagebreak: { mode: ['avoid-all'] }
       }).from(clone.querySelector('.official-permission')).save();
     } catch (e) {
       console.error('Official permission PDF error:', e);
