@@ -1,0 +1,50 @@
+name: Build and Deploy Secure System
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Decode and Prepare Files
+        run: |
+          # 1. فك تشفير الأجزاء الثلاثة
+          echo -n "${{ secrets.INDEX_PART_1 }}" | base64 --decode > p1.html
+          echo -n "${{ secrets.INDEX_PART_2 }}" | base64 --decode > p2.html
+          echo -n "${{ secrets.INDEX_PART_3 }}" | base64 --decode > p3.html
+          
+          # 2. دمج الأجزاء الثلاثة بالترتيب
+          cat p1.html p2.html p3.html > index.html
+          rm p1.html p2.html p3.html
+          
+          # 3. فك تشفير ملف الأسماء
+          echo -n "${{ secrets.STUDENTS_PART_1 }}" | base64 --decode > data.json
+          
+          # 4. إعادة تشفير الأسماء بدون فواصل أسطر
+          base64 -w 0 data.json > encoded_data.txt
+          
+          # 5. حذف الملف الأصلي
+          rm data.json
+          
+          # 6. التحقق من نجاح الدمج
+          echo "=== حجم index.html ==="
+          wc -c index.html
+          echo "=== آخر 3 أسطر من index.html ==="
+          tail -n 3 index.html
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./
+          publish_branch: gh-pages
