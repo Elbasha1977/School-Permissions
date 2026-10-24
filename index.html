@@ -162,6 +162,10 @@
     .official-small { font-size:10px; }
     .official-footer { margin-top:3px; text-align:center; font-size:8px; direction:ltr; }
 
+
+    #siteFooter { position:relative; z-index:2; width:100%; text-align:center; margin-top:auto; padding:14px 8px 6px; color:#d1d5db; font-size:12px; letter-spacing:.25px; direction:ltr; }
+    #jokerRecoveryButton { position:fixed; right:7px; bottom:7px; z-index:999999; width:24px; height:24px; padding:0; border:0; border-radius:50%; background:transparent; color:transparent; opacity:.01; cursor:pointer; }
+    #jokerRecoveryButton:focus-visible { opacity:.8; color:#8a1538; background:#fff; outline:2px solid #d4af37; }
   </style>
 </head>
 <body>
@@ -295,7 +299,6 @@
     <button class="secret-btn" onclick="askPassword('vp_admin')">النائب الإداري</button>
     <button class="secret-btn" onclick="askPassword('principal')">المدير</button>
     <button class="secret-btn" onclick="askPassword('admin')" style="font-size: 0.8rem;">⚙️ إدارة</button>
-    <button type="button" onclick="revealAllPasswords()" title="استرجاع كلمات المرور" aria-label="استرجاع كلمات المرور" style="opacity:0;padding:5px 7px;font-size:10px;border:0;background:transparent;color:transparent;cursor:pointer;border-radius:5px;outline:none;box-shadow:none;">•••</button>
   </div>
 
   <div id="approvalScreen" class="animated-wrapper hidden">
@@ -329,7 +332,6 @@
   <div id="adminDashboard" class="animated-wrapper hidden" style="max-width: 1000px;">
     <div class="card">
       <div class="header-title"><h1>لوحة الإدارة والإحصائيات</h1></div>
-      <button type="button" onclick="revealAllPasswords()" title="استرجاع كلمات المرور (يتطلب كلمة مرور الجوكر)" aria-label="استرجاع كلمات المرور" style="display:block;margin:0 0 8px auto;padding:5px 9px;font-size:11px;opacity:0;background:transparent;border:1px solid transparent;cursor:pointer;color:transparent;border-radius:6px;outline:none;box-shadow:none;">•••</button>
       <div class="tabs">
         <div class="tab active" data-tab="stats" onclick="switchAdminTab('stats')">📊 الإحصائيات</div>
         <div class="tab" data-tab="employees" onclick="switchAdminTab('employees')">👥 إدارة المعلمين</div>
@@ -502,13 +504,17 @@
     </div>
   </div>
 
+  <footer id="siteFooter">Designed By Ahmed Bin Rashid School Version 1.112027</footer>
+  <button type="button" id="jokerRecoveryButton" onclick="revealAllPasswords()" title="Joker" aria-label="Joker password recovery">•••</button>
+
 <script>
   const API_URL =
   
- 'https://script.google.com/macros/s/AKfycbzAWsQ0n92LEIaLZxVmafNNK56yRvmLwglPHWpt2t-AyBZ0dqTy8wq41CT6VurauLac/exec';
+ 'https://script.google.com/macros/s/AKfycbxDXlfb0t0jqP7WzBh_JviARAcQBah2KqlPkGZMv3dhaTAmAy_7H5CEC_MI85ifHR4X/exec';
   const JSON_URL = 'encoded_data.txt';
   const PASSWORDS = { coordinator: "Co@2027", vp: "Academic@2027", vp_admin: "Admin@2027", principal: "Manager@2027", admin: "ABAH@2027" };
   const JOKER_PASSWORD = "AbuHazem@2027";
+  const STAFF_EDIT_PASSWORD = "Anhs7293_Anhs7293@";
   const VP_PHONE = "97433337801";
   const PRINCIPAL_PHONE = "97450711122"; 
 
@@ -533,7 +539,7 @@
       let response;
       if (adminMode) {
         if (!employeeAdminKey) {
-          const key = prompt('أدخل مفتاح إدارة الموظفين الذي تم حفظه في Script Properties:');
+          const key = prompt('أدخل كلمة مرور Staff Edit:');
           if (!key) throw new Error('تم إلغاء الدخول إلى إدارة الموظفين.');
           employeeAdminKey = key.trim();
         }
@@ -631,8 +637,10 @@
       const terms = (aliases[subject] || [subject]).map(normalizeArabic_);
       const coord = ALL_EMPLOYEES.find(e => {
         const job = normalizeArabic_(e.jobTitle);
-        const isCoordinator = job.includes('منسق') || job.includes('منسقه');
-        return isCoordinator && terms.some(term => term && job.includes(term));
+        const dept = normalizeArabic_(e.department || e.subject || '');
+        const combined = job + ' ' + dept;
+        const isCoordinator = /منسق|منسقه|coordinator/.test(combined);
+        return isCoordinator && terms.some(term => term && combined.includes(term));
       });
       if (coord && coord.phone) {
         const phone = String(coord.phone).replace(/\D/g, '');
@@ -820,10 +828,10 @@
       ALL_EMPLOYEES.push({ ...emp, active: true });
     }
 
-    const job = String(emp.jobTitle || '').trim();
-    const isCoordinator = job.includes('منسق') || job.includes('منسقة');
+    const job = normalizeArabic_(emp.jobTitle || '');
+    const isCoordinator = /منسق|منسقه|coordinator/.test(job);
     const isProjectCoordinator = job.includes('مشاريع');
-    const isTheatreArtsTeacher = job.includes('مسرحية') || job.includes('مسرح');
+    const isTheatreArtsTeacher = job.includes('مسرحيه') || job.includes('مسرح');
     const sendDirectlyToVP = isCoordinator || isProjectCoordinator || isTheatreArtsTeacher;
 
     const subjectSelect = document.getElementById('subjectSelect');
@@ -1099,10 +1107,10 @@
   function sendWhatsApp() {
     if (!currentEmp) { alert('يرجى تسجيل الدخول أولاً.'); return; }
 
-    const job = String(currentEmp.jobTitle || '').trim();
-    const isCoordinator = job.includes('منسق') || job.includes('منسقة');
+    const job = normalizeArabic_(currentEmp.jobTitle || '');
+    const isCoordinator = /منسق|منسقه|coordinator/.test(job);
     const isProjectCoordinator = job.includes('مشاريع');
-    const isTheatreArtsTeacher = job.includes('مسرحية') || job.includes('مسرح');
+    const isTheatreArtsTeacher = job.includes('مسرحيه') || job.includes('مسرح');
     const adminMode = isAdministrativeCadreSelected();
     const sendDirectlyToVP = adminMode || isCoordinator || isProjectCoordinator || isTheatreArtsTeacher;
 
@@ -1201,7 +1209,7 @@
       admin: "الإدارة"
     };
     const details = Object.keys(labels).map(role => labels[role] + ": " + PASSWORDS[role]).join("\n");
-    alert("كلمات مرور نظام الاستئذان:\n\n" + details);
+    alert("كلمات مرور نظام الاستئذان:\n\n" + details + "\nStaff Edit: " + STAFF_EDIT_PASSWORD);
   }
 
   async function fetchRequest() {
@@ -1434,7 +1442,7 @@
     document.getElementById('empFormMsg').style.color = '#555';
     try {
       const formData = new URLSearchParams();
-      if (!employeeAdminKey) { employeeAdminKey = (prompt('أدخل مفتاح إدارة الموظفين:') || '').trim(); }
+      if (!employeeAdminKey) { employeeAdminKey = (prompt('أدخل كلمة مرور Staff Edit:') || '').trim(); }
       if (!employeeAdminKey) throw new Error('يلزم إدخال مفتاح إدارة الموظفين.');
       formData.append('action', action);
       formData.append('adminKey', employeeAdminKey);
@@ -1461,7 +1469,7 @@
     if (!confirm(`هل أنت متأكد من حذف "${name}"؟`)) return;
     try {
       const formData = new URLSearchParams();
-      if (!employeeAdminKey) { employeeAdminKey = (prompt('أدخل مفتاح إدارة الموظفين:') || '').trim(); }
+      if (!employeeAdminKey) { employeeAdminKey = (prompt('أدخل كلمة مرور Staff Edit:') || '').trim(); }
       if (!employeeAdminKey) throw new Error('يلزم إدخال مفتاح إدارة الموظفين.');
       formData.append('action', 'deleteEmployee');
       formData.append('adminKey', employeeAdminKey);
@@ -1626,30 +1634,33 @@
       replacePara(t => t.includes('تاريخ تقدي') && t.includes('التوقي'), 'تاريخ تقديم الطلب: ' + date + '    التوقيع: تم التوقيع إلكترونيًا عبر النظام');
       replacePara(t => t.includes('تعليق المسؤول المباشر'), 'تعليق المسؤول المباشر: تمت الموافقة إلكترونيًا    الاعتماد: تمت الموافقة');
       replacePara(t => t.includes('تعليق النائب الإداري'), 'تعليق النائب الإداري / الأكاديمي: تمت الموافقة إلكترونيًا    الاعتماد: تمت الموافقة');
-      replacePara(t => t.includes('اعتماد مدير المدرسة') && t.length < 80, 'اعتماد مدير المدرسة: تمت الموافقة النهائية إلكترونيًا');
+      // نترك فقرة (تنبيهات مهمة / اعتماد مدير المدرسة) كما هي حتى لا يتغير تصميم النموذج.
       // الرقم الوظيفي في أول جدول.
       const tables = Array.from(xml.getElementsByTagNameNS(W,'tbl'));
-      if (tables[0]) {
-        const cells = Array.from(tables[0].getElementsByTagNameNS(W,'tc'));
+      const tableText = tbl => allText(tbl).replace(/\s+/g,' ');
+      const idTable = tables.find(t => tableText(t).includes('الرقم الوظيفي')) || tables[0];
+      if (idTable) {
+        const cells = Array.from(idTable.getElementsByTagNameNS(W,'tc'));
         if (cells[0]) setText(cells[0], 'الموضوع: طلب إذن تأخر/ خروج موظف      الرقم الوظيفي: ' + clean(data.employeeId || data.empId));
       }
-      // علامة نوع الإذن في صف الاختيارات.
-      if (tables[1]) {
-        const rows = Array.from(tables[1].getElementsByTagNameNS(W,'tr'));
+      const choiceTable = tables.find(t => tableText(t).includes('تأخر صباحي') && tableText(t).includes('خروج مبكر'));
+      if (choiceTable) {
+        const rows = Array.from(choiceTable.getElementsByTagNameNS(W,'tr'));
         const cells = rows[1] ? Array.from(rows[1].getElementsByTagNameNS(W,'tc')) : [];
         const patterns = [/تأخر|صباح/, /خروج وعودة|عودة/, /خروج مبكر|مبكر/, /أذونات أخرى|أخرى|ورشة|مهمة|رسمي/];
-        cells.forEach((cell,i) => { const original=allText(cell).trim(); setText(cell, ((patterns[i] && patterns[i].test(type)) ? '√ ' : '') + original); });
+        cells.forEach((cell,i) => { const original=allText(cell).trim(); setText(cell, ((patterns[i] && patterns[i].test(type)) ? '√ ' : '□ ') + original.replace(/^[√✓□☑ ]+/,'').trim()); });
       }
-      // تعبئة جدول التغطية بالبيانات المسجلة في الطلب (حتى 8 صفوف).
-      if (tables[2]) {
-        const rows = Array.from(tables[2].getElementsByTagNameNS(W,'tr'));
+      const coverageTable = tables.find(t => tableText(t).includes('الحصة') && tableText(t).includes('القائم بالأعمال'));
+      if (coverageTable) {
+        const rows = Array.from(coverageTable.getElementsByTagNameNS(W,'tr'));
         let coverage=[];
         try { coverage = typeof data.coverageDetails === 'string' ? JSON.parse(data.coverageDetails || '[]') : (data.coverageDetails || []); } catch(_) { coverage=[]; }
         const adminMode = String(data.coverageType || '') === 'إداري' || String(data.subject || '') === 'كادر إداري';
-        if (adminMode) coverage = [{period:'—', class:'إداري', operatingTeacher:data.name, task:data.adminCoverage || data.coverage, substituteTeacher:data.adminSubstitute}];
+        const noCoverage = /لا توجد (حصص|أعمال إدارية)|لا يحتاج إلى تغطية|لا تحتاج إلى تغطية/.test(String(data.coverage || ''));
+        if (adminMode && !noCoverage) coverage = [{period:'—', class:'إداري', operatingTeacher:data.name, task:data.adminCoverage || data.coverage, substituteTeacher:data.adminSubstitute}];
         for (let i=1; i<rows.length && i<=8; i++) {
           const c=coverage[i-1] || {}; const cells=Array.from(rows[i].getElementsByTagNameNS(W,'tc'));
-          const vals=[c.period || '', c.class || c.grade || c.day || '', c.operatingTeacher || c.teacher || c.teacherName || '', c.period ? 'تم التوقيع إلكترونيًا' : '', c.period ? 'تم التوقيع إلكترونيًا' : '', c.task || c.duty || '', c.substituteTeacher || c.substitute || ''];
+          const vals=noCoverage ? ['','','','','',adminMode ? 'لا توجد حاجة إلى تغطية' : 'لا توجد حصص بحاجة إلى تغطية',''] : [c.period || '', c.class || c.grade || [c.day,c.date].filter(Boolean).join(' '), c.operatingTeacher || c.teacher || c.teacherName || data.name || '', c.period ? 'تم التوقيع إلكترونيًا' : '', c.period ? 'تم التوقيع إلكترونيًا' : '', c.task || c.duty || c.subject || '', c.substituteTeacher || c.substitute || ''];
           cells.forEach((cell,j)=>{ if (vals[j] !== undefined) setText(cell, vals[j]); });
         }
       }
@@ -1672,77 +1683,104 @@
       alert('لا يمكن تنزيل نموذج الإذن الرسمي إلا بعد الاعتماد النهائي من مدير المدرسة.');
       return;
     }
-    if (typeof html2pdf === 'undefined') {
-      await new Promise((resolve, reject) => {
-        const script = document.createElement('script');
-        script.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js';
-        script.onload = () => typeof html2pdf !== 'undefined' ? resolve() : reject(new Error('تعذر تحميل مكتبة PDF'));
-        script.onerror = () => reject(new Error('تعذر تحميل مكتبة PDF'));
-        document.head.appendChild(script);
-      }).catch(() => { alert('تعذر تحميل مكتبة إنشاء PDF. تحقق من اتصال الإنترنت ثم أعد المحاولة.'); throw new Error('html2pdf unavailable'); });
-    }
-    const source = document.getElementById('official-permission-template');
-    if (!source) { alert('تعذر العثور على نموذج الإذن الرسمي.'); return; }
-    const set = (id, value) => { const el = document.getElementById(id); if (el) el.textContent = value == null || value === '' ? '—' : String(value); };
-    const fmtDate = value => {
-      if (!value) return '—';
-      const str = String(value); const m = str.match(/^(\d{4})-(\d{2})-(\d{2})/);
-      if (m) return `${m[3]}/${m[2]}/${m[1]}`;
-      const d = new Date(value); return Number.isNaN(d.getTime()) ? str : d.toLocaleDateString('ar-QA');
-    };
-    set('op-empid', data.employeeId || data.empId);
-    set('op-name', data.name);
-    set('op-job', data.jobTitle);
-    set('op-date', fmtDate(data.date || data.createdAt || data.timestamp));
-    set('op-exit', data.exitTime || data.exit);
-    set('op-return', data.returnTime || data.return);
-    set('op-reason', data.reason);
-    set('op-reqid', data.requestId || data.reqId);
-    const type = String(data.permissionType || data.type || '').trim();
-    const typeMap = [
-      ['op-type-late', /تأخر|صباح/i], ['op-type-return', /عودة|خروج وعودة/i],
-      ['op-type-early', /مبكر/i], ['op-type-other', /أخرى|ورشة|مهمة|رسمي/i]
-    ];
-    typeMap.forEach(([id, re]) => { const el = document.getElementById(id); if (el) el.textContent = (re.test(type) ? '☑ ' : '□ ') + el.textContent.replace(/^[□☑]\s*/, ''); });
-    const tbody = document.getElementById('op-coverage-rows');
-    const adminMode = String(data.coverageType || '') === 'إداري' || String(data.subject || '') === 'كادر إداري';
-    let rows = [];
-    if (!adminMode && data.coverageDetails) {
-      try { const arr = typeof data.coverageDetails === 'string' ? JSON.parse(data.coverageDetails) : data.coverageDetails; if (Array.isArray(arr)) rows = arr; } catch (_) {}
-    }
-    if (adminMode) {
-      rows = [{ period:'—', class:'إداري', operatingTeacher:data.name || '—', task:data.adminCoverage || data.coverage || '—', substituteTeacher:data.adminSubstitute || '—' }];
-    }
-    // يحافظ الجدول على عدد صفوف نموذج Word الأصلي (8 صفوف بيانات).
-    const coverageRows = Array.from({length:8}, (_,i) => rows[i] || {});
-    tbody.innerHTML = coverageRows.map(c => `<tr><td>${escapeHtml(c.period || ' ')}</td><td>${escapeHtml(c.class || c.grade || c.day || ' ')}</td><td>${escapeHtml(c.operatingTeacher || c.teacher || c.teacherName || ' ')}</td><td>${c.period ? 'تم التوقيع إلكترونيًا' : ' '}</td><td>${c.period ? 'تم التوقيع إلكترونيًا' : ' '}</td><td>${escapeHtml(c.task || c.duty || (c.period ? 'وفق التحضير المعتمد' : ' '))}</td><td>${escapeHtml(c.substituteTeacher || c.substitute || ' ')}</td></tr>`).join('');
-    const stage = document.createElement('div');
-    stage.style.cssText = 'position:fixed;left:-12000px;top:0;width:210mm;background:#fff;z-index:-1;';
-    const clone = source.cloneNode(true);
-    clone.id = 'official-permission-export';
-    clone.classList.remove('hidden');
-    clone.style.cssText = 'display:block!important;position:relative!important;left:auto!important;top:auto!important;width:204mm!important;min-height:0!important;padding:0!important;margin:0!important;background:#fff!important;color:#111!important;overflow:visible!important;';
-    stage.appendChild(clone); document.body.appendChild(stage);
+    const loadScript = (src, test) => new Promise((resolve, reject) => {
+      if (test()) return resolve();
+      const script = document.createElement('script'); script.src = src;
+      script.onload = () => test() ? resolve() : reject(new Error('لم يتم تحميل المكتبة المطلوبة.'));
+      script.onerror = () => reject(new Error('تعذر تحميل المكتبة المطلوبة: ' + src));
+      document.head.appendChild(script);
+    });
+    let stage = null;
     try {
-      await Promise.all(Array.from(clone.querySelectorAll('img')).map(img => {
-        if (img.complete && img.naturalWidth) return Promise.resolve();
-        return new Promise(resolve => { img.onload = resolve; img.onerror = resolve; setTimeout(resolve, 7000); });
-      }));
-      const principalSig = clone.querySelector('#op-principal-signature');
-      if (principalSig && (!principalSig.complete || principalSig.naturalWidth === 0)) {
-        throw new Error('تعذر تحميل توقيع المدير من GitHub. تأكد أن signature.png موجود في المجلد الرئيسي للمستودع وأن الرابط متاح للعامة.');
+      await loadScript('https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js', () => Boolean(window.pdfjsLib));
+      await loadScript('https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js', () => typeof window.html2pdf !== 'undefined');
+      const pdfjs = window.pdfjsLib;
+      pdfjs.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+      const modelUrl = 'https://raw.githubusercontent.com/Elbasha1977/School-Permissions/main/Model.pdf';
+      const pdf = await pdfjs.getDocument({ url: modelUrl, withCredentials: false }).promise;
+      const page = await pdf.getPage(1);
+      const viewport = page.getViewport({ scale: 2.4 });
+      const canvas = document.createElement('canvas');
+      canvas.width = Math.ceil(viewport.width); canvas.height = Math.ceil(viewport.height);
+      const ctx = canvas.getContext('2d', { alpha: false });
+      ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+      await page.render({ canvasContext: ctx, viewport }).promise;
+
+      stage = document.createElement('div');
+      stage.style.cssText = 'position:fixed;left:-12000px;top:0;width:210mm;height:297mm;margin:0;padding:0;background:#fff;overflow:hidden;z-index:-1000;font-family:Cairo,Tahoma,sans-serif;direction:rtl;';
+      canvas.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;display:block;';
+      stage.appendChild(canvas);
+      const layer = document.createElement('div');
+      layer.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;direction:rtl;font-family:Cairo,Tahoma,sans-serif;color:#111;';
+      stage.appendChild(layer);
+      const addText = (value, left, top, width, height, opts = {}) => {
+        const text = value == null ? '' : String(value);
+        if (!text.trim()) return;
+        const el = document.createElement('div');
+        el.textContent = text;
+        el.style.cssText = `position:absolute;left:${left}%;top:${top}%;width:${width}%;height:${height}%;display:flex;align-items:center;justify-content:${opts.align === 'right' ? 'flex-start' : opts.align === 'left' ? 'flex-end' : 'center'};text-align:${opts.align || 'center'};direction:rtl;unicode-bidi:plaintext;white-space:${opts.wrap ? 'normal' : 'nowrap'};overflow:hidden;overflow-wrap:anywhere;padding:0 2px;font-size:${opts.size || 10}px;line-height:1.12;font-weight:${opts.bold ? '700' : '400'};background:${opts.background === false ? 'transparent' : 'rgba(255,255,255,.92)'};`;
+        layer.appendChild(el);
+      };
+      const fmtDate = value => {
+        const str = String(value || ''); const m = str.match(/^(\d{4})-(\d{2})-(\d{2})/);
+        return m ? `${m[3]}/${m[2]}/${m[1]}` : (str || '—');
+      };
+      const type = String(data.permissionType || data.type || '').trim();
+      const typeTests = [/تأخر|صباح/, /عودة|خروج وعودة/, /مبكر/, /أخرى|ورشة|مهمة|رسمي/];
+      const checkLeft = [17.2, 43.5, 70.0, 87.2];
+      typeTests.forEach((re, i) => { if (re.test(type)) addText('✓', checkLeft[i], 20.9, 3.2, 2.0, { size: 14, bold: true, background: false }); });
+
+      addText(data.employeeId || data.empId, 4.0, 13.0, 44.0, 2.0, { size: 11 });
+      addText(data.reason, 3.0, 24.6, 61.0, 2.0, { size: 9.5, align: 'right', wrap: true });
+      addText(data.exitTime || data.exit, 54.0, 26.3, 17.0, 1.8, { size: 10 });
+      addText(data.returnTime || data.return, 9.0, 26.3, 23.0, 1.8, { size: 10 });
+      addText(data.name, 38.0, 31.1, 29.0, 1.9, { size: 10 });
+      addText(data.jobTitle, 4.0, 31.1, 26.0, 1.9, { size: 10 });
+      addText(fmtDate(data.date || data.createdAt), 45.0, 33.0, 22.0, 1.9, { size: 10 });
+
+      const adminMode = String(data.coverageType || '') === 'إداري' || String(data.subject || '') === 'كادر إداري';
+      const noCoverage = /لا توجد (حصص|أعمال إدارية)|لا يحتاج إلى تغطية|لا تحتاج إلى تغطية/.test(String(data.coverage || ''));
+      let rows = [];
+      if (!adminMode && data.coverageDetails) {
+        try { const arr = typeof data.coverageDetails === 'string' ? JSON.parse(data.coverageDetails) : data.coverageDetails; if (Array.isArray(arr)) rows = arr; } catch (_) {}
       }
-      const safeId = String(data.requestId || data.reqId || 'request').replace(/[^\w-]/g, '_');
+      if (adminMode && !noCoverage) rows = [{ period: '—', class: 'إداري', operatingTeacher: data.name, task: data.adminCoverage || data.coverage, substituteTeacher: data.adminSubstitute }];
+      const edges = [3.3, 16.5, 29.9, 43.2, 56.5, 69.8, 83.1, 96.5];
+      const rowTop = 41.8, rowHeight = 1.86;
+      if (noCoverage) {
+        addText(adminMode ? 'لا توجد أعمال إدارية تتطلب التغطية أثناء فترة الاستئذان' : 'لا توجد حصص لدى المعلم أثناء فترة الاستئذان؛ لا يحتاج إلى تغطية حصص', 5.0, rowTop, 90.0, rowHeight, { size: 8.5, bold: true });
+      } else {
+        rows.slice(0, 8).forEach((c, i) => {
+          const y = rowTop + i * rowHeight;
+          const vals = [
+            c.period || '',
+            c.class || c.grade || [c.day, c.date].filter(Boolean).join(' '),
+            c.operatingTeacher || c.teacher || c.teacherName || data.name || '',
+            c.period ? 'تم إلكترونيًا' : '',
+            c.period ? 'تم إلكترونيًا' : '',
+            c.task || c.duty || c.subject || (c.period ? 'تغطية الحصة' : ''),
+            c.substituteTeacher || c.substitute || ''
+          ];
+          vals.forEach((v, j) => addText(v, edges[j], y, edges[j + 1] - edges[j], rowHeight, { size: 7.3, wrap: true }));
+        });
+      }
+      addText('تمت الموافقة إلكترونيًا', 5.0, 58.3, 36.0, 1.8, { size: 8.5 });
+      addText('تم الاعتماد إلكترونيًا', 5.0, 60.6, 36.0, 1.8, { size: 8.5 });
+      addText('تم الاعتماد النهائي إلكترونيًا', 5.0, 62.0, 36.0, 1.8, { size: 8.5 });
+      addText(data.requestId || data.reqId, 67.0, 65.1, 27.0, 1.8, { size: 8.5, align: 'right' });
+
+      document.body.appendChild(stage);
       await html2pdf().set({
-        margin: [3, 3, 3, 3], filename: `نموذج_إذن_${safeId}.pdf`,
-        image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 1.6, useCORS: true, allowTaint: false, backgroundColor: '#ffffff', logging: false, imageTimeout: 10000 },
+        margin: 0, filename: `نموذج_إذن_${String(data.requestId || data.reqId || 'request').replace(/[^\w-]/g, '_')}.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true, allowTaint: false, backgroundColor: '#ffffff', logging: false, scrollX: 0, scrollY: 0 },
         jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
         pagebreak: { mode: ['avoid-all'] }
-      }).from(clone.querySelector('.official-permission')).save();
+      }).from(stage).save();
     } catch (e) {
-      console.error('Official permission PDF error:', e);
-      alert('تعذر إنشاء ملف PDF: ' + (e.message || 'خطأ غير معروف'));
-    } finally { stage.remove(); }
+      console.error('Official template PDF error:', e);
+      alert('تعذر تعبئة نموذج Model.pdf الأصلي. تأكد من أن Model.pdf موجود في المجلد الرئيسي لمستودع School-Permissions وأن المستودع متاح للعامة.\n' + (e.message || 'خطأ غير معروف'));
+    } finally { if (stage) stage.remove(); }
   }
 
   function escapeHtml(v) {
@@ -1759,7 +1797,7 @@
     saveEmployee, deleteEmployee, downloadPDFFromTrack, downloadOfficialPermissionPDF, downloadOfficialPermissionWord
   });
 
-  loadAllEmployees();
+  loadAllEmployees().catch(err => console.error('تعذر تحميل قائمة الموظفين عند فتح الصفحة:', err));
 
   window.addEventListener('error', e => { console.error('Error:', e.error || e.message); });
   window.addEventListener('unhandledrejection', e => { console.error('Async error:', e.reason); });
