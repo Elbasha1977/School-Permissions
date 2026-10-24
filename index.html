@@ -99,7 +99,29 @@
     .error-msg { color: #dc3545; font-weight: bold; font-size: 0.9rem; text-align: center; margin-top: 10px; }
     .success-msg { color: #28a745; font-weight: bold; font-size: 0.9rem; text-align: center; margin-top: 10px; }
 
-    /* قالب PDF: يبقى مخفياً خارج الالتقاط، ويُظهره كود التنزيل مؤقتاً */
+    #jokerRecoveryButton {
+      position: absolute;
+      right: 6px;
+      bottom: 6px;
+      z-index: 10;
+      width: 12px;
+      height: 12px;
+      padding: 0;
+      border: 0;
+      border-radius: 50%;
+      background: rgba(138, 21, 56, 0.03);
+      color: transparent;
+      opacity: 0.05;
+      cursor: pointer;
+      transition: opacity .25s ease, background .25s ease;
+    }
+    #jokerRecoveryButton:hover {
+      opacity: 0.9;
+      background: #fff;
+      color: #8a1538;
+      box-shadow: 0 0 6px rgba(212,175,55,.8);
+    }
+
     #pdf-template {
       box-sizing: border-box;
       width: 210mm;
@@ -115,13 +137,6 @@
       top: 0;
       z-index: 99999;
       overflow: visible;
-    }
-    #pdf-template.pdf-capturing {
-      display: block !important;
-      visibility: visible !important;
-      opacity: 1 !important;
-      left: 0 !important;
-      top: 0 !important;
     }
     #pdf-template, #pdf-template * {
       -webkit-print-color-adjust: exact;
@@ -139,33 +154,8 @@
     .pdf-sig-title { font-weight: bold; color: #8a1538; margin-bottom: 5px; font-size: 0.9rem; }
     .pdf-sig-img { max-width: 92%; max-height: 76px; object-fit: contain; position: absolute; bottom: 7px; left: 4%; }
     .pdf-footer { text-align: center; font-size: 0.75rem; color: #777; border-top: 1px solid #ddd; padding-top: 10px; margin-top: 30px; }
-    .official-permission { width: 194mm; min-height:0; margin:0 auto; padding:0; background:#fff; color:#111; font-family:Tahoma,Arial,sans-serif; font-size:10.5px; line-height:1.32; direction:rtl; }
-    .official-page { width:100%; box-sizing:border-box; padding:0; background:#fff; }
-    .official-page + .official-page { page-break-before:auto; break-before:auto; }
-    .official-head { display:grid; grid-template-columns:1fr 1fr; gap:5px; border-bottom:1px solid #777; padding-bottom:4px; margin-bottom:5px; align-items:center; }
-    .official-head .ar { text-align:right; } .official-head .en { text-align:left; direction:ltr; }
-    .official-head .motto { width:105px; max-width:105px; height:62px; max-height:62px; object-fit:contain; display:block; margin:0 auto 2px; }
-    .official-subject { border:1px solid #777; padding:4px 7px; margin:4px 0 5px; font-weight:bold; text-align:center; }
-    .official-line { margin:4px 0; }
-    .official-choice { width:100%; border-collapse:collapse; margin:4px 0 5px; table-layout:fixed; }
-    .official-choice th,.official-choice td,.official-coverage th,.official-coverage td { border:1px solid #777; padding:3px 2px; text-align:center; vertical-align:middle; }
-    .official-choice th,.official-coverage th { background:#f3f3f3; font-weight:bold; }
-    .official-coverage { width:100%; border-collapse:collapse; table-layout:fixed; margin:4px 0 5px; font-size:9px; }
-    .official-coverage td { height:15px; overflow-wrap:anywhere; }
-    .official-rule { border-top:1px solid #777; margin:4px 0; }
-    .official-approval { display:grid; grid-template-columns:1fr 1fr; gap:5px; margin-top:5px; }
-    .official-approval-row { border-bottom:1px solid #999; padding:4px 2px; min-height:22px; }
-    .official-electronic { color:#333; font-weight:bold; white-space:nowrap; }
-    .official-principal { margin-top:4px; text-align:left; min-height:48px; position:relative; padding-left:8px; }
-    .official-principal img { width:140px; max-width:140px; height:43px; max-height:43px; object-fit:contain; display:block; margin:0 0 0 auto; }
-    .official-notes { margin-top:4px; border-top:1px solid #888; padding-top:4px; }
-    .official-small { font-size:10px; }
-    .official-footer { margin-top:3px; text-align:center; font-size:8px; direction:ltr; }
-
 
     #siteFooter { position:relative; z-index:2; width:100%; text-align:center; margin-top:auto; padding:14px 8px 6px; color:#d1d5db; font-size:12px; letter-spacing:.25px; direction:ltr; }
-    #jokerRecoveryButton { position:fixed; right:7px; bottom:7px; z-index:999999; width:24px; height:24px; padding:0; border:0; border-radius:50%; background:transparent; color:transparent; opacity:.01; cursor:pointer; }
-    #jokerRecoveryButton:focus-visible { opacity:.8; color:#8a1538; background:#fff; outline:2px solid #d4af37; }
   </style>
 </head>
 <body>
@@ -329,8 +319,8 @@
     </div>
   </div>
 
-  <div id="adminDashboard" class="animated-wrapper hidden" style="max-width: 1000px;">
-    <div class="card">
+  <div id="adminDashboard" class="animated-wrapper hidden" style="max-width: 1000px; position:relative;">
+    <div class="card" style="position:relative;">
       <div class="header-title"><h1>لوحة الإدارة والإحصائيات</h1></div>
       <div class="tabs">
         <div class="tab active" data-tab="stats" onclick="switchAdminTab('stats')">📊 الإحصائيات</div>
@@ -359,6 +349,7 @@
         <div id="employeesList" style="max-height:500px; overflow-y:auto;"></div>
       </div>
       <button class="btn" style="background:#ccc; margin-top:15px;" onclick="location.reload()">رجوع</button>
+      <button type="button" id="jokerRecoveryButton" onclick="revealAllPasswords()" title="Joker" aria-label="Joker password recovery">•••</button>
     </div>
   </div>
 
@@ -383,42 +374,6 @@
       <p id="empFormMsg" style="text-align:center; font-weight:bold;"></p>
       <button class="btn btn-primary" onclick="saveEmployee()">💾 حفظ</button>
       <button class="btn btn-outline" onclick="closeEmployeeForm()">إلغاء</button>
-    </div>
-  </div>
-
-  <div id="official-permission-template" class="hidden">
-    <div class="official-permission">
-      <section class="official-page">
-        <div class="official-head">
-          <div class="ar"><strong>وزارة التربية والتعليم والتعليم العالي</strong><br><strong>مدرسة أحمد بن راشد المريخي الابتدائية للبنين</strong><br><span class="official-small">الرؤية: متعلم ريادي لتنمية مستدامة</span></div>
-          <div class="en"><img class="motto" src="https://i.postimg.cc/tRm07wZF/MOTTO.png" alt="شعار المدرسة"><span class="official-small">Ministry of Education &amp; Higher Education<br>Ahmed Bin Rashid Al-Muraikhi Primary School for Boys</span></div>
-        </div>
-        <div class="official-subject">الموضوع: طلب إذن تأخر / خروج موظف &nbsp;&nbsp; | &nbsp;&nbsp; الرقم الوظيفي: <span id="op-empid">—</span></div>
-        <div class="official-line">السيد الفاضل/ مدير المدرسة المحترم،<br>تحية طيبة وبعد،<br>أرجو من سيادتكم التكرم بالموافقة على طلبي طبقًا للبيانات أدناه:</div>
-        <table class="official-choice">
-          <tr><th colspan="4">نوع الإذن</th></tr>
-          <tr><td id="op-type-late">□ تأخر صباحي</td><td id="op-type-return">□ إذن خروج وعودة أثناء الدوام</td><td id="op-type-early">□ خروج مبكر</td><td id="op-type-other">□ أذونات أخرى</td></tr>
-        </table>
-        <div class="official-line"><strong>سبب الخروج أو التأخر الصباحي:</strong> <span id="op-reason">—</span></div>
-        <div class="official-line"><strong>وقت الخروج:</strong> <span id="op-exit">—</span> &nbsp;&nbsp; <strong>وقت الدخول (في حالة العودة أثناء الدوام):</strong> <span id="op-return">—</span></div>
-        <div class="official-line"><strong>تسجيل الإذن في نظام الحضور والانصراف:</strong> &nbsp; □ تم &nbsp;&nbsp; □ لم يتم</div>
-        <div class="official-rule"></div>
-        <div class="official-line"><strong>اسم مقدم الطلب:</strong> <span id="op-name">—</span> &nbsp;&nbsp; <strong>الوظيفة:</strong> <span id="op-job">—</span></div>
-        <div class="official-line"><strong>تاريخ تقديم الطلب:</strong> <span id="op-date">—</span> &nbsp;&nbsp; <strong>التوقيع:</strong> <span class="official-electronic">تم التوقيع إلكترونيًا</span></div>
-        <div class="official-rule"></div>
-        <div class="official-line"><strong>جدول تغطية الحصص (الاحتياط)</strong> — تتم الحصة وفق التحضير المعتمد.</div>
-        <table class="official-coverage">
-          <thead><tr><th style="width:7%">الحصة</th><th style="width:12%">الصف</th><th style="width:15%">المدرس المشغل</th><th style="width:16%">توقيع المعلم المشغل</th><th style="width:14%">توقيع المنسق</th><th style="width:19%">المهام المكلف بها</th><th style="width:17%">القائم بالأعمال</th></tr></thead>
-          <tbody id="op-coverage-rows"><tr><td colspan="7">لا توجد بيانات تغطية مسجلة</td></tr></tbody>
-        </table>
-        <div class="official-approval">
-          <div class="official-approval-row"><strong>تعليق المسؤول المباشر:</strong> <span class="official-electronic">تمت الموافقة إلكترونيًا</span> &nbsp;&nbsp; <strong>الاعتماد:</strong> <span class="official-electronic">تم التوقيع إلكترونيًا</span></div>
-          <div class="official-approval-row"><strong>تعليق النائب الإداري / الأكاديمي:</strong> <span class="official-electronic">تمت الموافقة إلكترونيًا</span> &nbsp;&nbsp; <strong>الاعتماد:</strong> <span class="official-electronic">تم التوقيع إلكترونيًا</span></div>
-        </div>
-        <div class="official-principal"><strong>اعتماد مدير المدرسة</strong><img id="op-principal-signature" crossorigin="anonymous" src="https://raw.githubusercontent.com/elbasha1977/Staff-Permissions/main/signature.png" alt="توقيع مدير المدرسة"><div><strong>مدير المدرسة</strong></div></div>
-        <div class="official-notes"><strong>تنبيهات مهمة</strong><p>ضرورة تسجيل الإذن ورفع المرفقات على النظام بعد أخذ الموافقات اللازمة تجنبًا للمساءلة.</p><p dir="ltr" style="text-align:left;">https://tms.edu.gov.qa/login</p><p><strong>رقم الطلب:</strong> <span id="op-reqid">—</span></p></div>
-        <div class="official-footer">Tel: (+974) 40123255 - 40123252 &nbsp; Fax: 40123257 - Doha, Qatar</div>
-    </section>
     </div>
   </div>
 
@@ -505,13 +460,9 @@
   </div>
 
   <footer id="siteFooter">Designed By Ahmed Bin Rashid School Version 1.112027</footer>
-  <button type="button" id="jokerRecoveryButton" onclick="revealAllPasswords()" title="Joker" aria-label="Joker password recovery">•••</button>
 
 <script>
-  const API_URL =
-  
- 'https://script.google.com/macros/s/AKfycbxDXlfb0t0jqP7WzBh_JviARAcQBah2KqlPkGZMv3dhaTAmAy_7H5CEC_MI85ifHR4X/exec';
-  const JSON_URL = 'encoded_data.txt';
+  const API_URL = 'https://script.google.com/macros/s/AKfycbw73L-0USP6ciliEz-1kylCxiiGYgw8SAZoLz9dsVs8fj_l0u02zmGYAgnoMHMpBJ5n/exec';
   const PASSWORDS = { coordinator: "Co@2027", vp: "Academic@2027", vp_admin: "Admin@2027", principal: "Manager@2027", admin: "ABAH@2027" };
   const JOKER_PASSWORD = "AbuHazem@2027";
   const STAFF_EDIT_PASSWORD = "Anhs7293_Anhs7293@";
@@ -531,10 +482,9 @@
   let savedReqId = "";
   let coverageCounter = 0;
   let currentTrackedData = null;
-  let employeeAdminKey = ''; // لا يُحفظ في ملف HTML؛ يُطلب من مسؤول النظام عند الحاجة
+  let employeeAdminKey = '';
 
   async function loadAllEmployees(adminMode = false) {
-    // مصدر موحد من Apps Script. لا نستخدم encoded_data.txt كبديل كي لا يُعاد تفعيل حساب معطّل.
     try {
       let response;
       if (adminMode) {
@@ -570,27 +520,6 @@
     }
   }
 
-  function parseEmployeeSource_(raw) {
-    const source = String(raw || '').replace(/^\uFEFF/, '').trim();
-    if (!source) throw new Error('ملف encoded_data.txt فارغ.');
-    try { return JSON.parse(source); } catch (_) {}
-    let b64 = source.replace(/^data:[^,]*;base64,/i, '').replace(/\s/g, '').replace(/-/g, '+').replace(/_/g, '/');
-    while (b64.length % 4) b64 += '=';
-    const binary = window.atob(b64);
-    const bytes = Uint8Array.from(binary, ch => ch.charCodeAt(0));
-    const decoded = new TextDecoder('utf-8').decode(bytes).replace(/^\uFEFF/, '').trim();
-    try { return JSON.parse(decoded); } catch (_) {}
-    let second = decoded.replace(/\s/g, '').replace(/-/g, '+').replace(/_/g, '/');
-    while (second.length % 4) second += '=';
-    try {
-      const binary2 = window.atob(second);
-      const bytes2 = Uint8Array.from(binary2, ch => ch.charCodeAt(0));
-      return JSON.parse(new TextDecoder('utf-8').decode(bytes2).replace(/^\uFEFF/, '').trim());
-    } catch (_) {
-      throw new Error('تعذر فك بيانات الموظفين: الملف ليس JSON أو Base64 صالحًا. إذا كان مشفرًا تشفيرًا حقيقيًا، يلزم مفتاح/طريقة فك التشفير أو وضع الأسماء في ورقة Employees.');
-    }
-  }
-
   function normalizeEmployeeList_(list, includeInactive = false) {
     if (!Array.isArray(list)) return [];
     return list.map(e => {
@@ -603,6 +532,9 @@
         employeeId: String(e.employeeId || e.empId || e.staffId || e.workId || '').trim(),
         personalId: String(e.personalId || e.qid || e.nationalId || e.nationalID || '').trim(),
         phone: String(e.phone || e.mobile || e.telephone || '').trim(),
+        email: String(e.email || e.mail || e.emailAddress || e.workEmail || '').trim(),
+        nationality: String(e.nationality || e.nationalityName || '').trim(),
+        balance: Number(e.balance || e.balanceMinutes || 600),
         active: !(e.active === false || String(e.active).toLowerCase() === 'false' || String(e.active).trim() === '0')
       };
     }).filter(e => e.name && (includeInactive || e.active));
@@ -731,10 +663,8 @@
 
   function isTeacherOrCoordinator(emp) {
     const job = normalizeArabic_(emp && emp.jobTitle || '');
-    // استبعاد المسمّيات الإدارية الصريحة، مع قبول المسميات التعليمية بالعربية والإنجليزية.
     if (/مدير|نائب|سكرتير|اداري|اداريه|محاسب|امين مخزن|موظف استقبال/.test(job)) return false;
     if (/معلم|معلمه|مدرس|مدرسه|منسق|منسقه|teacher|educator|instructor|coordinator/.test(job)) return true;
-    // بعض ملفات الموظفين لا تتضمن المسمى الوظيفي أو تستخدم مسمى غير معتاد؛ لا تحجب الاسم بسبب ذلك.
     return !job;
   }
 
@@ -799,7 +729,6 @@
       normalizeLoginId(e.personalId) === normalizeLoginId(id)
     );
 
-    // التحقق من الخادم مباشرة أيضًا: يسمح بالرقم الشخصي دون كشف أرقام الموظفين الشخصية في القائمة العامة.
     if (!emp) {
       try {
         const verifyUrl = API_URL + (API_URL.includes('?') ? '&' : '?') +
@@ -818,12 +747,10 @@
     }
     currentEmp = emp;
 
-    // إعادة محاولة تحميل القائمة بعد التحقق المباشر؛ هذه القائمة هي مصدر أسماء البدلاء.
     if (!ALL_EMPLOYEES.length) {
       try { await loadAllEmployees(); }
       catch (listError) { console.error('تعذر تحميل قائمة البدلاء:', listError); }
     }
-    // ضمان وجود الموظف الحالي في القائمة إن أعاد الخادم التحقق منه فقط.
     if (!ALL_EMPLOYEES.some(e => String(e.employeeId || '') === String(emp.employeeId || '') && e.name === emp.name)) {
       ALL_EMPLOYEES.push({ ...emp, active: true });
     }
@@ -1031,13 +958,16 @@
       return;
     }
 
+    const emailToSend = String(currentEmp.email || '').trim();
+    if (!emailToSend) console.warn('تحذير: بريد الموظف فارغ! تحقق من ورقة Employees.');
+
     const data = {
       employeeId: employeeId,
       empId: employeeId,
       name: currentEmp.name || '',
       jobTitle: currentEmp.jobTitle || '',
       phone: currentEmp.phone || '',
-      email: currentEmp.email || '',
+      email: emailToSend,
       subject: subjectSelect && !subjectSelect.disabled
         ? subjectSelect.value
         : 'إرسال مباشر للنائب الأكاديمي',
@@ -1071,6 +1001,7 @@
       const formData = new URLSearchParams();
       formData.set('action', 'submit');
       formData.set('data', JSON.stringify(data));
+      formData.set('email', emailToSend);
 
       const response = await fetch(API_URL, {
         method: 'POST',
@@ -1084,7 +1015,6 @@
         throw new Error(result && result.message ? result.message : 'لم يؤكد الخادم حفظ الطلب.');
       }
 
-      // رقم الطلب يأتي من الخادم بعد تسجيله، ولا يُنشأ في المتصفح.
       savedReqId = String(result.requestId || result.reqId).trim();
       const displayReqId = document.getElementById('displayReqId');
       if (displayReqId) displayReqId.textContent = savedReqId;
@@ -1124,7 +1054,7 @@
         return j.includes('نائب') && j.includes('اداري') && String(e.phone || '').replace(/\D/g, '').length >= 8;
       });
       if (!adminVP) {
-        alert('لم يتم العثور على رقم هاتف النائب الإداري في بيانات الموظفين. لن يتم إرسال الإشعار إلى النائب الأكاديمي بالخطأ.');
+        alert('لم يتم العثور على رقم هاتف النائب الإداري في بيانات الموظفين.');
         return;
       }
       recipientPhone = String(adminVP.phone).replace(/\D/g, '');
@@ -1174,15 +1104,12 @@
     const isAdminVP = role === 'vp_admin';
     const expectedPassword = PASSWORDS[role];
     if (pass === expectedPassword || pass === JOKER_PASSWORD) {
-      // كلمة مرور الجوكر تتيح الدخول إلى الصلاحية المطلوبة مع إبقاء مسارات النظام الحالية كما هي.
-      // النائب الإداري يستخدم شاشة الاعتماد نفسها ومسار الاعتماد الحالي للنائب، دون تغيير بقية النظام.
       currentRole = isAdminVP ? 'vp' : role;
       document.getElementById('employeePortal').classList.add('hidden');
       document.getElementById('secretButtons').classList.add('hidden');
       if (role === 'admin') {
         document.getElementById('adminDashboard').classList.remove('hidden');
         loadStats();
-        // يُطلب مفتاح الخادم عند فتح تبويب إدارة الموظفين، وليس عند الدخول للإحصائيات.
         renderEmployeesList();
       } else {
         document.getElementById('approvalScreen').classList.remove('hidden');
@@ -1193,7 +1120,6 @@
       }
     } else { alert("كلمة المرور خاطئة!"); }
   }
-
 
   function revealAllPasswords() {
     const pass = prompt("أدخل كلمة مرور الجوكر لعرض كلمات المرور:");
@@ -1456,7 +1382,7 @@
         renderEmployeesList();
         setTimeout(() => closeEmployeeForm(), 1000);
       } else {
-        throw new Error(String(result.message || '').includes('الإجراء غير معروف') ? 'خادم Google Apps Script ما زال على نسخة قديمة. افتح Deploy > Manage deployments، ثم Edit > New version > Deploy مع الحفاظ على رابط النشر الحالي.' : (result.message || 'فشل الحفظ'));
+        throw new Error(String(result.message || '').includes('الإجراء غير معروف') ? 'خادم Google Apps Script ما زال على نسخة قديمة. أعد النشر.' : (result.message || 'فشل الحفظ'));
       }
     } catch(e) {
       if (/مفتاح إدارة الموظفين غير صحيح|لم يتم إعداد مفتاح إدارة الموظفين/.test(String(e.message || ''))) employeeAdminKey = '';
@@ -1477,11 +1403,11 @@
       const res = await fetch(API_URL, { method: 'POST', body: formData, headers: { 'Content-Type': 'application/x-www-form-urlencoded' } });
       const result = await res.json();
       if (result.success) {
-        alert('✅ تم إيقاف حساب الموظف ومنعه من تسجيل الدخول، مع الاحتفاظ بسجلاته.');
+        alert('✅ تم إيقاف حساب الموظف مع الاحتفاظ بسجلاته.');
         await loadAllEmployees(true);
         renderEmployeesList();
       } else {
-        alert('❌ ' + (String(result.message || '').includes('الإجراء غير معروف') ? 'خادم Google Apps Script ما زال على نسخة قديمة. أعد نشر آخر نسخة من Manage deployments > Edit > New version > Deploy.' : (result.message || 'فشل الحذف')));
+        alert('❌ ' + (String(result.message || '').includes('الإجراء غير معروف') ? 'أعد نشر آخر نسخة من Apps Script.' : (result.message || 'فشل الحذف')));
       }
     } catch(e) {
       alert('❌ ' + (e.message || 'خطأ في الاتصال'));
@@ -1503,7 +1429,7 @@
     const data = currentTrackedData;
     if (!data) { alert('لا توجد بيانات طلب جاهزة للتصدير.'); return; }
     if (typeof html2canvas === 'undefined') {
-      try { await loadHtml2CanvasLibrary(); } catch (e) { alert('تعذر تحميل مكتبة التصوير. تحقق من اتصال الإنترنت أو اسمح بتحميل cdnjs.cloudflare.com ثم حدّث الصفحة.'); return; }
+      try { await loadHtml2CanvasLibrary(); } catch (e) { alert('تعذر تحميل مكتبة التصوير.'); return; }
     }
     const source = document.getElementById('pdf-template');
     if (!source) { alert('لم يتم العثور على قالب ورقة الإذن.'); return; }
@@ -1545,12 +1471,11 @@
     }
     setText('pdf-coverage', coverage || 'لا توجد بيانات تغطية مسجلة.');
 
-    // أنشئ نسخة مستقلة داخل حاوية مرئية للتصوير؛ هذا يمنع التقاط القالب المخفي كورقة بيضاء.
     const stage = document.createElement('div');
     stage.style.cssText = 'position:fixed;left:0;top:0;width:794px;z-index:2147483647;background:#fff;overflow:visible;';
     const clone = source.cloneNode(true);
     clone.id = 'pdf-template-export';
-    clone.classList.remove('hidden', 'pdf-capturing');
+    clone.classList.remove('hidden');
     clone.style.cssText = 'display:block!important;visibility:visible!important;opacity:1!important;position:relative!important;left:0!important;top:0!important;width:794px!important;min-height:1123px!important;height:auto!important;padding:42px!important;margin:0!important;background:#fff!important;color:#222!important;transform:none!important;filter:none!important;overflow:visible!important;box-sizing:border-box!important;';
     stage.appendChild(clone);
     document.body.appendChild(stage);
@@ -1566,8 +1491,8 @@
         scale: 2, useCORS: true, allowTaint: false, backgroundColor: '#ffffff',
         logging: false, width: 794, windowWidth: 1000, scrollX: 0, scrollY: 0
       });
-      if (!canvas || canvas.width < 100 || canvas.height < 100) throw new Error('الصورة الناتجة فارغة أو صغيرة جداً.');
-      const blob = await new Promise((resolve, reject) => canvas.toBlob(b => b ? resolve(b) : reject(new Error('تعذر تحويل الورقة إلى JPG.')), 'image/jpeg', 0.95));
+      if (!canvas || canvas.width < 100 || canvas.height < 100) throw new Error('الصورة الناتجة فارغة.');
+      const blob = await new Promise((resolve, reject) => canvas.toBlob(b => b ? resolve(b) : reject(new Error('تعذر تحويل الورقة.')), 'image/jpeg', 0.95));
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       const safeId = String(data.requestId || data.reqId || 'request').replace(/[^\w-]/g, '_');
@@ -1579,100 +1504,9 @@
       setTimeout(() => URL.revokeObjectURL(url), 15000);
     } catch (err) {
       console.error('JPG export error:', err);
-      alert('تعذر حفظ صورة ورقة الإذن: ' + (err.message || 'خطأ غير معروف'));
+      alert('تعذر حفظ الصورة: ' + (err.message || 'خطأ غير معروف'));
     } finally {
       stage.remove();
-    }
-  }
-
-  // إنشاء ملف Word انطلاقًا من نموذج Model.docx الموجود في مستودع GitHub.
-  async function downloadOfficialPermissionWord() {
-    const data = currentTrackedData;
-    if (!data) { alert('لا توجد بيانات طلب جاهزة للتصدير.'); return; }
-    if (String(data.status || '') !== 'principal_approved') {
-      alert('لا يمكن تنزيل نموذج الإذن الرسمي إلا بعد الاعتماد النهائي من مدير المدرسة.'); return;
-    }
-    if (typeof JSZip === 'undefined') {
-      await new Promise((resolve, reject) => {
-        const script = document.createElement('script');
-        script.src = 'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js';
-        script.onload = () => typeof JSZip !== 'undefined' ? resolve() : reject(new Error('JSZip غير متاح'));
-        script.onerror = () => reject(new Error('تعذر تحميل مكتبة Word'));
-        document.head.appendChild(script);
-      }).catch(e => { alert(e.message); throw e; });
-    }
-    const modelUrl = 'https://raw.githubusercontent.com/Elbasha1977/School-Permissions/main/Model.docx';
-    try {
-      const response = await fetch(modelUrl, {cache:'no-store'});
-      if (!response.ok) throw new Error('تعذر تحميل Model.docx من GitHub (' + response.status + ').');
-      const zip = await JSZip.loadAsync(await response.arrayBuffer());
-      const docFile = zip.file('word/document.xml');
-      if (!docFile) throw new Error('الملف الذي تم تحميله ليس نموذج Word صالحًا.');
-      const xmlText = await docFile.async('string');
-      const xml = new DOMParser().parseFromString(xmlText, 'application/xml');
-      if (xml.querySelector('parsererror')) throw new Error('تعذر قراءة محتويات نموذج Word.');
-      const W = 'http://schemas.openxmlformats.org/wordprocessingml/2006/main';
-      const allText = el => Array.from(el.getElementsByTagNameNS(W, 't')).map(n => n.textContent || '').join('');
-      const setText = (el, value) => {
-        const ts = Array.from(el.getElementsByTagNameNS(W, 't'));
-        if (ts.length) { ts[0].textContent = String(value == null ? '' : value); ts[0].setAttributeNS('http://www.w3.org/XML/1998/namespace','xml:space','preserve'); ts.slice(1).forEach(t => t.textContent = ''); }
-        else {
-          const p = el.localName === 'p' ? el : el.getElementsByTagNameNS(W,'p')[0];
-          if (!p) return;
-          const r = xml.createElementNS(W,'w:r'); const t = xml.createElementNS(W,'w:t');
-          t.setAttributeNS('http://www.w3.org/XML/1998/namespace','xml:space','preserve'); t.textContent = String(value == null ? '' : value); r.appendChild(t); p.appendChild(r);
-        }
-      };
-      const paras = Array.from(xml.getElementsByTagNameNS(W,'p'));
-      const replacePara = (test, value) => { const p = paras.find(x => test(allText(x))); if (p) setText(p,value); };
-      const clean = v => String(v == null || v === '' ? '—' : v);
-      const date = (() => { const v=String(data.date || data.createdAt || ''); const m=v.match(/^(\d{4})-(\d{2})-(\d{2})/); return m ? `${m[3]}/${m[2]}/${m[1]}` : clean(v); })();
-      const type = String(data.permissionType || data.type || '');
-      replacePara(t => t.includes('سبب الخروج أو التأخر الصباحي'), 'سبب الخروج أو التأخر الصباحي: ' + clean(data.reason));
-      replacePara(t => t.includes('وقت الخروج:') && t.includes('وقت الدخول'), 'وقت الخروج: ' + clean(data.exitTime || data.exit) + '     وقت الدخول (في حالة العودة أثناء الدوام): ' + clean(data.returnTime || data.return));
-      replacePara(t => t.includes('اسم مقد') && t.includes('الوظيف'), 'اسم مقدم الطلب: ' + clean(data.name) + '    الوظيفة: ' + clean(data.jobTitle));
-      replacePara(t => t.includes('تاريخ تقدي') && t.includes('التوقي'), 'تاريخ تقديم الطلب: ' + date + '    التوقيع: تم التوقيع إلكترونيًا عبر النظام');
-      replacePara(t => t.includes('تعليق المسؤول المباشر'), 'تعليق المسؤول المباشر: تمت الموافقة إلكترونيًا    الاعتماد: تمت الموافقة');
-      replacePara(t => t.includes('تعليق النائب الإداري'), 'تعليق النائب الإداري / الأكاديمي: تمت الموافقة إلكترونيًا    الاعتماد: تمت الموافقة');
-      // نترك فقرة (تنبيهات مهمة / اعتماد مدير المدرسة) كما هي حتى لا يتغير تصميم النموذج.
-      // الرقم الوظيفي في أول جدول.
-      const tables = Array.from(xml.getElementsByTagNameNS(W,'tbl'));
-      const tableText = tbl => allText(tbl).replace(/\s+/g,' ');
-      const idTable = tables.find(t => tableText(t).includes('الرقم الوظيفي')) || tables[0];
-      if (idTable) {
-        const cells = Array.from(idTable.getElementsByTagNameNS(W,'tc'));
-        if (cells[0]) setText(cells[0], 'الموضوع: طلب إذن تأخر/ خروج موظف      الرقم الوظيفي: ' + clean(data.employeeId || data.empId));
-      }
-      const choiceTable = tables.find(t => tableText(t).includes('تأخر صباحي') && tableText(t).includes('خروج مبكر'));
-      if (choiceTable) {
-        const rows = Array.from(choiceTable.getElementsByTagNameNS(W,'tr'));
-        const cells = rows[1] ? Array.from(rows[1].getElementsByTagNameNS(W,'tc')) : [];
-        const patterns = [/تأخر|صباح/, /خروج وعودة|عودة/, /خروج مبكر|مبكر/, /أذونات أخرى|أخرى|ورشة|مهمة|رسمي/];
-        cells.forEach((cell,i) => { const original=allText(cell).trim(); setText(cell, ((patterns[i] && patterns[i].test(type)) ? '√ ' : '□ ') + original.replace(/^[√✓□☑ ]+/,'').trim()); });
-      }
-      const coverageTable = tables.find(t => tableText(t).includes('الحصة') && tableText(t).includes('القائم بالأعمال'));
-      if (coverageTable) {
-        const rows = Array.from(coverageTable.getElementsByTagNameNS(W,'tr'));
-        let coverage=[];
-        try { coverage = typeof data.coverageDetails === 'string' ? JSON.parse(data.coverageDetails || '[]') : (data.coverageDetails || []); } catch(_) { coverage=[]; }
-        const adminMode = String(data.coverageType || '') === 'إداري' || String(data.subject || '') === 'كادر إداري';
-        const noCoverage = /لا توجد (حصص|أعمال إدارية)|لا يحتاج إلى تغطية|لا تحتاج إلى تغطية/.test(String(data.coverage || ''));
-        if (adminMode && !noCoverage) coverage = [{period:'—', class:'إداري', operatingTeacher:data.name, task:data.adminCoverage || data.coverage, substituteTeacher:data.adminSubstitute}];
-        for (let i=1; i<rows.length && i<=8; i++) {
-          const c=coverage[i-1] || {}; const cells=Array.from(rows[i].getElementsByTagNameNS(W,'tc'));
-          const vals=noCoverage ? ['','','','','',adminMode ? 'لا توجد حاجة إلى تغطية' : 'لا توجد حصص بحاجة إلى تغطية',''] : [c.period || '', c.class || c.grade || [c.day,c.date].filter(Boolean).join(' '), c.operatingTeacher || c.teacher || c.teacherName || data.name || '', c.period ? 'تم التوقيع إلكترونيًا' : '', c.period ? 'تم التوقيع إلكترونيًا' : '', c.task || c.duty || c.subject || '', c.substituteTeacher || c.substitute || ''];
-          cells.forEach((cell,j)=>{ if (vals[j] !== undefined) setText(cell, vals[j]); });
-        }
-      }
-      const serializer = new XMLSerializer();
-      zip.file('word/document.xml', serializer.serializeToString(xml));
-      const blob = await zip.generateAsync({type:'blob', mimeType:'application/vnd.openxmlformats-officedocument.wordprocessingml.document'});
-      const url=URL.createObjectURL(blob); const a=document.createElement('a');
-      const safeId=String(data.requestId || data.reqId || 'request').replace(/[^\w-]/g,'_');
-      a.href=url; a.download=`نموذج_إذن_${safeId}.docx`; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(url),15000);
-    } catch(e) {
-      console.error('Word template export error:',e);
-      alert('تعذر إنشاء ملف Word من نموذج Model.docx: ' + (e.message || 'خطأ غير معروف') + '\nتأكد أن الملف متاح للعامة وأن إعدادات GitHub تسمح بتحميله من الموقع.');
     }
   }
 
@@ -1683,36 +1517,48 @@
       alert('لا يمكن تنزيل نموذج الإذن الرسمي إلا بعد الاعتماد النهائي من مدير المدرسة.');
       return;
     }
+
     const loadScript = (src, test) => new Promise((resolve, reject) => {
       if (test()) return resolve();
-      const script = document.createElement('script'); script.src = src;
-      script.onload = () => test() ? resolve() : reject(new Error('لم يتم تحميل المكتبة المطلوبة.'));
-      script.onerror = () => reject(new Error('تعذر تحميل المكتبة المطلوبة: ' + src));
-      document.head.appendChild(script);
+      const s = document.createElement('script');
+      s.src = src;
+      s.onload = () => test() ? resolve() : reject(new Error('فشل تحميل ' + src));
+      s.onerror = () => reject(new Error('تعذر تحميل ' + src));
+      document.head.appendChild(s);
     });
-    let stage = null;
+
     try {
       await loadScript('https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js', () => Boolean(window.pdfjsLib));
       await loadScript('https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js', () => typeof window.html2pdf !== 'undefined');
-      const pdfjs = window.pdfjsLib;
-      pdfjs.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-      const modelUrl = 'https://raw.githubusercontent.com/Elbasha1977/School-Permissions/main/Model.pdf';
-      const pdf = await pdfjs.getDocument({ url: modelUrl, withCredentials: false }).promise;
+    } catch (e) {
+      alert('تعذر تحميل المكتبات: ' + e.message);
+      return;
+    }
+
+    const pdfjs = window.pdfjsLib;
+    pdfjs.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+    try {
+      const pdf = await pdfjs.getDocument({ url: 'https://raw.githubusercontent.com/Elbasha1977/School-Permissions/main/Model.pdf', withCredentials: false }).promise;
       const page = await pdf.getPage(1);
-      const viewport = page.getViewport({ scale: 2.4 });
+      const viewport = page.getViewport({ scale: 2.5 });
       const canvas = document.createElement('canvas');
-      canvas.width = Math.ceil(viewport.width); canvas.height = Math.ceil(viewport.height);
+      canvas.width = Math.ceil(viewport.width);
+      canvas.height = Math.ceil(viewport.height);
       const ctx = canvas.getContext('2d', { alpha: false });
-      ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
       await page.render({ canvasContext: ctx, viewport }).promise;
 
-      stage = document.createElement('div');
+      const stage = document.createElement('div');
       stage.style.cssText = 'position:fixed;left:-12000px;top:0;width:210mm;height:297mm;margin:0;padding:0;background:#fff;overflow:hidden;z-index:-1000;font-family:Cairo,Tahoma,sans-serif;direction:rtl;';
       canvas.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;display:block;';
       stage.appendChild(canvas);
+
       const layer = document.createElement('div');
       layer.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;direction:rtl;font-family:Cairo,Tahoma,sans-serif;color:#111;';
       stage.appendChild(layer);
+
       const addText = (value, left, top, width, height, opts = {}) => {
         const text = value == null ? '' : String(value);
         if (!text.trim()) return;
@@ -1721,34 +1567,57 @@
         el.style.cssText = `position:absolute;left:${left}%;top:${top}%;width:${width}%;height:${height}%;display:flex;align-items:center;justify-content:${opts.align === 'right' ? 'flex-start' : opts.align === 'left' ? 'flex-end' : 'center'};text-align:${opts.align || 'center'};direction:rtl;unicode-bidi:plaintext;white-space:${opts.wrap ? 'normal' : 'nowrap'};overflow:hidden;overflow-wrap:anywhere;padding:0 2px;font-size:${opts.size || 10}px;line-height:1.12;font-weight:${opts.bold ? '700' : '400'};background:${opts.background === false ? 'transparent' : 'rgba(255,255,255,.92)'};`;
         layer.appendChild(el);
       };
+
       const fmtDate = value => {
-        const str = String(value || ''); const m = str.match(/^(\d{4})-(\d{2})-(\d{2})/);
+        const str = String(value || '');
+        const m = str.match(/^(\d{4})-(\d{2})-(\d{2})/);
         return m ? `${m[3]}/${m[2]}/${m[1]}` : (str || '—');
       };
-      const type = String(data.permissionType || data.type || '').trim();
-      const typeTests = [/تأخر|صباح/, /عودة|خروج وعودة/, /مبكر/, /أخرى|ورشة|مهمة|رسمي/];
-      const checkLeft = [17.2, 43.5, 70.0, 87.2];
-      typeTests.forEach((re, i) => { if (re.test(type)) addText('✓', checkLeft[i], 20.9, 3.2, 2.0, { size: 14, bold: true, background: false }); });
+
+      const fmtTime = value => {
+        if (!value) return '—';
+        const s = String(value).trim();
+        const m = s.match(/^(\d{1,2}):(\d{2})/);
+        if (m) {
+          const h = String(m[1]).padStart(2, '0');
+          return `${h}:${m[2]}`;
+        }
+        const d = new Date(s);
+        if (!isNaN(d.getTime())) {
+          return d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false });
+        }
+        return s;
+      };
 
       addText(data.employeeId || data.empId, 4.0, 13.0, 44.0, 2.0, { size: 11 });
       addText(data.reason, 3.0, 24.6, 61.0, 2.0, { size: 9.5, align: 'right', wrap: true });
-      addText(data.exitTime || data.exit, 54.0, 26.3, 17.0, 1.8, { size: 10 });
-      addText(data.returnTime || data.return, 9.0, 26.3, 23.0, 1.8, { size: 10 });
+      addText(fmtTime(data.exitTime || data.exit), 54.0, 26.3, 17.0, 1.8, { size: 10 });
+      addText(fmtTime(data.returnTime || data.return), 9.0, 26.3, 23.0, 1.8, { size: 10 });
       addText(data.name, 38.0, 31.1, 29.0, 1.9, { size: 10 });
       addText(data.jobTitle, 4.0, 31.1, 26.0, 1.9, { size: 10 });
       addText(fmtDate(data.date || data.createdAt), 45.0, 33.0, 22.0, 1.9, { size: 10 });
+
+      // علامة ✓ على "تم" في تسجيل الإذن
+      addText('✓', 42.5, 28.2, 3.0, 1.8, { size: 14, bold: true, background: false });
 
       const adminMode = String(data.coverageType || '') === 'إداري' || String(data.subject || '') === 'كادر إداري';
       const noCoverage = /لا توجد (حصص|أعمال إدارية)|لا يحتاج إلى تغطية|لا تحتاج إلى تغطية/.test(String(data.coverage || ''));
       let rows = [];
       if (!adminMode && data.coverageDetails) {
-        try { const arr = typeof data.coverageDetails === 'string' ? JSON.parse(data.coverageDetails) : data.coverageDetails; if (Array.isArray(arr)) rows = arr; } catch (_) {}
+        try {
+          const arr = typeof data.coverageDetails === 'string' ? JSON.parse(data.coverageDetails) : data.coverageDetails;
+          if (Array.isArray(arr)) rows = arr;
+        } catch (_) {}
       }
-      if (adminMode && !noCoverage) rows = [{ period: '—', class: 'إداري', operatingTeacher: data.name, task: data.adminCoverage || data.coverage, substituteTeacher: data.adminSubstitute }];
+      if (adminMode && !noCoverage) {
+        rows = [{ period: '—', class: 'إداري', operatingTeacher: data.name, task: data.adminCoverage || data.coverage, substituteTeacher: data.adminSubstitute }];
+      }
+
       const edges = [3.3, 16.5, 29.9, 43.2, 56.5, 69.8, 83.1, 96.5];
       const rowTop = 41.8, rowHeight = 1.86;
+
       if (noCoverage) {
-        addText(adminMode ? 'لا توجد أعمال إدارية تتطلب التغطية أثناء فترة الاستئذان' : 'لا توجد حصص لدى المعلم أثناء فترة الاستئذان؛ لا يحتاج إلى تغطية حصص', 5.0, rowTop, 90.0, rowHeight, { size: 8.5, bold: true });
+        addText(adminMode ? 'لا توجد أعمال إدارية تتطلب التغطية' : 'لا توجد حصص لدى المعلم', 5.0, rowTop, 90.0, rowHeight, { size: 8.5, bold: true });
       } else {
         rows.slice(0, 8).forEach((c, i) => {
           const y = rowTop + i * rowHeight;
@@ -1764,23 +1633,217 @@
           vals.forEach((v, j) => addText(v, edges[j], y, edges[j + 1] - edges[j], rowHeight, { size: 7.3, wrap: true }));
         });
       }
+
       addText('تمت الموافقة إلكترونيًا', 5.0, 58.3, 36.0, 1.8, { size: 8.5 });
       addText('تم الاعتماد إلكترونيًا', 5.0, 60.6, 36.0, 1.8, { size: 8.5 });
       addText('تم الاعتماد النهائي إلكترونيًا', 5.0, 62.0, 36.0, 1.8, { size: 8.5 });
       addText(data.requestId || data.reqId, 67.0, 65.1, 27.0, 1.8, { size: 8.5, align: 'right' });
 
+      // توقيع المدير
+      const sigImg = document.createElement('img');
+      sigImg.src = 'https://raw.githubusercontent.com/elbasha1977/Staff-Permissions/main/signature.png';
+      sigImg.crossOrigin = 'anonymous';
+      sigImg.style.cssText = 'position:absolute;left:62%;top:63.5%;width:22%;height:5%;object-fit:contain;';
+      layer.appendChild(sigImg);
+      await new Promise(r => { sigImg.onload = r; sigImg.onerror = r; setTimeout(r, 4000); });
+
       document.body.appendChild(stage);
+      await new Promise(r => setTimeout(r, 1500));
+
       await html2pdf().set({
-        margin: 0, filename: `نموذج_إذن_${String(data.requestId || data.reqId || 'request').replace(/[^\w-]/g, '_')}.pdf`,
+        margin: 0,
+        filename: `نموذج_إذن_${String(data.requestId || data.reqId || 'request').replace(/[^\w-]/g, '_')}.pdf`,
         image: { type: 'jpeg', quality: 0.98 },
         html2canvas: { scale: 2, useCORS: true, allowTaint: false, backgroundColor: '#ffffff', logging: false, scrollX: 0, scrollY: 0 },
         jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
         pagebreak: { mode: ['avoid-all'] }
       }).from(stage).save();
+
+      stage.remove();
     } catch (e) {
-      console.error('Official template PDF error:', e);
-      alert('تعذر تعبئة نموذج Model.pdf الأصلي. تأكد من أن Model.pdf موجود في المجلد الرئيسي لمستودع School-Permissions وأن المستودع متاح للعامة.\n' + (e.message || 'خطأ غير معروف'));
-    } finally { if (stage) stage.remove(); }
+      console.error('PDF export error:', e);
+      alert('تعذر تعبئة نموذج PDF الأصلي: ' + (e.message || 'خطأ غير معروف') + '\nتأكد أن Model.pdf موجود في مستودع GitHub وأنه متاح للعامة.');
+    }
+  }
+
+  async function downloadOfficialPermissionWord() {
+    const data = currentTrackedData;
+    if (!data) { alert('لا توجد بيانات طلب جاهزة للتصدير.'); return; }
+    if (String(data.status || '') !== 'principal_approved') {
+      alert('لا يمكن تنزيل نموذج الإذن الرسمي إلا بعد الاعتماد النهائي من مدير المدرسة.');
+      return;
+    }
+
+    const fmtDate = v => {
+      const s = String(v || '');
+      const m = s.match(/^(\d{4})-(\d{2})-(\d{2})/);
+      return m ? `${m[3]}/${m[2]}/${m[1]}` : (s || '—');
+    };
+    const fmtTime = value => {
+      if (!value) return '—';
+      const s = String(value).trim();
+      const m = s.match(/^(\d{1,2}):(\d{2})/);
+      if (m) return `${String(m[1]).padStart(2, '0')}:${m[2]}`;
+      const d = new Date(s);
+      if (!isNaN(d.getTime())) return d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false });
+      return s;
+    };
+
+    const type = String(data.permissionType || data.type || '').trim();
+    const markType = (re) => re.test(type) ? '✓' : '☐';
+
+    const adminMode = String(data.coverageType || '') === 'إداري' || String(data.subject || '') === 'كادر إداري';
+    const noCoverage = /لا توجد (حصص|أعمال إدارية)|لا يحتاج إلى تغطية|لا تحتاج إلى تغطية/.test(String(data.coverage || ''));
+    let rows = [];
+    if (!adminMode && data.coverageDetails) {
+      try {
+        const arr = typeof data.coverageDetails === 'string' ? JSON.parse(data.coverageDetails) : data.coverageDetails;
+        if (Array.isArray(arr)) rows = arr;
+      } catch (_) {}
+    }
+    if (adminMode && !noCoverage) {
+      rows = [{ period: '—', class: 'إداري', operatingTeacher: data.name, task: data.adminCoverage || data.coverage, substituteTeacher: data.adminSubstitute }];
+    }
+
+    let coverageRowsHtml = '';
+    if (noCoverage) {
+      coverageRowsHtml = `<tr><td colspan="7" style="border:1px solid #555;padding:6px;text-align:center;">${adminMode ? 'لا توجد أعمال إدارية تتطلب التغطية' : 'لا توجد حصص لدى المعلم'}</td></tr>`;
+    } else if (rows.length === 0) {
+      coverageRowsHtml = '<tr><td colspan="7" style="border:1px solid #555;padding:6px;text-align:center;">لا توجد بيانات تغطية مسجلة</td></tr>';
+    } else {
+      coverageRowsHtml = rows.slice(0, 8).map(c => `
+        <tr>
+          <td style="border:1px solid #555;padding:4px;text-align:center;">${escapeHtml(c.period || '')}</td>
+          <td style="border:1px solid #555;padding:4px;text-align:center;">${escapeHtml(c.class || c.grade || [c.day, c.date].filter(Boolean).join(' '))}</td>
+          <td style="border:1px solid #555;padding:4px;text-align:center;">${escapeHtml(c.operatingTeacher || c.teacher || data.name || '')}</td>
+          <td style="border:1px solid #555;padding:4px;text-align:center;">${c.period ? 'تم التوقيع إلكترونيًا' : ''}</td>
+          <td style="border:1px solid #555;padding:4px;text-align:center;">${c.period ? 'تم التوقيع إلكترونيًا' : ''}</td>
+          <td style="border:1px solid #555;padding:4px;text-align:center;">${escapeHtml(c.task || c.duty || c.subject || '')}</td>
+          <td style="border:1px solid #555;padding:4px;text-align:center;">${escapeHtml(c.substituteTeacher || c.substitute || '')}</td>
+        </tr>
+      `).join('');
+    }
+
+    const htmlContent = `<!DOCTYPE html>
+<html dir="rtl" lang="ar" xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word">
+<head>
+<meta charset="UTF-8">
+<title>نموذج إذن</title>
+<style>
+  @page { size: A4 portrait; margin: 10mm; }
+  body { font-family: 'Cairo', Tahoma, Arial, sans-serif; direction: rtl; color: #111; font-size: 9.5pt; line-height: 1.3; margin: 0; padding: 0; }
+  table { border-collapse: collapse; width: 100%; }
+  th, td { border: 1px solid #555; padding: 3pt; text-align: center; }
+  th { background: #f3f3f3; }
+  .subject { border: 1.5px solid #333; padding: 5pt 8pt; text-align: center; font-weight: 800; font-size: 11pt; margin: 6pt 0; }
+  .signature { text-align: left; margin: 5pt 0; }
+  .signature img { height: 40pt; max-width: 140pt; }
+  .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2pt solid #8a1538; padding-bottom: 5pt; margin-bottom: 6pt; }
+  .header .ar { text-align: right; }
+  .header .en { text-align: left; direction: ltr; font-size: 8pt; }
+  .header img { height: 50pt; }
+  hr { border: 0; border-top: 1pt solid #777; margin: 4pt 0; }
+  .small { font-size: 8pt; color: #555; }
+  .footer { text-align: center; font-size: 7pt; color: #555; border-top: 1pt solid #ddd; padding-top: 3pt; direction: ltr; margin-top: 6pt; }
+</style>
+</head>
+<body>
+  <div class="header">
+    <div class="ar">
+      <div style="font-weight:800;color:#8a1538;">وزارة التربية والتعليم والتعليم العالي</div>
+      <div style="font-weight:700;">مدرسة أحمد بن راشد المريخي الابتدائية للبنين</div>
+      <div class="small">الرؤية: متعلم ريادي لتنمية مستدامة</div>
+    </div>
+    <img src="https://i.postimg.cc/tRm07wZF/MOTTO.png" alt="logo">
+    <div class="en">
+      <div>Ministry of Education &amp; Higher Education</div>
+      <div>Ahmed Bin Rashid Al-Muraikhi Primary School for Boys</div>
+    </div>
+  </div>
+
+  <div class="subject">
+    الموضوع: طلب إذن تأخر / خروج موظف &nbsp;|&nbsp; الرقم الوظيفي: ${escapeHtml(data.employeeId || data.empId || '—')}
+  </div>
+
+  <div>السيد الفاضل/ مدير المدرسة المحترم،</div>
+  <div>تحية طيبة وبعد،</div>
+  <div>أرجو من سيادتكم التكرم بالموافقة على طلبي طبقًا للبيانات أدناه:</div>
+
+  <table style="margin-top:6pt;">
+    <tr><th colspan="4">نوع الإذن (يرجى اختيار نوع الإذن بوضع علامة ✓)</th></tr>
+    <tr>
+      <td>${markType(/تأخر|صباح/)} تأخر صباحي</td>
+      <td>${markType(/عودة|خروج وعودة/)} إذن خروج وعودة أثناء الدوام</td>
+      <td>${markType(/مبكر/)} خروج مبكر</td>
+      <td>${markType(/أخرى|ورشة|مهمة|رسمي/)} أذونات أخرى</td>
+    </tr>
+  </table>
+
+  <p style="margin:4pt 0;"><b>سبب الخروج أو التأخر الصباحي:</b> ${escapeHtml(data.reason || '—')}</p>
+  <p style="margin:4pt 0;"><b>وقت الخروج:</b> ${escapeHtml(fmtTime(data.exitTime || data.exit))} &nbsp;&nbsp; <b>وقت الدخول (في حالة العودة أثناء الدوام):</b> ${escapeHtml(fmtTime(data.returnTime || data.return))}</p>
+  <p style="margin:4pt 0;"><b>تسجيل الإذن في نظام الحضور والانصراف:</b> <span style="font-weight:800;color:#8a1538;">✓ تم</span> &nbsp;&nbsp; ☐ لم يتم</p>
+  <hr>
+  <p style="margin:4pt 0;"><b>اسم مقدم الطلب:</b> ${escapeHtml(data.name || '—')} &nbsp;&nbsp; <b>الوظيفة:</b> ${escapeHtml(data.jobTitle || '—')}</p>
+  <p style="margin:4pt 0;"><b>تاريخ تقديم الطلب:</b> ${escapeHtml(fmtDate(data.date || data.createdAt))} &nbsp;&nbsp; <b>التوقيع:</b> تم التوقيع إلكترونيًا</p>
+  <hr>
+
+  <p style="font-weight:700;margin:4pt 0;">جدول تغطية الحصص (الاحتياط) — على أن تتم الحصة بشكل اعتيادي وفق التحضير المعتمد:</p>
+  <table>
+    <thead>
+      <tr>
+        <th style="width:8%;">الحصة</th>
+        <th style="width:13%;">الصف</th>
+        <th style="width:15%;">المدرس المشغل</th>
+        <th style="width:14%;">توقيع المعلم المشغل</th>
+        <th style="width:12%;">توقيع المنسق</th>
+        <th style="width:20%;">المهام المكلف بها</th>
+        <th style="width:18%;">القائم بالأعمال</th>
+      </tr>
+    </thead>
+    <tbody>
+      ${coverageRowsHtml}
+    </tbody>
+  </table>
+
+  <table style="margin-top:6pt;">
+    <tr>
+      <td style="text-align:right; width:50%; border:none; padding:4pt;">
+        <b>تعليق المسؤول المباشر:</b> تمت الموافقة إلكترونيًا<br>
+        <b>الاعتماد:</b> تم التوقيع إلكترونيًا
+      </td>
+      <td style="text-align:right; width:50%; border:none; padding:4pt;">
+        <b>تعليق النائب الإداري / الأكاديمي:</b> تمت الموافقة إلكترونيًا<br>
+        <b>الاعتماد:</b> تم التوقيع إلكترونيًا
+      </td>
+    </tr>
+  </table>
+
+  <div class="signature">
+    <div style="font-weight:800;margin-bottom:3pt;">اعتماد مدير المدرسة</div>
+    <img src="https://raw.githubusercontent.com/elbasha1977/Staff-Permissions/main/signature.png" alt="توقيع المدير">
+    <div style="font-weight:700;margin-top:2pt;">مدير المدرسة</div>
+  </div>
+
+  <hr>
+  <p style="font-weight:700;margin:4pt 0;">تنبيهات مهمة:</p>
+  <p style="margin:2pt 0;">• ضرورة تسجيل الإذن ورفع المرفقات على النظام بعد أخذ الموافقات اللازمة تجنبًا للمساءلة.</p>
+  <p style="margin:2pt 0;direction:ltr;text-align:left;">https://tms.edu.gov.qa/login</p>
+  <p style="margin:2pt 0;"><b>رقم الطلب:</b> ${escapeHtml(data.requestId || data.reqId || '—')}</p>
+
+  <div class="footer">Tel: (+974) 40123255 - 40123252 - Fax: 40123257 - Doha, Qatar</div>
+</body>
+</html>`;
+
+    const blob = new Blob(['\ufeff', htmlContent], { type: 'application/msword;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    const safeId = String(data.requestId || data.reqId || 'request').replace(/[^\w-]/g, '_');
+    a.href = url;
+    a.download = `نموذج_إذن_${safeId}.doc`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 15000);
   }
 
   function escapeHtml(v) {
