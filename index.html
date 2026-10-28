@@ -7,6 +7,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <style>
     :root { --primary: #8a1538; --primary-light: #a61b45; --gold: #d4af37; --bg: #0f172a; --card-bg: rgba(255, 255, 255, 0.98); }
     * { box-sizing: border-box; font-family: 'Cairo', Tahoma, sans-serif; }
@@ -145,7 +146,17 @@
     .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; z-index: 10000; }
     .modal-box { background: #fff; padding: 25px; border-radius: 15px; width: 100%; max-width: 400px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); text-align: center; }
     .modal-box h3 { margin-top: 0; color: var(--primary); }
+    .pdf-choice-actions { display:grid;grid-template-columns:1fr;gap:10px;margin-top:16px; }
+    .pdf-choice-actions .btn { margin:0; }
     .modal-box input { text-align: center; font-size: 1.2rem; letter-spacing: 2px; }
+
+    /* تنسيق جدول البدلاء الجميل */
+    .coverage-table { width: 100%; border-collapse: separate; border-spacing: 0; margin: 15px 0; font-size: 0.9rem; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+    .coverage-table th { background: linear-gradient(135deg, #8a1538, #a61b45); color: white; padding: 12px 10px; font-weight: 700; text-align: center; border-bottom: 2px solid #d4af37; }
+    .coverage-table td { padding: 10px; text-align: center; border-bottom: 1px solid #e2e8f0; color: #334155; }
+    .coverage-table tr:nth-child(even) td { background-color: #f8fafc; }
+    .coverage-table tr:hover td { background-color: #fff1f2; transition: background 0.2s; }
+    .coverage-table td:first-child { font-weight: 700; color: #8a1538; }
   </style>
 </head>
 <body>
@@ -648,7 +659,10 @@
     ['trackScreen','formScreen','approvalScreen','adminDashboard','employeeFormScreen','leaveLoginCard','leaveFormCard','leaveLandingCard','loginCard'].forEach(id => { const el = document.getElementById(id); if (el) el.classList.add('hidden'); });
     const portal = document.getElementById('employeePortal');
     if (portal) { portal.classList.remove('hidden'); portal.style.display = 'none'; }
-    document.getElementById('homeScreen').style.display = 'block';
+    const home = document.getElementById('homeScreen');
+    if (home) home.style.display = 'block';
+    const secretButtons = document.getElementById('secretButtons');
+    if (secretButtons) { secretButtons.classList.remove('hidden'); secretButtons.style.display = 'flex'; }
     ['empIdInput','leaveEmployeeId','trackReqId','searchReqId','leaveLandingTrackId','leaveTrackReqId'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
     ['loginError','leaveLoginError','leaveLandingTrackStatus','leaveTrackStatus'].forEach(id => { const el = document.getElementById(id); if (el) el.textContent = ''; });
     currentLeaveRequesterId = ''; currentLeaveEmp = null; currentLeaveSummary = null; currentLeaveRequestId = ''; leaveWhatsAppRequest = null; leaveWhatsAppRows = []; currentTrackedData = null;
@@ -1014,7 +1028,35 @@
     });
   }
 
-  function getCoverageArray(data) { try { const raw = data && data.coverageDetails; const arr = typeof raw === 'string' ? JSON.parse(raw) : raw; return Array.isArray(arr) ? arr : []; } catch (_) { return []; } }
+  function getCoverageArray(data) {
+    try {
+      let raw = data && data.coverageDetails;
+      if (typeof raw === 'string') { try { raw = JSON.parse(raw); } catch (_) { raw = null; } }
+      // Some saved requests wrap the coverage list inside an object.
+      if (raw && !Array.isArray(raw) && typeof raw === 'object') {
+        raw = raw.coverageDetails || raw.coverageRows || raw.coverage || raw.rows || raw.leaveCoverage || [];
+        if (typeof raw === 'string') { try { raw = JSON.parse(raw); } catch (_) { raw = []; } }
+      }
+      if (Array.isArray(raw) && raw.length) return raw.map(r => ({
+        ...r,
+        period: r.period || r.lessonPeriod || r.classPeriod || r.lesson || '',
+        className: r.className || r.class || r.grade || r.classroom || '',
+        substituteTeacher: r.substituteTeacher || r.substitute || r.teacher || r.name || '',
+        subject: r.subject || r.subjectName || '',
+        day: r.day || r.weekday || '',
+        date: r.date || r.coverageDate || '',
+        tasks: r.tasks || r.task || r.subject || r.subjectName || ''
+      }));
+      // Legacy records sometimes have only a readable coverage string.
+      const text = String((data && data.coverage) || '').trim();
+      if (text) return text.split(/\r?\n/).map(line => {
+        const row = {};
+        line.split('|').forEach(part => { const i = part.indexOf(':'); if (i > -1) row[part.slice(0, i).trim()] = part.slice(i + 1).trim(); });
+        return { period: row['الحصة'] || '', className: row['الصف'] || '', subject: row['المادة'] || '', day: row['اليوم'] || '', date: row['التاريخ'] || '', substituteTeacher: row['البديل'] || '' };
+      }).filter(r => r.period || r.className || r.substituteTeacher);
+      return [];
+    } catch (_) { return []; }
+  }
 
   function sendLeaveSubstituteWhatsApp(index) {
     if (!currentLeaveRequesterId || !leaveWhatsAppRequest) { return alert('غير مصرح لك بإرسال رسائل البدلاء. هذه الخدمة متاحة فقط لمقدم طلب الإجازة.'); } const requestOwnerId = String(leaveWhatsAppRequest.employeeId || leaveWhatsAppRequest.empId || ''); if (!requestOwnerId || String(currentLeaveRequesterId) !== requestOwnerId) { return alert('غير مصرح لك بإرسال رسائل البدلاء. هذه الخدمة متاحة فقط لمقدم طلب الإجازة.'); } if (String(leaveWhatsAppRequest.permissionType || '') !== 'طلب إجازة') { return alert('هذا الطلب ليس طلب إجازة.'); } const row = leaveWhatsAppRows[index]; const request = leaveWhatsAppRequest; if (!row || !request) return alert('تعذر العثور على بيانات طلب الإجازة.');
@@ -1024,9 +1066,35 @@
   }
 
   function renderCoverageTableHtml(rows, emptyText = 'لا توجد بيانات تغطية مسجلة.', isRequester = false) {
-    const safeRows = Array.isArray(rows) ? rows : []; const th = 'border:1px solid #d7dce2;padding:9px 8px;background:#f1f3f6;color:#8a1538;font-weight:700;white-space:nowrap;'; const td = 'border:1px solid #d7dce2;padding:8px;text-align:center;';
-    if (!safeRows.length) return `<div style="padding:10px;background:#fff;border:1px solid #e0e0e0;border-radius:8px;color:#666;">${escapeHtml(emptyText)}</div>`; const showWaButton = isRequester && currentLeaveRequesterId && leaveWhatsAppRequest && String(currentLeaveRequesterId) === String(leaveWhatsAppRequest.employeeId || leaveWhatsAppRequest.empId || '') && String(leaveWhatsAppRequest.permissionType || '') === 'طلب إجازة';
-    return `<table style="width:100%;border-collapse:collapse;background:#fff;font-size:.9rem;border:1px solid #d7dce2;"><thead><tr><th style="${th}">اسم المعلم البديل</th><th style="${th}">اليوم</th><th style="${th}">التاريخ</th><th style="${th}">الصف</th><th style="${th}">الحصة</th>${showWaButton ? `<th style="${th}">واتساب</th>` : ''}</tr></thead><tbody>${safeRows.map((c, i) => `<tr style="background:${i % 2 ? '#f8fafc' : '#fff'}"><td style="${td};text-align:right;font-weight:600;">${escapeHtml(c.substituteTeacher || c.substitute || '—')}</td><td style="${td}">${escapeHtml(c.day || '—')}</td><td style="${td}" dir="ltr">${escapeHtml(c.date || '—')}</td><td style="${td};font-weight:700;">${escapeHtml(c.className || c.class || c.grade || 'لم يحدد')}</td><td style="${td}">${escapeHtml(c.period || '—')}</td>${showWaButton ? `<td style="${td}"><button type="button" onclick="sendLeaveSubstituteWhatsApp(${i})" style="border:0;background:#25D366;color:#fff;border-radius:7px;padding:7px 11px;cursor:pointer;font-size:16px;">☎️ واتساب</button></td>` : ''}</tr>`).join('')}</tbody></table>`;
+    const safeRows = Array.isArray(rows) ? rows : []; 
+    if (!safeRows.length) return `<div style="padding:10px;background:#fff;border:1px solid #e0e0e0;border-radius:8px;color:#666;text-align:center;">${escapeHtml(emptyText)}</div>`; 
+    
+    const showWaButton = isRequester && currentLeaveRequesterId && leaveWhatsAppRequest && String(currentLeaveRequesterId) === String(leaveWhatsAppRequest.employeeId || leaveWhatsAppRequest.empId || '') && String(leaveWhatsAppRequest.permissionType || '') === 'طلب إجازة';
+    
+    return `<table class="coverage-table">
+      <thead>
+        <tr>
+          <th>اسم المعلم البديل</th>
+          <th>اليوم</th>
+          <th>التاريخ</th>
+          <th>الصف</th>
+          <th>الحصة</th>
+          ${showWaButton ? `<th>إجراء</th>` : ''}
+        </tr>
+      </thead>
+      <tbody>
+        ${safeRows.map((c, i) => `
+          <tr>
+            <td>${escapeHtml(c.substituteTeacher || c.substitute || '—')}</td>
+            <td>${escapeHtml(c.day || '—')}</td>
+            <td dir="ltr">${escapeHtml(c.date || '—')}</td>
+            <td>${escapeHtml(c.className || c.class || c.grade || 'لم يحدد')}</td>
+            <td>${escapeHtml(c.period || '—')}</td>
+            ${showWaButton ? `<td><button type="button" onclick="sendLeaveSubstituteWhatsApp(${i})" style="border:0;background:#25D366;color:#fff;border-radius:7px;padding:7px 11px;cursor:pointer;font-size:14px; font-weight:bold;">☎️ واتساب</button></td>` : ''}
+          </tr>
+        `).join('')}
+      </tbody>
+    </table>`;
   }
 
   function setPdfCoverageTable(data) {
@@ -1077,7 +1145,30 @@
 
   function sendAutoWhatsApp(phone, reqId, nextRole, currentRoleName, data, status) {
     data = data || {}; let msg; if (String(data.permissionType || '') === 'طلب إجازة') { const ld = parseLeaveData(data); msg = `السلام عليكم،\nإلى/ ${nextRole} المحترم،\nتم اعتماد طلب الإجازة وإحالته إليكم للمراجعة.\n• رقم الطلب: ${reqId}\n• مقدم الطلب: ${data.name || 'غير متاح'}\n• الرقم الوظيفي: ${data.employeeId || 'غير متاح'}\n• الوظيفة: ${data.jobTitle || 'غير متاح'}\n• نوع الإجازة: ${ld.leaveType || 'غير محدد'}\n• من يوم ${ld.startDay || dateDayArabic(ld.startDate)} الموافق ${ld.startDate || '—'} إلى يوم ${ld.endDay || dateDayArabic(ld.endDate)} الموافق ${ld.endDate || '—'}\n• المدة: ${ld.days || '—'} يومًا\n• السبب: ${ld.reason || data.reason || '—'}\n\nحالة الطلب: ${status}\nشاكرين تعاونكم.`; } else { let coverageText = data.coverage || data.adminCoverage || 'لا توجد تفاصيل.'; msg = `السلام عليكم،\nإلى/ ${nextRole} المحترم،\nتم اعتماد طلب الاستئذان وإحالته إليكم.\n• رقم الطلب: ${reqId}\n• مقدم الطلب: ${data.name || 'غير متاح'}\n• الرقم الوظيفي: ${data.employeeId || 'غير متاح'}\n• نوع الإذن: ${data.permissionType || 'غير متاح'}\n• التاريخ: ${data.date || 'غير متاح'}\n• وقت الخروج: ${data.exitTime || 'غير محدد'}\n• وقت العودة: ${data.returnTime || 'غير محدد'}\n• تفاصيل التغطية:\n${coverageText}\n\nحالة الطلب: ${status}\nشاكرين تعاونكم.`; }
-    const url = /Android|iPhone/i.test(navigator.userAgent) ? `whatsapp://send?phone=${phone}&text=${encodeURIComponent(msg)}` : `https://web.whatsapp.com/send?phone=${phone}&text=${encodeURIComponent(msg)}`; window.open(url, '_blank');
+    const cleanPhone = String(phone || '').replace(/\D/g, '');
+    const url = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(msg)}`;
+    let opened = null;
+    try { opened = window.open(url, '_blank'); } catch (_) {}
+    // Mobile browsers may block a new tab after an asynchronous approval request.
+    // Always leave a visible, user-triggered fallback when the browser blocks it.
+    if (!opened) {
+      const msgBox = document.getElementById('approveMsg');
+      if (msgBox) {
+        let fallback = document.getElementById('approvalWhatsAppFallback');
+        if (!fallback) {
+          fallback = document.createElement('button');
+          fallback.id = 'approvalWhatsAppFallback';
+          fallback.type = 'button';
+          fallback.className = 'btn btn-wa';
+          fallback.style.cssText = 'display:block;width:100%;margin-top:10px;font-weight:800;';
+          fallback.textContent = '📲 إرسال رسالة للمسؤول على واتساب';
+          msgBox.insertAdjacentElement('afterend', fallback);
+        }
+        fallback.onclick = () => { const w = window.open(url, '_blank'); if (!w) window.location.href = url; };
+        fallback.classList.remove('hidden');
+      }
+    }
+    return url;
   }
 
   async function switchAdminTab(tab) {
@@ -1193,44 +1284,173 @@
     if (!data) return alert('لا بيانات.');
     if (String(data.status) !== 'principal_approved') return alert('يجب الاعتماد النهائي أولاً.');
     
-    let htmlContent = `<!DOCTYPE html>
-<html dir="rtl" lang="ar" xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word">
-<head><meta charset="UTF-8"><title>نموذج إذن</title>
-<style>
-@page { size: A4 portrait; margin: 5mm; }
-body { font-family: 'Cairo', Tahoma, Arial, sans-serif; direction: rtl; color: #111; font-size: 8.5pt; line-height: 1.15; margin: 0; padding: 0; }
-table { border-collapse: collapse; width: 100%; }
-th, td { border: 1px solid #555; padding: 2pt; text-align: center; }
-th { background: #f3f3f3; }
-.subject { border: 1px solid #333; padding: 3pt 6pt; text-align: center; font-weight: 800; font-size: 10pt; margin: 4pt 0; background: #fafafa; }
-.signature { text-align: left; margin: 4pt 0; }
-.signature img { height: 30pt; max-width: 120pt; }
-.header-table { width:100%; border-collapse:collapse; border-bottom:2pt solid #8a1538; margin-bottom:6pt; }
-.header-table td { border: none; padding: 0; vertical-align: middle; }
-.header-ar { text-align: right; }
-.header-en { text-align: left; direction: ltr; font-size: 7pt; }
-hr { border: 0; border-top: 1pt solid #777; margin: 3pt 0; }
-.small { font-size: 7pt; color: #555; }
-.footer { text-align: center; font-size: 6pt; color: #555; border-top: 1pt solid #ddd; padding-top: 2pt; direction: ltr; margin-top: 4pt; }
-.date-cell { mso-number-format:'\\@'; direction: ltr; unicode-bidi: embed; }
-.time-cell { font-weight:bold; }
-</style></head>
-<body>${buildOfficialHtml(data, true)}</body></html>`;
-    
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(htmlContent, 'text/html');
-    const logos = doc.querySelectorAll('img.single-logo');
-    if (logos.length > 1) {
-      for (let i = 1; i < logos.length; i++) logos[i].remove();
+    if (typeof JSZip === 'undefined') return alert('تعذر تحميل مكتبة إنشاء Word. تأكد من اتصال الإنترنت ثم أعد المحاولة.');
+
+    try {
+        // 1. جلب قالب Model.docx من جيت هاب
+        const templateUrl = 'https://raw.githubusercontent.com/Elbasha1977/School-Permissions/main/Model.docx';
+        const response = await fetch(templateUrl);
+        if (!response.ok) throw new Error('تعذر تحميل قالب Model.docx من GitHub');
+
+        const bytes = await response.arrayBuffer();
+        const zip = await JSZip.loadAsync(bytes);
+        const xmlFile = zip.file('word/document.xml');
+        if (!xmlFile) throw new Error('قالب Word لا يحتوي على document.xml');
+        
+        const xml = await xmlFile.async('string');
+        const parsed = new DOMParser().parseFromString(xml, 'application/xml');
+        if (parsed.getElementsByTagName('parsererror').length) throw new Error('تعذر قراءة قالب Word.');
+
+        // 2. استخراج بيانات الطلب
+        const coverageRows = getCoverageArray(data);
+        
+        // 3. تجهيز قيم العناصر النائبة الـ 27
+        const values = {
+            '{{EMPLOYEE_ID}}': data.employeeId || data.empId || '',
+            '{{REASON}}': data.reason || '',
+            '{{EXIT_TIME}}': fmtTime(data.exitTime || data.exit),
+            '{{TIME_BACK}}': fmtTime(data.returnTime || data.return),
+            '{{EMPLOYEE_JOB}}': data.jobTitle || '',
+            '{{EMPLOYEE_NAME}}': data.name || '',
+            '{{REQUEST_DATE}}': fmtDate(data.date || new Date()),
+        };
+
+        // تعبئة بيانات التغطية للصفوف (حتى 15 صفاً)
+        for (let i = 1; i <= 15; i++) {
+            const row = coverageRows[i - 1] || {};
+            values[`{{COVERAGE_${i}_PERIOD}}`] = row.period || row.lessonPeriod || row.classPeriod || '';
+            values[`{{COVERAGE_${i}_CLASS}}`] = row.className || row.class || row.grade || row.classroom || '';
+            values[`{{COVERAGE_${i}_TEACHER}}`] = row.substituteTeacher || row.substitute || row.teacher || row.name || '';
+            values[`{{TASKS_${i}}}`] = row.tasks || row.task || row.subject || row.subjectName || ''; 
+            values[`{{SUBSTITUTE_${i}}}`] = row.substituteTeacher || row.substitute || row.teacher || row.name || ''; 
+        }
+
+        // 4. استبدال العناصر النائبة داخل الـ XML
+        const ns = 'http://schemas.openxmlformats.org/wordprocessingml/2006/main';
+        const paragraphs = Array.from(parsed.getElementsByTagNameNS(ns, 'p'));
+        paragraphs.forEach(p => replaceDocxTokensInParagraph(p, values, null));
+        // Mark the selected permission type in the official Word template.
+        const selectedType = String(data.permissionType || data.type || '').trim();
+        const typeAliases = {
+          'تأخر صباحي': ['تأخر صباحي', 'تأخر صباحى'],
+          'إذن خروج وعودة': ['إذن خروج وعودة أثناء الدوام', 'إذن خروج وعودة', 'خروج وعودة'],
+          'خروج مبكر': ['خروج مبكر'],
+          'ورشة تعليمية': ['ورشة تعليمية'],
+          'مهمة رسمية': ['مهمة رسمية']
+        };
+        const aliases = typeAliases[selectedType] || [selectedType];
+        for (const p of paragraphs) {
+          const visible = (p.textContent || '').replace(/\s+/g, ' ').trim();
+          if (!visible || !aliases.some(a => a && visible.includes(a))) continue;
+          if (visible.includes('✓') || visible.includes('✔')) continue;
+          const run = parsed.createElementNS(ns, 'w:r');
+          const rPr = parsed.createElementNS(ns, 'w:rPr');
+          const color = parsed.createElementNS(ns, 'w:color'); color.setAttributeNS(ns, 'w:val', 'FF0000');
+          const bold = parsed.createElementNS(ns, 'w:b'); rPr.appendChild(color); rPr.appendChild(bold); run.appendChild(rPr);
+          const t = parsed.createElementNS(ns, 'w:t'); t.textContent = ' ✓'; run.appendChild(t); p.appendChild(run);
+        }
+
+        // 5. إعادة ضغط الملف وتحميله
+        zip.file('word/document.xml', new XMLSerializer().serializeToString(parsed));
+        const blob = await zip.generateAsync({ type: 'blob', mimeType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
+        
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `نموذج_إذن_${data.requestId || 'req'}.docx`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 30000);
+
+        showPdfChoice('permission', data);
+    } catch (e) {
+        console.error('Word export error:', e);
+        alert('تعذر إنشاء ملف Word: ' + (e.message || 'خطأ غير معروف'));
     }
-    
-    htmlContent = '<!DOCTYPE html>\n' + doc.documentElement.outerHTML;
-    const blob = new Blob(['\ufeff', htmlContent], { type: 'application/msword;charset=utf-8' });
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = `نموذج_إذن_${String(data.requestId || 'req').replace(/[^\w-]/g, '_')}.doc`;
-    document.body.appendChild(a); a.click(); a.remove();
-    setTimeout(() => URL.revokeObjectURL(a.href), 15000);
+  }
+
+  function showPdfChoice(type, data) {
+    const old = document.getElementById('pdfChoiceOverlay');
+    if (old) old.remove();
+    const overlay = document.createElement('div');
+    overlay.id = 'pdfChoiceOverlay';
+    overlay.className = 'modal-overlay';
+    overlay.innerHTML = `<div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="pdfChoiceTitle" dir="rtl">
+      <h3 id="pdfChoiceTitle">تحويل ملف Word إلى PDF يدويًا</h3>
+      <p>تم تنزيل ملف Word. لتحويله إلى PDF باستخدام Microsoft Word على الكمبيوتر، اتبع الخطوات التالية:</p>
+      <ol style="line-height:1.9;padding-right:24px;text-align:right">
+        <li>افتح مجلد <b>Downloads (التنزيلات)</b> وابحث عن ملف ${type === 'leave' ? 'الإجازة' : 'الإذن'} الذي تم تنزيله.</li>
+        <li>افتح الملف باستخدام برنامج <b>Microsoft Word</b>.</li>
+        <li>راجع بيانات الطلب وجدول التغطية والتنسيق.</li>
+        <li>من قائمة <b>File (ملف)</b> اختر <b>Save As (حفظ باسم)</b> أو <b>Export (تصدير)</b>.</li>
+        <li>اختر نوع الملف <b>PDF (*.pdf)</b>.</li>
+        <li>حدد مكان الحفظ ثم اضغط <b>Save (حفظ)</b> أو <b>Publish (نشر)</b>.</li>
+        <li>افتح ملف PDF الناتج للتأكد من ظهور جميع البيانات والجدول بصورة صحيحة.</li>
+      </ol>
+      <p><b>طريقة بديلة:</b> من Word اختر File → Print → Microsoft Print to PDF → Print، ثم حدد مكان حفظ الملف.</p>
+      <div class="pdf-choice-actions"><button type="button" class="btn btn-primary" id="closePdfGuideBtn">فهمت</button></div>
+    </div>`;
+    document.body.appendChild(overlay);
+    overlay.querySelector('#closePdfGuideBtn').onclick = () => overlay.remove();
+  }
+
+  function documentHtmlForPdf(type, data) {
+    if (type === 'leave') return leaveDocumentHtml(data);
+    return `<!DOCTYPE html><html dir="rtl" lang="ar"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>
+      @page{size:A4 portrait;margin:5mm}*{box-sizing:border-box}body{font-family:Cairo,Tahoma,Arial,sans-serif;direction:rtl;color:#111;font-size:8.5pt;line-height:1.15;margin:0;padding:0}table{border-collapse:collapse;width:100%}th,td{border:1px solid #555;padding:2pt;text-align:center}th{background:#f3f3f3}.subject{border:1px solid #333;padding:3pt 6pt;text-align:center;font-weight:800;font-size:10pt;margin:4pt 0;background:#fafafa}.signature{text-align:left;margin:4pt 0}.signature img{height:30pt;max-width:120pt}.header-table{width:100%;border-collapse:collapse;border-bottom:2pt solid #8a1538;margin-bottom:6pt}.header-table td{border:none;padding:0;vertical-align:middle}.header-ar{text-align:right}.header-en{text-align:left;direction:ltr;font-size:7pt}hr{border:0;border-top:1pt solid #777;margin:3pt 0}.small{font-size:7pt;color:#555}.footer{text-align:center;font-size:6pt;color:#555;border-top:1pt solid #ddd;padding-top:2pt;direction:ltr;margin-top:4pt}.date-cell{direction:ltr;unicode-bidi:embed}.time-cell{font-weight:bold}img{max-width:100%;object-fit:contain}
+      </style></head><body>${buildOfficialHtml(data, true)}</body></html>`;
+  }
+
+  function printDocumentPdf(type, data) {
+    const popup = window.open('', '_blank');
+    if (!popup) throw new Error('تم حظر النافذة المنبثقة');
+    const html = documentHtmlForPdf(type, data);
+    popup.document.open(); popup.document.write(html); popup.document.close();
+    // Let the document and its images render before opening the print dialog.
+    setTimeout(() => { try { if (!popup.closed) { popup.focus(); popup.print(); } } catch (_) {} }, 1000);
+  }
+
+  async function createDocumentPdf(type, data) {
+    if (typeof html2canvas === 'undefined') await loadHtml2CanvasLibrary();
+    if (!window.jspdf || !window.jspdf.jsPDF) throw new Error('مكتبة PDF غير متاحة؛ تحقق من اتصال الإنترنت.');
+    const html = documentHtmlForPdf(type, data);
+    const parsed = new DOMParser().parseFromString(html, 'text/html');
+    const stage = document.createElement('div');
+    stage.style.cssText = 'position:fixed;left:-12000px;top:0;width:794px;background:#fff;z-index:-1;';
+    const style = document.createElement('style');
+    style.textContent = 'html,body{width:794px!important;max-width:794px!important;background:#fff!important;margin:0!important;padding:0!important}body{padding:28px!important;box-sizing:border-box!important}*{box-sizing:border-box}';
+    parsed.head.appendChild(style);
+    const embeddedStyles = Array.from(parsed.head.querySelectorAll('style')).map(el => el.textContent || '').join('\n');
+    const pageStyle = document.createElement('style'); pageStyle.textContent = embeddedStyles; stage.appendChild(pageStyle);
+    const content = document.createElement('div');
+    content.innerHTML = parsed.body.innerHTML;
+    content.style.cssText = 'width:738px;background:#fff;color:#111;direction:rtl;';
+    stage.appendChild(content); document.body.appendChild(stage);
+    try {
+      if (document.fonts && document.fonts.ready) await document.fonts.ready;
+      await Promise.all(Array.from(content.querySelectorAll('img')).map(img => img.complete && img.naturalWidth > 0 ? Promise.resolve() : new Promise(resolve => { img.onload = resolve; img.onerror = resolve; setTimeout(resolve, 3500); })));
+      const canvas = await html2canvas(content, {scale:2, useCORS:true, allowTaint:false, backgroundColor:'#ffffff', logging:false, windowWidth:850, scrollX:0, scrollY:0});
+      const { jsPDF } = window.jspdf;
+      const pdf = new jsPDF({orientation:'portrait',unit:'mm',format:'a4',compress:true});
+      const pageW = 190, pageH = 277;
+      const pxPerMm = canvas.width / pageW;
+      const pageHeightPx = Math.floor(pageH * pxPerMm);
+      let y = 0, page = 0;
+      while (y < canvas.height) {
+        const sliceHeight = Math.min(pageHeightPx, canvas.height - y);
+        const slice = document.createElement('canvas'); slice.width = canvas.width; slice.height = sliceHeight;
+        const ctx = slice.getContext('2d'); ctx.fillStyle = '#fff'; ctx.fillRect(0,0,slice.width,slice.height); ctx.drawImage(canvas,0,y,canvas.width,sliceHeight,0,0,canvas.width,sliceHeight);
+        const image = slice.toDataURL('image/jpeg',0.94);
+        if (page > 0) pdf.addPage();
+        const h = sliceHeight / pxPerMm;
+        pdf.addImage(image,'JPEG',10,10,pageW,h,undefined,'FAST');
+        y += sliceHeight; page++;
+      }
+      const prefix = type === 'leave' ? 'إجازة' : 'إذن';
+      const reqId = String(data.requestId || data.reqId || 'معتمد').replace(/[^\w\-\u0600-\u06FF]/g,'_');
+      pdf.save(`${prefix}_${reqId}.pdf`);
+    } finally { stage.remove(); }
   }
 
   function buildOfficialHtml(data, isWord = false) {
@@ -1543,6 +1763,7 @@ hr { border: 0; border-top: 1pt solid #777; margin: 3pt 0; }
       zip.file('word/document.xml',new XMLSerializer().serializeToString(parsed));
       const blob=await zip.generateAsync({type:'blob',mimeType:'application/vnd.openxmlformats-officedocument.wordprocessingml.document'});
       const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=`طلب_إجازة_${data.requestId||'معتمد'}.docx`;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),30000);
+      showPdfChoice('leave', data);
     } catch(e){console.error('Word export error:',e);alert('تعذر إنشاء ملف Word: '+(e.message||'خطأ غير معروف'));}
     finally{if(btn){btn.disabled=false;btn.textContent=oldLabel;}}
   }
@@ -1644,7 +1865,7 @@ hr { border: 0; border-top: 1pt solid #777; margin: 3pt 0; }
     verifyLeaveEmp, submitLeaveRequest, sendLeaveWhatsApp,
     openLeaveTracking, trackLeaveRequestFromLanding, trackLeaveRequestFromLeaveScreen,
     updateLeaveDateSummary, addLeaveCoverageEntry, sendLeaveSubstituteWhatsApp,
-    downloadOfficialLeaveWord,
+    downloadOfficialLeaveWord, showPdfChoice, createDocumentPdf, printDocumentPdf,
     leaveDocumentHtml, ensureLeaveSummaryForDocument, copyLeaveRequestId, copyPermissionRequestId,
     showTrackingScreen, trackRequest, verifyEmp, calcDuration, submitRequest,
     sendWhatsApp, askPassword, revealAllPasswords, fetchRequest, approveRequest, sendAutoWhatsApp,
