@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html dir="rtl" lang="ar">
 <head>
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>نظام الاستئذان - مدرسة أحمد بن راشد المريخي</title>
@@ -257,6 +260,10 @@
           <label for="leaveSubject">المادة / الصفة لتحديد مسار الموافقة</label>
           <select id="leaveSubject" required>
             <option value="">-- اختر --</option>
+            <option>مدير المدرسة</option>
+            <option>مساعد مدير المدرسة للشؤون الأكاديمية</option>
+            <option>مساعد مدير المدرسة للشؤون الإدارية</option>
+            <option>كادر إداري</option>
             <option>اللغة العربية</option>
             <option>اللغة الإنجليزية</option>
             <option>الرياضيات</option>
@@ -266,10 +273,6 @@
             <option>التربية الرياضية</option>
             <option>تكنولوجيا المعلومات</option>
             <option>العلوم الشرعية</option>
-            <option>كادر إداري</option>
-            <option>مدير المدرسة</option>
-            <option>مساعد مدير المدرسة للشؤون الأكاديمية</option>
-            <option>مساعد مدير المدرسة للشؤون الإدارية</option>
             <option>أخرى</option>
           </select>
         </div>
@@ -405,8 +408,8 @@
         </div>
         <div class="form-group"><label>التاريخ</label><input type="date" id="permDate"></div>
         <div class="row">
-          <div class="form-group"><label>وقت الخروج (من 7:00 إلى 2:00)</label><input type="time" id="exitTime" min="07:00" max="14:00" onchange="calcDuration()"></div>
-          <div class="form-group"><label>وقت العودة (من 7:00 إلى 2:00)</label><input type="time" id="returnTime" min="07:00" max="14:00" onchange="calcDuration()"></div>
+          <div class="form-group"><label>وقت الخروج (من 7:00 صباحًا إلى 2:00 ظهرًا)</label><select id="exitTime" onchange="calcDuration()"><option value="">-- اختر الوقت --</option></select></div>
+          <div class="form-group"><label>وقت العودة (من 7:00 صباحًا إلى 2:00 ظهرًا)</label><select id="returnTime" onchange="calcDuration()"><option value="">-- اختر الوقت --</option></select></div>
         </div>
         <div class="form-group"><label>سبب الاستئذان</label><input type="text" id="reason" placeholder="اذكر السبب..."></div>
         <div class="form-group" id="classCoverageGroup">
@@ -487,7 +490,7 @@
         <p><strong>الموظف:</strong> <span id="detName"></span></p>
         <p><strong>المسمى:</strong> <span id="detJob"></span></p>
         <p><strong>السبب:</strong> <span id="detReason"></span></p>
-        <div style="margin:12px 0;"><strong style="display:block;margin-bottom:8px;color:#8a1538;">جدول تغطية الحصص:</strong><div id="detCoverage" style="overflow-x:auto;"></div></div>
+        <div id="detCoverageSection" style="display:none;margin:12px 0;"><strong id="detCoverageTitle" style="display:block;margin-bottom:8px;color:#8a1538;">جدول تغطية الحصص:</strong><div id="detCoverage" style="overflow-x:auto;"></div></div>
         <p><strong>الحالة:</strong> <span id="detStatus" class="balance-badge"></span></p>
         <div id="detSubstituteApprovals" style="white-space:pre-wrap;margin:10px 0;padding:10px;background:#fff;border:1px solid #ddd;border-radius:8px;"></div>
         <div id="substituteConsentBox" class="hidden" style="margin:10px 0;padding:12px;background:#fff8e8;border:1px solid #e6c56a;border-radius:8px;"><label style="display:flex;gap:8px;align-items:center;"><input type="checkbox" id="substituteConfirmCheck" onchange="toggleSubstituteApproveButton()"><span>أؤكد أنا <strong id="substituteConfirmName"></strong> موافقتي على <span id="substituteConfirmType">تغطية الحصة/الحصص</span> الموضحة أعلاه.</span></label></div>
@@ -602,7 +605,7 @@
   <footer id="siteFooter">Designed By Ahmed Bin Rashid School Version 1.112027</footer>
 
   <script>
-  const API_URL = 'https://script.google.com/macros/s/AKfycbwXItD-7Skb6lpWrXBb95WcJLB5Jyt2OsxNg3Aukqmr2qecQC4Of5NITRG1OeV2uMLH/exec';
+  const API_URL = 'https://script.google.com/macros/s/AKfycbzbufnKQuNFgbXAQh2339rfJ2xtkHZ6ZgwpGuWQFI2XmRBkPVtbYUyuIUKf_qPVgRz8/exec';
   const VP_PHONE = "97433337801";
   const PRINCIPAL_PHONE = "97450711122";
   const SUBJECTS = ["مدير المدرسة", "مساعد مدير المدرسة للشؤون الأكاديمية", "مساعد مدير المدرسة للشؤون الإدارية", "اللغة العربية", "اللغة الإنجليزية", "الرياضيات", "العلوم", "العلوم الاجتماعية", "الفنون البصرية", "التربية الرياضية", "تكنولوجيا المعلومات", "العلوم الشرعية"];
@@ -655,6 +658,7 @@
     if (currentSubstituteSession) { try { const fd = new URLSearchParams(); fd.set('action', 'substituteLogout'); fd.set('substituteSession', currentSubstituteSession); fetch(API_URL, { method: 'POST', body: fd }).catch(() => {}); } catch (_) {} }
     if (currentRequesterSession) { try { const fd = new URLSearchParams(); fd.set('action', 'requesterLogout'); fd.set('requesterSession', currentRequesterSession); fetch(API_URL, { method: 'POST', body: fd }).catch(() => {}); } catch (_) {} }
     currentSessionToken = ''; currentSubstituteSession = ''; currentRequesterSession = '';
+    const staleApprovalWa = document.getElementById('approvalWhatsAppFallback'); if (staleApprovalWa) { staleApprovalWa.hidden = true; staleApprovalWa.classList.add('hidden'); staleApprovalWa.onclick = null; }
     try { sessionStorage.removeItem('sp_session_token'); } catch (_) {}
     ['trackScreen','formScreen','approvalScreen','adminDashboard','employeeFormScreen','leaveLoginCard','leaveFormCard','leaveLandingCard','loginCard'].forEach(id => { const el = document.getElementById(id); if (el) el.classList.add('hidden'); });
     const portal = document.getElementById('employeePortal');
@@ -721,7 +725,7 @@
       document.getElementById('leaveEmployeeInfo').innerHTML=`<p>مرحبًا، <strong>${escapeHtml(currentLeaveEmp.name)}</strong></p><p>الوظيفة: ${escapeHtml(currentLeaveEmp.jobTitle||'')}</p><p>الرقم الوظيفي: ${escapeHtml(currentLeaveEmp.employeeId||'')}</p>`;
       const counts=currentLeaveSummary.counts||{}; document.getElementById('leaveBalanceSummary').innerHTML=`<div style="font-weight:900;color:#17623f;margin-bottom:7px;">ملخص الإجازات المعتمدة</div><div>رصيد الإجازات العارضة السنوي: <b>${currentLeaveSummary.casualRemaining} يومًا</b> من أصل 10 أيام.</div><div>المستهلك من الإجازات العارضة هذا العام: <b>${currentLeaveSummary.casualUsed} يومًا</b>.</div><div style="margin-top:8px;font-weight:700;">عدد الإجازات الأخرى المعتمدة: ${currentLeaveSummary.otherApprovedCount||0}</div><div style="font-size:13px;margin-top:4px;">${Object.keys(counts).filter(k=>k!=='عارضة').map(k=>`${escapeHtml(k)}: ${counts[k]}`).join(' | ')||'لا توجد إجازات أخرى معتمدة مسجلة.'}</div>`;
       document.getElementById('leaveSignature').textContent='تم التوقيع إلكترونيًا — تاريخ تقديم الطلب: '+new Date().toLocaleDateString('en-CA'); document.getElementById('leaveLoginCard').classList.add('hidden'); document.getElementById('leaveFormCard').classList.remove('hidden');
-      const admins = ALL_EMPLOYEES.filter(e => !isTeacherOrCoordinator(e) && String(e.employeeId) !== String(currentLeaveEmp.employeeId)).map(e => `<option value="${escapeHtml(e.name || '')}" data-emp-id="${escapeHtml(e.employeeId || '')}" data-phone="${escapeHtml(e.phone || '')}">${escapeHtml(e.name)} — ${escapeHtml(e.jobTitle || '')}</option>`).join('');
+      const admins = ALL_EMPLOYEES.filter(e => String(e.employeeId) !== String(currentLeaveEmp.employeeId)).map(e => `<option value="${escapeHtml(e.name || '')}" data-emp-id="${escapeHtml(e.employeeId || '')}" data-phone="${escapeHtml(e.phone || '')}">${escapeHtml(e.name)} — ${escapeHtml(e.jobTitle || '')}</option>`).join('');
       document.getElementById('leaveAdminSubstituteSelect').innerHTML = '<option value="">-- اختر الموظف الإداري البديل --</option>' + admins;
     } catch(e) { err.textContent='تعذر تحميل بيانات الموظف والإجازات: '+(e.message||'خطأ اتصال'); }
   }
@@ -769,10 +773,17 @@
   }
 
   function addLeaveCoverageEntry() {
-    const container = document.getElementById('leaveCoverageEntries'); if (!container) return; const teachers = ALL_EMPLOYEES.filter(e => isTeacherOrCoordinator(e)).map(e => { const name = escapeHtml(e.name || ''); const empId = escapeHtml(e.employeeId || ''); const phone = escapeHtml(e.phone || ''); return `<option value="${name}" data-emp-id="${empId}" data-phone="${phone}">${name}</option>`; }).join(''); const days = DAYS.map(d => `<option value="${escapeHtml(d)}">${escapeHtml(d)}</option>`).join(''); const periods = PERIODS.map(p => `<option value="الحصة ${escapeHtml(p)}">الحصة ${escapeHtml(p)}</option>`).join(''); const classes = [...Array.from({length: 7}, (_, i) => `الخامس ${i + 1}`), ...Array.from({length: 7}, (_, i) => `السادس ${i + 1}`)].map(c => `<option value="${c}">${c}</option>`).join(''); const subjects = SUBJECTS.map(s => `<option value="${escapeHtml(s)}">${escapeHtml(s)}</option>`).join('');
+    const container = document.getElementById('leaveCoverageEntries'); if (!container) return;
+    const days = DAYS.map(d => `<option value="${escapeHtml(d)}">${escapeHtml(d)}</option>`).join('');
+    const periods = PERIODS.map(p => `<option value="الحصة ${escapeHtml(p)}">الحصة ${escapeHtml(p)}</option>`).join('');
+    const classes = [...Array.from({length: 7}, (_, i) => `الخامس ${i + 1}`), ...Array.from({length: 7}, (_, i) => `السادس ${i + 1}`)].map(c => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('');
+    const subjects = [...SUBJECTS.filter(s => !['مدير المدرسة','مساعد مدير المدرسة للشؤون الأكاديمية','مساعد مدير المدرسة للشؤون الإدارية'].includes(s)), 'كادر إداري'].map(s => `<option value="${escapeHtml(s)}">${escapeHtml(s)}</option>`).join('');
     const div = document.createElement('div'); div.className = 'coverage-entry'; div.style.cssText = 'border:1px solid #dbe4ec;padding:12px;border-radius:8px;margin:10px 0;';
-    div.innerHTML = `<div class="form-group"><label>المعلم البديل</label><select class="cov-teacher" required><option value="">-- اختر المعلم --</option>${teachers}</select></div><div class="form-group"><label>الصف / الشعبة</label><select class="cov-class" required><option value="">-- اختر الصف --</option>${classes}</select></div><div class="form-group"><label>المادة</label><select class="cov-subject" required>${subjects}</select></div><div class="row"><div class="form-group"><label>اليوم</label><select class="cov-day" required>${days}</select></div><div class="form-group"><label>تاريخ الحصة</label><input type="date" class="cov-date" required></div><div class="form-group"><label>الحصة</label><select class="cov-period" required>${periods}</select></div></div><button type="button" class="btn btn-danger" onclick="this.closest('.coverage-entry').remove()">حذف الحصة</button>`;
+    div.innerHTML = `<div class="form-group"><label>المادة</label><select class="cov-subject" required onchange="refreshCoverageTeacherOptions(this.closest('.coverage-entry'), this.value)">${subjects}</select></div><div class="form-group"><label>المعلم البديل</label><select class="cov-teacher" required><option value="">-- اختر المادة أولًا --</option></select></div><div class="form-group"><label>الصف / الشعبة</label><select class="cov-class" required><option value="">-- اختر الصف --</option>${classes}</select></div><div class="row"><div class="form-group"><label>اليوم</label><select class="cov-day" required>${days}</select></div><div class="form-group"><label>تاريخ الحصة</label><input type="date" class="cov-date" required></div><div class="form-group"><label>الحصة</label><select class="cov-period" required>${periods}</select></div></div><button type="button" class="btn btn-danger" onclick="this.closest('.coverage-entry').remove()">حذف الحصة</button>`;
     container.appendChild(div);
+    const mainSubject = document.getElementById('leaveSubject')?.value || '';
+    if (mainSubject && subjects.includes(`value="${mainSubject}"`)) div.querySelector('.cov-subject').value = mainSubject;
+    refreshCoverageTeacherOptions(div, div.querySelector('.cov-subject').value || mainSubject);
   }
 
   function openLeaveTracking() { const reqId=currentLeaveRequestId || document.getElementById('leaveRequestId')?.textContent || ''; const input=document.getElementById('leaveTrackReqId'); if(input) input.value=String(reqId).trim(); const panel=document.getElementById('leaveTrackingPanel'); if(panel) panel.scrollIntoView({behavior:'smooth',block:'center'}); if(reqId) trackLeaveRequestFromLeaveScreen(); }
@@ -949,16 +960,67 @@
   }
 
   function populateAdminSubstitutes() {
-    const select = document.getElementById('adminSubstituteSelect'); if (!select) return; const currentValue = select.value; const options = ALL_EMPLOYEES.filter(e => String(e.employeeId || e.empId || '') !== String(currentEmp?.employeeId || currentEmp?.empId || '') && !isTeacherOrCoordinator(e)).map(e => `<option value="${escapeHtml(e.name || '')}" data-emp-id="${escapeHtml(e.employeeId || e.empId || '')}" data-phone="${escapeHtml(e.phone || '')}">${escapeHtml(e.name || '')} — ${escapeHtml(e.jobTitle || '')}</option>`).join(''); select.innerHTML = '<option value="">-- اختر الموظف الإداري البديل --</option>' + options; if ([...select.options].some(o => o.value === currentValue)) select.value = currentValue; toggleAdminSubstituteMsgBtn();
+    const select = document.getElementById('adminSubstituteSelect'); if (!select) return; const currentValue = select.value; const options = ALL_EMPLOYEES.filter(e => String(e.employeeId || e.empId || '') !== String(currentEmp?.employeeId || currentEmp?.empId || '')).map(e => `<option value="${escapeHtml(e.name || '')}" data-emp-id="${escapeHtml(e.employeeId || e.empId || '')}" data-phone="${escapeHtml(e.phone || '')}">${escapeHtml(e.name || '')} — ${escapeHtml(e.jobTitle || '')}</option>`).join(''); select.innerHTML = '<option value="">-- اختر الموظف الإداري البديل --</option>' + options; if ([...select.options].some(o => o.value === currentValue)) select.value = currentValue; toggleAdminSubstituteMsgBtn();
   }
 
-  document.addEventListener('change', event => { if (event.target && (event.target.id === 'subjectSelect' || event.target.id === 'noCoverageNeeded')) updateCoverageMode(); });
+  document.addEventListener('change', event => { if (event.target && (event.target.id === 'subjectSelect' || event.target.id === 'noCoverageNeeded')) { updateCoverageMode(); if (event.target.id === 'subjectSelect') document.querySelectorAll('#coverageEntries .coverage-entry').forEach(entry => { const rowSubject = entry.querySelector('.cov-subject')?.value; refreshCoverageTeacherOptions(entry, rowSubject || event.target.value); }); } if (event.target && event.target.id === 'leaveSubject') { document.querySelectorAll('#leaveCoverageEntries .coverage-entry').forEach(entry => { const rowSubject = entry.querySelector('.cov-subject')?.value; refreshCoverageTeacherOptions(entry, rowSubject || event.target.value); }); } });
+
+  function subjectMatchesEmployee(emp, subject) {
+    const wanted = normalizeArabic_(subject || '');
+    if (!wanted || wanted === 'اخري' || wanted === 'اخرى') return isTeacherOrCoordinator(emp);
+    if (wanted === 'كادر اداري' || wanted.includes('مدير المدرسه') || wanted.includes('مساعد مدير')) return true;
+    const combined = normalizeArabic_([emp.jobTitle, emp.department, emp.subject, emp.specialty, emp.specialization].filter(Boolean).join(' '));
+    const aliases = {
+      'اللغة العربية': ['عربي', 'اللغه العربيه'],
+      'اللغة الإنجليزية': ['انجليزي', 'انجليزيه', 'english'],
+      'الرياضيات': ['رياضيات', 'math'],
+      'العلوم': ['علوم', 'science'],
+      'العلوم الاجتماعية': ['اجتماعيه', 'اجتماعيات', 'دراسات اجتماعيه'],
+      'الفنون البصرية': ['فنون', 'رسم', 'بصريه'],
+      'التربية الرياضية': ['رياضيه', 'رياضه', 'بدنيه', 'تربيه بدنيه'],
+      'تكنولوجيا المعلومات': ['تكنولوجيا', 'حاسوب', 'حوسبه', 'كمبيوتر', 'it'],
+      'العلوم الشرعية': ['شرعيه', 'اسلاميه', 'تربيه اسلاميه']
+    };
+    const keys = aliases[subject] || [wanted];
+    return isTeacherOrCoordinator(emp) && keys.some(k => combined.includes(normalizeArabic_(k)));
+  }
+
+  function eligibleSubstitutes(subject, includeRequester = false) {
+    const requesterId = String(currentEmp?.employeeId || currentEmp?.empId || currentLeaveEmp?.employeeId || '');
+    return (ALL_EMPLOYEES || []).filter(e => {
+      if (!includeRequester && requesterId && String(e.employeeId || e.empId || '') === requesterId) return false;
+      if (normalizeArabic_(subject) === 'كادر اداري') return true;
+      return subjectMatchesEmployee(e, subject);
+    });
+  }
+
+  function refreshCoverageTeacherOptions(entry, subject) {
+    if (!entry) return;
+    const select = entry.querySelector('.cov-teacher');
+    if (!select) return;
+    const oldValue = select.value;
+    const list = eligibleSubstitutes(subject);
+    select.innerHTML = '<option value="">-- اختر البديل المناسب --</option>' + list.map(e =>
+      `<option value="${escapeHtml(e.name || '')}" data-emp-id="${escapeHtml(e.employeeId || e.empId || '')}" data-phone="${escapeHtml(e.phone || '')}">${escapeHtml(e.name || '')} — ${escapeHtml(e.jobTitle || '')}</option>`
+    ).join('');
+    if (oldValue && list.some(e => String(e.name) === oldValue)) select.value = oldValue;
+    const idx = entry.dataset.entryId || '';
+    const msgBtn = document.getElementById(`msgSubBtn_${idx}`);
+    if (msgBtn) msgBtn.classList.toggle('hidden', !select.value);
+  }
 
   function addCoverageEntry() {
-    coverageCounter++; const idx = coverageCounter; const wrap = document.getElementById('coverageEntries'); const teacherOptions = ALL_EMPLOYEES.filter(e => String(e.employeeId || e.empId || '') !== String(currentEmp?.employeeId || currentEmp?.empId || '') && isTeacherOrCoordinator(e)).map(e => `<option value="${escapeHtml(e.name)}" data-emp-id="${escapeHtml(e.employeeId || e.empId || '')}" data-phone="${escapeHtml(e.phone || '')}">${escapeHtml(e.name)} — ${escapeHtml(e.jobTitle || '')}</option>`).join(''); const subjectOptions = SUBJECTS.map(s => `<option value="${s}">${s}</option>`).join(''); const dayOptions = DAYS.map(d => `<option value="${d}">${d}</option>`).join(''); const periodOptions = PERIODS.map(p => `<option value="الحصة ${p}">الحصة ${p}</option>`).join('');
+    coverageCounter++; const idx = coverageCounter; const wrap = document.getElementById('coverageEntries');
+    const subjectOptions = [...SUBJECTS.filter(s => !['مدير المدرسة','مساعد مدير المدرسة للشؤون الأكاديمية','مساعد مدير المدرسة للشؤون الإدارية'].includes(s)), 'كادر إداري'].map(s => `<option value="${escapeHtml(s)}">${escapeHtml(s)}</option>`).join('');
+    const dayOptions = DAYS.map(d => `<option value="${escapeHtml(d)}">${escapeHtml(d)}</option>`).join('');
+    const periodOptions = PERIODS.map(p => `<option value="الحصة ${escapeHtml(p)}">الحصة ${escapeHtml(p)}</option>`).join('');
     const div = document.createElement('div'); div.className = 'coverage-entry'; div.dataset.entryId = idx;
-    div.innerHTML = `<h4>تغطية حصة #${idx} <button type="button" class="btn btn-danger btn-sm" style="float:left;" onclick="removeCoverageEntry(${idx})">حذف</button></h4><div class="row"><div class="form-group"><label>الصف / الشعبة</label><select class="cov-class" required><option value="">-- اختر الصف --</option>${Array.from({length:7},(_,i)=>`<option value="الخامس ${i+1}">الخامس ${i+1}</option>`).join("")}${Array.from({length:7},(_,i)=>`<option value="السادس ${i+1}">السادس ${i+1}</option>`).join("")}</select></div><div class="form-group"><label>المادة</label><select class="cov-subject">${subjectOptions}</select></div><div class="form-group"><label>اليوم</label><select class="cov-day">${dayOptions}</select></div></div><div class="row"><div class="form-group"><label>التاريخ</label><input type="date" class="cov-date"></div><div class="form-group"><label>الحصة</label><select class="cov-period">${periodOptions}</select></div></div><div class="form-group"><label>المعلم البديل</label><select class="cov-teacher" onchange="toggleSubstituteMsgBtn(${idx})"><option value="">-- اختر المعلم البديل --</option>${teacherOptions}</select></div><button type="button" class="btn btn-msg-substitute hidden" id="msgSubBtn_${idx}" onclick="sendSubstituteMsg(${idx})">📨 إرسال رسالة للمعلم البديل</button>`;
+    div.innerHTML = `<h4>تغطية حصة #${idx} <button type="button" class="btn btn-danger btn-sm" style="float:left;" onclick="removeCoverageEntry(${idx})">حذف</button></h4><div class="row"><div class="form-group"><label>الصف / الشعبة</label><select class="cov-class" required><option value="">-- اختر الصف --</option>${Array.from({length:7},(_,i)=>`<option value="الخامس ${i+1}">الخامس ${i+1}</option>`).join('')}${Array.from({length:7},(_,i)=>`<option value="السادس ${i+1}">السادس ${i+1}</option>`).join('')}</select></div><div class="form-group"><label>المادة</label><select class="cov-subject" onchange="refreshCoverageTeacherOptions(this.closest('.coverage-entry'), this.value)">${subjectOptions}</select></div><div class="form-group"><label>اليوم</label><select class="cov-day">${dayOptions}</select></div></div><div class="row"><div class="form-group"><label>التاريخ</label><input type="date" class="cov-date"></div><div class="form-group"><label>الحصة</label><select class="cov-period">${periodOptions}</select></div></div><div class="form-group"><label>المعلم البديل</label><select class="cov-teacher" onchange="toggleSubstituteMsgBtn(${idx})" required><option value="">-- اختر المادة أولًا --</option></select></div><button type="button" class="btn btn-msg-substitute hidden" id="msgSubBtn_${idx}" onclick="sendSubstituteMsg(${idx})">📨 إرسال رسالة للمعلم البديل</button>`;
     wrap.appendChild(div);
+    const mainSubject = document.getElementById('subjectSelect')?.value || '';
+    const subjectSelect = div.querySelector('.cov-subject');
+    if (mainSubject && subjectOptions.includes(`value="${mainSubject}"`)) subjectSelect.value = mainSubject;
+    refreshCoverageTeacherOptions(div, subjectSelect.value || mainSubject);
   }
 
   function removeCoverageEntry(id) { document.querySelector(`.coverage-entry[data-entry-id="${id}"]`)?.remove(); }
@@ -975,6 +1037,20 @@
     entries.forEach(entry => { const subject = entry.querySelector('.cov-subject').value; const day = entry.querySelector('.cov-day').value; const date = entry.querySelector('.cov-date').value; const period = entry.querySelector('.cov-period').value; const sel = entry.querySelector('.cov-teacher'); const teacher = sel.value; const teacherEmpId = sel.selectedOptions[0]?.dataset?.empId || ''; if (subject && day && period && teacher) { const className = entry.querySelector('.cov-class')?.value || ''; if (!className) { result.push({ _invalid: true }); return; } result.push({ className, subject, day, date, period, substituteTeacher: teacher, substituteEmpId: teacherEmpId }); } });
     return result;
   }
+
+
+  function populatePermissionTimeDropdowns() {
+    const options = ['<option value="">-- اختر الوقت --</option>'];
+    for (let minutes = 7 * 60; minutes <= 14 * 60; minutes += 15) {
+      const h = Math.floor(minutes / 60), m = minutes % 60;
+      const value = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+      const hour12 = h % 12 || 12;
+      const label = `${hour12}:${String(m).padStart(2, '0')} ${h < 12 ? 'صباحًا' : 'ظهرًا'}`;
+      options.push(`<option value="${value}">${label}</option>`);
+    }
+    ['exitTime', 'returnTime'].forEach(id => { const el = document.getElementById(id); if (el) el.innerHTML = options.join(''); });
+  }
+  populatePermissionTimeDropdowns();
 
   function calcDuration() {
     const exit = document.getElementById('exitTime').value; const ret = document.getElementById('returnTime').value; const type = document.getElementById('permType').value; if (type === 'ورشة تعليمية' || type === 'مهمة رسمية') return 0;
@@ -1009,12 +1085,45 @@
     const url = /Android|iPhone/i.test(navigator.userAgent) ? `whatsapp://send?phone=${recipientPhone}&text=${encodeURIComponent(msg)}` : `https://web.whatsapp.com/send?phone=${recipientPhone}&text=${encodeURIComponent(msg)}`; window.open(url, '_blank');
   }
 
+  function resetApprovalScreenForLogin() {
+    // Start every approval role with a clean search screen. Details must only
+    // become visible after a successful request lookup.
+    const details = document.getElementById('requestDetails');
+    if (details) details.classList.add('hidden');
+
+    document.getElementById('substituteConsentBox')?.classList.add('hidden');
+    const coverageSection = document.getElementById('detCoverageSection');
+    if (coverageSection) coverageSection.style.display = 'none';
+    const approvals = document.getElementById('detSubstituteApprovals');
+    if (approvals) { approvals.style.display = 'none'; approvals.textContent = ''; }
+    const notice = document.getElementById('substituteMsgNotice');
+    if (notice) notice.classList.add('hidden');
+
+    const reqInput = document.getElementById('searchReqId');
+    if (reqInput) { reqInput.value = ''; delete reqInput.dataset.currentId; }
+    const msg = document.getElementById('approveMsg');
+    if (msg) { msg.textContent = ''; msg.style.color = ''; }
+    const wa = document.getElementById('approvalWhatsAppFallback');
+    if (wa) { wa.hidden = true; wa.classList.add('hidden'); wa.onclick = null; }
+
+    // Clear the actual IDs used by the current approval details markup.
+    ['detName','detJob','detReason','detCoverage','detStatus','detSubstituteName'].forEach(id => {
+      const el = document.getElementById(id); if (el) el.textContent = '';
+    });
+    const consentCheck = document.getElementById('substituteConfirmCheck');
+    if (consentCheck) consentCheck.checked = false;
+    const approve = document.getElementById('approveActionBtn');
+    const reject = document.getElementById('rejectActionBtn');
+    if (approve) { approve.disabled = false; approve.title = ''; }
+    if (reject) reject.disabled = false;
+  }
+
   function askPassword(role) {
     openPasswordModal("أدخل كلمة المرور:", async (pass) => {
       if (!pass) return;
       try {
         const fd = new URLSearchParams(); fd.set('action', 'login'); fd.set('role', role); fd.set('password', pass); const res = await fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' }, body: fd.toString() }); const out = await res.json(); if (!out || !out.success) { alert(out && out.message ? out.message : 'كلمة المرور خاطئة!'); return; }
-        currentSessionToken = String(out.sessionToken || ''); currentRole = String(out.role || role); try { sessionStorage.setItem('sp_session_token', currentSessionToken); } catch (_) {} currentLeaveRequesterId = ''; currentLeaveEmp = null; leaveWhatsAppRequest = null; leaveWhatsAppRows = []; currentSubstituteSession = ''; currentRequesterSession = '';
+        currentSessionToken = String(out.sessionToken || ''); currentRole = String(out.role || role); try { sessionStorage.setItem('sp_session_token', currentSessionToken); } catch (_) {} resetApprovalScreenForLogin(); currentLeaveRequesterId = ''; currentLeaveEmp = null; leaveWhatsAppRequest = null; leaveWhatsAppRows = []; currentSubstituteSession = ''; currentRequesterSession = '';
         document.getElementById('employeePortal').classList.add('hidden'); document.getElementById('secretButtons').classList.add('hidden'); document.getElementById('substituteLoginBox').classList.add('hidden'); document.getElementById('requesterSubstitutesBox').classList.add('hidden'); document.getElementById('searchBox').classList.remove('hidden');
         if (currentRole === 'admin') { document.getElementById('adminDashboard').classList.remove('hidden'); loadStats(); renderEmployeesList(); } else { document.getElementById('approvalScreen').classList.remove('hidden'); document.getElementById('approvalTitle').innerText = currentRole === 'coordinator' ? 'اعتماد المنسق' : currentRole === 'vp_admin' ? 'اعتماد النائب الإداري' : currentRole === 'vp' ? 'اعتماد النائب الأكاديمي' : 'الاعتماد النهائي (المدير)'; }
       } catch (e) { alert('تعذر الاتصال بالخادم للتحقق من كلمة المرور.'); }
@@ -1030,32 +1139,23 @@
 
   function getCoverageArray(data) {
     try {
-      let raw = data && data.coverageDetails;
-      if (typeof raw === 'string') { try { raw = JSON.parse(raw); } catch (_) { raw = null; } }
-      // Some saved requests wrap the coverage list inside an object.
-      if (raw && !Array.isArray(raw) && typeof raw === 'object') {
-        raw = raw.coverageDetails || raw.coverageRows || raw.coverage || raw.rows || raw.leaveCoverage || [];
-        if (typeof raw === 'string') { try { raw = JSON.parse(raw); } catch (_) { raw = []; } }
+      if (!data) return [];
+      let raw = data.coverageDetails;
+      if (typeof raw === 'string') raw = JSON.parse(raw || '{}');
+      if (Array.isArray(raw)) return raw;
+      if (raw && typeof raw === 'object') {
+        if (Array.isArray(raw.coverageArray)) return raw.coverageArray;
+        if (Array.isArray(raw.leaveCoverage)) return raw.leaveCoverage;
+        if (Array.isArray(raw.coverageDetails)) return raw.coverageDetails;
+        if (Array.isArray(raw.rows)) return raw.rows;
       }
-      if (Array.isArray(raw) && raw.length) return raw.map(r => ({
-        ...r,
-        period: r.period || r.lessonPeriod || r.classPeriod || r.lesson || '',
-        className: r.className || r.class || r.grade || r.classroom || '',
-        substituteTeacher: r.substituteTeacher || r.substitute || r.teacher || r.name || '',
-        subject: r.subject || r.subjectName || '',
-        day: r.day || r.weekday || '',
-        date: r.date || r.coverageDate || '',
-        tasks: r.tasks || r.task || r.subject || r.subjectName || ''
-      }));
-      // Legacy records sometimes have only a readable coverage string.
-      const text = String((data && data.coverage) || '').trim();
-      if (text) return text.split(/\r?\n/).map(line => {
-        const row = {};
-        line.split('|').forEach(part => { const i = part.indexOf(':'); if (i > -1) row[part.slice(0, i).trim()] = part.slice(i + 1).trim(); });
-        return { period: row['الحصة'] || '', className: row['الصف'] || '', subject: row['المادة'] || '', day: row['اليوم'] || '', date: row['التاريخ'] || '', substituteTeacher: row['البديل'] || '' };
-      }).filter(r => r.period || r.className || r.substituteTeacher);
+      // Some older requests store the coverage directly in the legacy field.
+      if (Array.isArray(data.coverage)) return data.coverage;
+      if (typeof data.coverage === 'string' && data.coverage.trim()) {
+        try { const parsed = JSON.parse(data.coverage); if (Array.isArray(parsed)) return parsed; } catch (_) {}
+      }
       return [];
-    } catch (_) { return []; }
+    } catch (e) { console.warn('تعذر قراءة بيانات جدول التغطية:', e); return []; }
   }
 
   function sendLeaveSubstituteWhatsApp(index) {
@@ -1103,27 +1203,75 @@
   }
 
   async function fetchRequest() {
-    const reqId = document.getElementById('searchReqId').value.trim(); if(!reqId) return; const fd = new URLSearchParams(); fd.append('action', 'getRequest'); fd.append('reqId', reqId); const res = await fetch(API_URL, { method: 'POST', body: fd, headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }); const result = await res.json();
-    if(result.success) {
+    const reqInput = document.getElementById('searchReqId');
+    const reqId = reqInput.value.trim();
+    if (!reqId) {
+      document.getElementById('requestDetails')?.classList.add('hidden');
+      return;
+    }
+
+    // Hide prior details only when the user searches for a different request.
+    if (reqInput.dataset.currentId !== reqId) document.getElementById('requestDetails')?.classList.add('hidden');
+    const msgBeforeSearch = document.getElementById('approveMsg');
+    if (msgBeforeSearch && reqInput.dataset.currentId !== reqId) { msgBeforeSearch.textContent = 'جارٍ البحث عن الطلب...'; msgBeforeSearch.style.color = '#555'; }
+
+    try {
+      const fd = new URLSearchParams();
+      fd.append('action', 'getRequest');
+      fd.append('reqId', reqId);
+      const res = await fetch(API_URL, { method: 'POST', body: fd, headers: { 'Content-Type': 'application/x-www-form-urlencoded' } });
+      const result = await res.json();
+      if(result.success) {
+        if (msgBeforeSearch) { msgBeforeSearch.textContent = ''; msgBeforeSearch.style.color = ''; }
       document.getElementById('requestDetails').classList.remove('hidden'); document.getElementById('detName').innerText = result.data.name; document.getElementById('detJob').innerText = result.data.jobTitle; document.getElementById('detReason').innerText = result.data.reason; let allCoverageRows = getCoverageArray(result.data);
       if (String(result.data.permissionType || '') === 'طلب إجازة') { try { const leaveDetails = typeof result.data.coverageDetails === 'string' ? JSON.parse(result.data.coverageDetails || '{}') : (result.data.coverageDetails || {}); if (leaveDetails.requestKind === 'leave' && Array.isArray(leaveDetails.leaveCoverage)) { const approvals = Array.isArray(result.data.substituteApprovals) ? result.data.substituteApprovals : []; allCoverageRows = leaveDetails.leaveCoverage.map(row => { const approval = approvals.find(a => String(a.employeeId || '').replace(/\s/g, '') === String(row.substituteEmpId || '').replace(/\s/g, '')); return { ...row, substituteTeacher: row.substituteTeacher || row.teacher || '—', approvalStatus: approval ? approval.status : 'pending' }; }); } } catch (e) { console.error('تعذر قراءة تغطية الإجازة:', e); } }
       if (String(result.data.permissionType || '') === 'طلب إجازة') { const isOwner = currentLeaveRequesterId && String(currentLeaveRequesterId) === String(result.data.employeeId || result.data.empId || ''); if (isOwner) { leaveWhatsAppRequest = result.data; leaveWhatsAppRows = allCoverageRows; } else { leaveWhatsAppRequest = null; leaveWhatsAppRows = []; } } else { leaveWhatsAppRequest = null; leaveWhatsAppRows = []; }
-      const isOwnerRequester = currentLeaveRequesterId && String(currentLeaveRequesterId) === String(result.data.employeeId || result.data.empId || ''); document.getElementById('detCoverage').innerHTML = allCoverageRows.length ? renderCoverageTableHtml(allCoverageRows, 'لا توجد بيانات تغطية مسجلة.', isOwnerRequester) : `<div style="padding:10px;background:#fff;border:1px solid #e0e0e0;border-radius:8px;">${escapeHtml(result.data.coverage || 'لا يوجد')}</div>`; document.getElementById('detStatus').innerText = result.data.status; document.getElementById('searchReqId').dataset.currentId = reqId;
+      const isOwnerRequester = currentLeaveRequesterId && String(currentLeaveRequesterId) === String(result.data.employeeId || result.data.empId || '');
+      const coverageSection = document.getElementById('detCoverageSection');
+      const coverageTitle = document.getElementById('detCoverageTitle');
+      const isLeaveRequest = String(result.data.permissionType || '') === 'طلب إجازة';
+      const hasCoverage = allCoverageRows.length > 0 || !!(result.data.coverage || result.data.adminCoverage);
+      document.getElementById('detCoverage').innerHTML = allCoverageRows.length ? renderCoverageTableHtml(allCoverageRows, 'لا توجد بيانات تغطية مسجلة.', isOwnerRequester) : `<div style="padding:10px;background:#fff;border:1px solid #e0e0e0;border-radius:8px;">${escapeHtml(result.data.coverage || result.data.adminCoverage || 'لا يوجد')}</div>`;
+      if (coverageSection) coverageSection.style.display = (isLeaveRequest && hasCoverage) || currentRole === 'substitute' ? 'block' : 'none';
+      if (coverageTitle) coverageTitle.textContent = (String(result.data.coverageType || '') === 'إداري' || String(result.data.subject || '') === 'كادر إداري') ? 'تغطية الأعمال الإدارية:' : 'جدول تغطية الحصص:';
+      document.getElementById('detStatus').innerText = result.data.status; document.getElementById('searchReqId').dataset.currentId = reqId;
       const approvalBox = document.getElementById('detSubstituteApprovals'); let approvalList = result.data.substituteApprovals || []; if (typeof approvalList === 'string') { try { approvalList = JSON.parse(approvalList); } catch (_) { approvalList = []; } }
-      if (Array.isArray(approvalList) && approvalList.length) { approvalBox.style.display = 'block'; approvalBox.innerHTML = '<strong>موافقات البدلاء:</strong>\n' + approvalList.map(a => `${escapeHtml(a.name)} — ${a.status === 'approved' ? '✅ موافق' : a.status === 'rejected' ? '❌ مرفوض' : '⏳ بانتظار الموافقة'}`).join('\n'); } else { approvalBox.style.display = 'none'; approvalBox.textContent = ''; }
+      const hasSubstituteApprovals = Array.isArray(approvalList) && approvalList.length > 0;
+      if (hasSubstituteApprovals) { approvalBox.style.display = 'block'; approvalBox.innerHTML = '<strong>حالة موافقات البدلاء:</strong>\n' + approvalList.map(a => `${escapeHtml(a.name || a.substituteName || 'البديل')} — ${a.status === 'approved' ? '✅ موافق' : a.status === 'rejected' ? '❌ مرفوض' : '⏳ بانتظار الموافقة'}`).join('\n'); } else { approvalBox.style.display = 'none'; approvalBox.textContent = ''; }
       const actionApprove = document.getElementById('approveActionBtn'); const actionReject = document.getElementById('rejectActionBtn'); const substituteConsent = document.getElementById('substituteConsentBox');
-      if (currentRole !== 'substitute') { if (substituteConsent) substituteConsent.classList.add('hidden'); const incomplete = Array.isArray(approvalList) && approvalList.some(a => a.status !== 'approved'); if (actionApprove) { actionApprove.disabled = currentRole === 'coordinator' && incomplete; actionApprove.title = actionApprove.disabled ? 'لن يمكن اعتماد الطلب حتى يوافق جميع البدلاء.' : ''; } if (actionReject) actionReject.disabled = false; }
+      // إخفاء تأكيد البديل افتراضياً؛ يظهر فقط للبديل المسجل دخوله عند وجود موافقة معلقة.
+      if (substituteConsent) substituteConsent.classList.add('hidden');
+      if (currentRole !== 'substitute') { const incomplete = isLeaveRequest && hasSubstituteApprovals && approvalList.some(a => a.status !== 'approved'); if (actionApprove) { actionApprove.disabled = currentRole === 'coordinator' && incomplete; actionApprove.title = actionApprove.disabled ? 'لن يمكن اعتماد الطلب حتى يوافق جميع البدلاء.' : ''; } if (actionReject) actionReject.disabled = false; }
       if (currentRole === 'substitute') {
         if (!currentSubstituteSession) { document.getElementById('approveMsg').innerText = 'يرجى تسجيل الدخول كبديل أولاً.'; document.getElementById('approveMsg').style.color = '#dc3545'; document.getElementById('requestDetails').classList.add('hidden'); return; }
         const mine = Array.isArray(approvalList) ? approvalList.find(a => String(a.employeeId).replace(/\s/g,'') === String(currentSubstituteEmpId).replace(/\s/g,'')) : null; if (!mine) { document.getElementById('approveMsg').innerText = 'هذا الطلب غير مسند إليك كبديل. تحقق من رقم الطلب والرقم الوظيفي.'; document.getElementById('approveMsg').style.color = '#dc3545'; } else {
           let ownWork = []; try { const rawDetails = typeof result.data.coverageDetails === 'string' ? JSON.parse(result.data.coverageDetails || '{}') : (result.data.coverageDetails || {}); const leaveDetails = String(result.data.permissionType || '') === 'طلب إجازة' ? rawDetails : null; const allWork = Array.isArray(rawDetails) ? rawDetails : (leaveDetails && Array.isArray(leaveDetails.leaveCoverage) ? leaveDetails.leaveCoverage : []); ownWork = allWork.filter(x => String(x.substituteEmpId || x.employeeId || '').replace(/\s/g, '') === String(currentSubstituteEmpId || '').replace(/\s/g, '')); } catch (_) {}
+          if (coverageSection) coverageSection.style.display = 'block';
           const isAdminCoverage = String(result.data.coverageType || '') === 'إداري' || String(result.data.subject || '') === 'كادر إداري';
           if (isAdminCoverage) { document.getElementById('detCoverage').innerHTML = `<div style="padding:14px;background:#fef3c7;border:2px solid #f59e0b;border-radius:10px;"><div style="font-weight:900;color:#92400e;margin-bottom:10px;font-size:15px;">📋 تغطية الأعمال الإدارية</div><p style="margin:6px 0;"><b>مقدم الطلب:</b> ${escapeHtml(result.data.name || '')} — ${escapeHtml(result.data.jobTitle || '')}</p><p style="margin:6px 0;"><b>الأعمال المطلوب تغطيتها:</b></p><div style="padding:10px;background:#fff;border-radius:8px;border:1px solid #fcd34d;font-weight:600;">${escapeHtml(result.data.adminCoverage || result.data.coverage || 'غير محددة')}</div><p style="margin:10px 0 0;color:#92400e;font-weight:700;">👤 البديل الإداري: ${escapeHtml(result.data.adminSubstitute || '')}</p></div>`; const typeSpan = document.getElementById('substituteConfirmType'); if (typeSpan) typeSpan.textContent = 'تغطية الأعمال الإدارية'; } else if (ownWork.length) { document.getElementById('detCoverage').innerHTML = renderCoverageTableHtml(ownWork, 'لا توجد بيانات تغطية مسجلة.', false); const typeSpan = document.getElementById('substituteConfirmType'); if (typeSpan) typeSpan.textContent = 'تغطية الحصة/الحصص'; } else { document.getElementById('detCoverage').innerHTML = `<div style="padding:10px;background:#fff;border:1px solid #e0e0e0;border-radius:8px;">${escapeHtml(result.data.coverage || 'لا يوجد')}</div>`; }
           document.getElementById('substituteConsentBox').classList.toggle('hidden', mine.status !== 'pending'); document.getElementById('substituteConfirmName').innerText = mine.name; document.getElementById('substituteConfirmCheck').checked = false; document.getElementById('approveActionBtn').disabled = mine.status !== 'pending'; document.getElementById('rejectActionBtn').disabled = mine.status !== 'pending'; toggleSubstituteApproveButton(); document.getElementById('approveMsg').innerText = mine.status === 'approved' ? 'سبق تسجيل موافقتك.' : mine.status === 'rejected' ? 'سبق تسجيل رفضك.' : 'ضع علامة التأكيد ثم اضغط موافقة، أو اختر رفض.'; document.getElementById('approveMsg').style.color = mine.status === 'rejected' ? '#dc3545' : '#28a745';
         }
       }
       if (result.data.substituteMsgSent) { let subName = ''; try { const details = typeof result.data.coverageDetails === 'string' ? JSON.parse(result.data.coverageDetails) : result.data.coverageDetails; if (Array.isArray(details) && details.length > 0) subName = details[0].substituteTeacher; } catch(_) {} if (subName) { document.getElementById('substituteMsgNotice').classList.remove('hidden'); document.getElementById('detSubstituteName').innerText = subName; } else document.getElementById('substituteMsgNotice').classList.add('hidden'); } else document.getElementById('substituteMsgNotice').classList.add('hidden');
-    } else alert(result.message);
+      } else {
+        document.getElementById('requestDetails')?.classList.add('hidden');
+        if (msgBeforeSearch) {
+          msgBeforeSearch.textContent = result.message || 'لم يتم العثور على الطلب.';
+          msgBeforeSearch.style.color = '#dc3545';
+        } else {
+          alert(result.message || 'لم يتم العثور على الطلب.');
+        }
+      }
+    } catch (error) {
+      document.getElementById('requestDetails')?.classList.add('hidden');
+      if (msgBeforeSearch) {
+        msgBeforeSearch.textContent = 'تعذر البحث عن الطلب. تحقق من الاتصال وحاول مرة أخرى.';
+        msgBeforeSearch.style.color = '#dc3545';
+      } else {
+        alert('تعذر البحث عن الطلب. تحقق من الاتصال وحاول مرة أخرى.');
+      }
+      console.error('fetchRequest error:', error);
+    }
   }
 
   function toggleSubstituteApproveButton() {
@@ -1139,35 +1287,51 @@
     if (result && result.code === 'UNAUTHORIZED') { alert('انتهت الجلسة. أعد تسجيل الدخول.'); backToHome(); return; }
     if(result.success) {
       document.getElementById('approveMsg').innerText = currentRole === 'substitute' ? `✅ ${result.message || 'تم تسجيل قرار البديل'}` : `✅ تم تسجيل القرار: ${result.newStatus}`; document.getElementById('approveMsg').style.color = "#28a745";
-      if (decision === 'approved' && currentRole !== 'substitute') { if (requestData && requestData.substituteMsgSent) { let subName = ''; try { const details = typeof requestData.coverageDetails === 'string' ? JSON.parse(requestData.coverageDetails) : requestData.coverageDetails; if (Array.isArray(details) && details.length > 0) subName = details[0].substituteTeacher; } catch(_) {} alert(`✅ تم إرسال رسالة للاستاذ ${subName || ''} وهو موافق علي التغطية.`); } if ((currentRole === 'coordinator' || currentRole === 'vp' || currentRole === 'vp_admin') && decision === 'approved') { if (currentRole === 'coordinator') sendAutoWhatsApp(VP_PHONE, reqId, 'النائب الأكاديمي', 'المنسق', requestData, result.newStatus); else { const isAdmin = requestData && (String(requestData.coverageType) === 'إداري' || String(requestData.subject) === 'كادر إداري'); sendAutoWhatsApp(PRINCIPAL_PHONE, reqId, 'مدير المدرسة', isAdmin ? 'النائب الإداري' : 'النائب الأكاديمي', requestData, result.newStatus); } } }
+      if (decision === 'approved' && ['coordinator', 'vp', 'vp_admin', 'principal'].includes(currentRole)) {
+        const isAdminRequest = requestData && (String(requestData.coverageType) === 'إداري' || String(requestData.subject) === 'كادر إداري');
+        let recipientPhone = '', recipientRole = '';
+        if (currentRole === 'coordinator') {
+          if (isAdminRequest) { const adminVp = typeof findVpAdminEmployee === 'function' ? findVpAdminEmployee() : null; recipientPhone = adminVp && adminVp.phone ? adminVp.phone : VP_PHONE; recipientRole = 'النائب الإداري'; }
+          else { recipientPhone = VP_PHONE; recipientRole = 'النائب الأكاديمي'; }
+        } else if (currentRole === 'vp' || currentRole === 'vp_admin') {
+          recipientPhone = PRINCIPAL_PHONE; recipientRole = 'مدير المدرسة';
+        } else {
+          recipientPhone = requestData && requestData.phone ? requestData.phone : '';
+          recipientRole = 'مقدم الطلب';
+        }
+        sendAutoWhatsApp(recipientPhone, reqId, recipientRole, currentRole, requestData || {}, result.newStatus);
+      }
     } else alert(result.message || 'تعذر حفظ القرار.');
   }
 
   function sendAutoWhatsApp(phone, reqId, nextRole, currentRoleName, data, status) {
-    data = data || {}; let msg; if (String(data.permissionType || '') === 'طلب إجازة') { const ld = parseLeaveData(data); msg = `السلام عليكم،\nإلى/ ${nextRole} المحترم،\nتم اعتماد طلب الإجازة وإحالته إليكم للمراجعة.\n• رقم الطلب: ${reqId}\n• مقدم الطلب: ${data.name || 'غير متاح'}\n• الرقم الوظيفي: ${data.employeeId || 'غير متاح'}\n• الوظيفة: ${data.jobTitle || 'غير متاح'}\n• نوع الإجازة: ${ld.leaveType || 'غير محدد'}\n• من يوم ${ld.startDay || dateDayArabic(ld.startDate)} الموافق ${ld.startDate || '—'} إلى يوم ${ld.endDay || dateDayArabic(ld.endDate)} الموافق ${ld.endDate || '—'}\n• المدة: ${ld.days || '—'} يومًا\n• السبب: ${ld.reason || data.reason || '—'}\n\nحالة الطلب: ${status}\nشاكرين تعاونكم.`; } else { let coverageText = data.coverage || data.adminCoverage || 'لا توجد تفاصيل.'; msg = `السلام عليكم،\nإلى/ ${nextRole} المحترم،\nتم اعتماد طلب الاستئذان وإحالته إليكم.\n• رقم الطلب: ${reqId}\n• مقدم الطلب: ${data.name || 'غير متاح'}\n• الرقم الوظيفي: ${data.employeeId || 'غير متاح'}\n• نوع الإذن: ${data.permissionType || 'غير متاح'}\n• التاريخ: ${data.date || 'غير متاح'}\n• وقت الخروج: ${data.exitTime || 'غير محدد'}\n• وقت العودة: ${data.returnTime || 'غير محدد'}\n• تفاصيل التغطية:\n${coverageText}\n\nحالة الطلب: ${status}\nشاكرين تعاونكم.`; }
+    data = data || {};
     const cleanPhone = String(phone || '').replace(/\D/g, '');
-    const url = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(msg)}`;
-    let opened = null;
-    try { opened = window.open(url, '_blank'); } catch (_) {}
-    // Mobile browsers may block a new tab after an asynchronous approval request.
-    // Always leave a visible, user-triggered fallback when the browser blocks it.
-    if (!opened) {
-      const msgBox = document.getElementById('approveMsg');
-      if (msgBox) {
-        let fallback = document.getElementById('approvalWhatsAppFallback');
-        if (!fallback) {
-          fallback = document.createElement('button');
-          fallback.id = 'approvalWhatsAppFallback';
-          fallback.type = 'button';
-          fallback.className = 'btn btn-wa';
-          fallback.style.cssText = 'display:block;width:100%;margin-top:10px;font-weight:800;';
-          fallback.textContent = '📲 إرسال رسالة للمسؤول على واتساب';
-          msgBox.insertAdjacentElement('afterend', fallback);
-        }
-        fallback.onclick = () => { const w = window.open(url, '_blank'); if (!w) window.location.href = url; };
-        fallback.classList.remove('hidden');
-      }
+    let msg;
+    if (String(data.permissionType || '') === 'طلب إجازة') {
+      const ld = parseLeaveData(data);
+      msg = `السلام عليكم،\nإلى/ ${nextRole} المحترم،\nتم اعتماد طلب الإجازة وإحالته إليكم للمراجعة.\n• رقم الطلب: ${reqId}\n• مقدم الطلب: ${data.name || 'غير متاح'}\n• الرقم الوظيفي: ${data.employeeId || data.empId || 'غير متاح'}\n• الوظيفة: ${data.jobTitle || 'غير متاح'}\n• نوع الإجازة: ${ld.leaveType || 'غير محدد'}\n• من ${ld.startDate || '—'} إلى ${ld.endDate || '—'}\n• المدة: ${ld.days || '—'} يومًا\n• السبب: ${ld.reason || data.reason || '—'}\n\nحالة الطلب: ${status}\nشاكرين تعاونكم.`;
+    } else {
+      const coverageText = data.coverage || data.adminCoverage || 'يرجى مراجعة تفاصيل التغطية في النظام.';
+      msg = `السلام عليكم،\nإلى/ ${nextRole} المحترم،\nتم اعتماد الطلب وإحالته إليكم.\n• رقم الطلب: ${reqId}\n• مقدم الطلب: ${data.name || 'غير متاح'}\n• الرقم الوظيفي: ${data.employeeId || data.empId || 'غير متاح'}\n• نوع الإذن: ${data.permissionType || 'غير متاح'}\n• التاريخ: ${data.date || 'غير متاح'}\n• وقت الخروج: ${data.exitTime || 'غير محدد'}\n• وقت العودة: ${data.returnTime || 'غير محدد'}\n• تفاصيل التغطية: ${coverageText}\n\nحالة الطلب: ${status}\nشاكرين تعاونكم.`;
     }
+    const msgBox = document.getElementById('approveMsg');
+    if (!msgBox) return '';
+    let button = document.getElementById('approvalWhatsAppFallback');
+    if (!button) {
+      button = document.createElement('button');
+      button.id = 'approvalWhatsAppFallback';
+      button.type = 'button';
+      button.className = 'btn btn-wa';
+      button.style.cssText = 'display:block;width:100%;margin-top:10px;font-weight:800;';
+      msgBox.insertAdjacentElement('afterend', button);
+    }
+    button.textContent = cleanPhone ? `📲 إرسال إشعار الاعتماد إلى ${nextRole} عبر واتساب` : '⚠️ لا يوجد رقم هاتف للمسؤول التالي';
+    button.disabled = !cleanPhone;
+    button.hidden = false;
+    button.classList.remove('hidden');
+    const url = cleanPhone ? `https://wa.me/${cleanPhone}?text=${encodeURIComponent(msg)}` : '';
+    button.onclick = () => { if (url) { const w = window.open(url, '_blank'); if (!w) window.location.href = url; } };
     return url;
   }
 
@@ -1279,6 +1443,39 @@
   }
 
 
+  function addPermissionTypeCheckMark(parsed, selectedType) {
+    const ns = 'http://schemas.openxmlformats.org/wordprocessingml/2006/main';
+    const raw = String(selectedType || '').trim();
+    if (!raw) return;
+    const normalize = value => String(value || '').replace(/[\u0640\sـ]/g, '').replace(/[أإآ]/g, 'ا').replace(/ى/g, 'ي').trim();
+    const aliases = {
+      'تأخر صباحي': ['تأخر صباحي', 'تأخر صباحى'],
+      'إذن خروج وعودة': ['إذن خروج وعودة أثناء الدوام', 'إذن خروج وعودة', 'خروج وعودة'],
+      'إذن خروج وعودة أثناء الدوام': ['إذن خروج وعودة أثناء الدوام', 'إذن خروج وعودة', 'خروج وعودة'],
+      'خروج مبكر': ['خروج مبكر'],
+      'ورشة تعليمية': ['ورشة تعليمية'],
+      'مهمة رسمية': ['مهمة رسمية']
+    };
+    let candidates = aliases[raw] || [raw];
+    const normalizedCandidates = candidates.map(normalize).filter(Boolean);
+    const paragraphs = Array.from(parsed.getElementsByTagNameNS(ns, 'p'));
+    const match = paragraphs.find(p => {
+      const visible = normalize(Array.from(p.getElementsByTagNameNS(ns, 't')).map(t => t.textContent || '').join(''));
+      return visible && normalizedCandidates.some(a => visible === a || (visible.includes(a) && visible.length <= a.length + 8));
+    });
+    if (!match) return;
+    const existing = Array.from(match.getElementsByTagNameNS(ns, 't')).map(t => t.textContent || '').join('');
+    if (/[✓✔√]/.test(existing)) return;
+    const run = parsed.createElementNS(ns, 'w:r');
+    const rPr = parsed.createElementNS(ns, 'w:rPr');
+    const color = parsed.createElementNS(ns, 'w:color'); color.setAttributeNS(ns, 'w:val', 'FF0000');
+    const bold = parsed.createElementNS(ns, 'w:b');
+    const size = parsed.createElementNS(ns, 'w:sz'); size.setAttributeNS(ns, 'w:val', '28');
+    rPr.appendChild(color); rPr.appendChild(bold); rPr.appendChild(size); run.appendChild(rPr);
+    const text = parsed.createElementNS(ns, 'w:t'); text.setAttributeNS('http://www.w3.org/XML/1998/namespace', 'xml:space', 'preserve'); text.textContent = '  ✓'; run.appendChild(text);
+    match.appendChild(run);
+  }
+
   async function downloadOfficialPermissionWord() {
     const data = currentTrackedData;
     if (!data) return alert('لا بيانات.');
@@ -1318,37 +1515,29 @@
         // تعبئة بيانات التغطية للصفوف (حتى 15 صفاً)
         for (let i = 1; i <= 15; i++) {
             const row = coverageRows[i - 1] || {};
-            values[`{{COVERAGE_${i}_PERIOD}}`] = row.period || row.lessonPeriod || row.classPeriod || '';
-            values[`{{COVERAGE_${i}_CLASS}}`] = row.className || row.class || row.grade || row.classroom || '';
-            values[`{{COVERAGE_${i}_TEACHER}}`] = row.substituteTeacher || row.substitute || row.teacher || row.name || '';
-            values[`{{TASKS_${i}}}`] = row.tasks || row.task || row.subject || row.subjectName || ''; 
-            values[`{{SUBSTITUTE_${i}}}`] = row.substituteTeacher || row.substitute || row.teacher || row.name || ''; 
+            const subName = row.substituteTeacher || row.substitute || row.teacher || row.name || data.adminSubstitute || '';
+            const className = row.className || row.class || row.grade || row.classroom || '';
+            const period = row.period || row.lessonPeriod || row.classPeriod || row.lesson || '';
+            const subjectOrTask = row.tasks || row.task || row.subject || row.subjectName || row.operatingTeacher || '';
+            values[`{{COVERAGE_${i}_PERIOD}}`] = period;
+            values[`{{COVERAGE_${i}_CLASS}}`] = className;
+            values[`{{COVERAGE_${i}_TEACHER}}`] = subName;
+            values[`{{COVERAGE_${i}_DAY}}`] = row.day || '';
+            values[`{{COVERAGE_${i}_DATE}}`] = row.date || '';
+            values[`{{COVERAGE_${i}_SUBJECT}}`] = row.subject || row.subjectName || '';
+            values[`{{COVERAGE_${i}_TASK}}`] = subjectOrTask;
+            values[`{{TASKS_${i}}}`] = subjectOrTask;
+            values[`{{SUBSTITUTE_${i}}}`] = subName;
         }
 
         // 4. استبدال العناصر النائبة داخل الـ XML
         const ns = 'http://schemas.openxmlformats.org/wordprocessingml/2006/main';
         const paragraphs = Array.from(parsed.getElementsByTagNameNS(ns, 'p'));
-        paragraphs.forEach(p => replaceDocxTokensInParagraph(p, values, null));
-        // Mark the selected permission type in the official Word template.
-        const selectedType = String(data.permissionType || data.type || '').trim();
-        const typeAliases = {
-          'تأخر صباحي': ['تأخر صباحي', 'تأخر صباحى'],
-          'إذن خروج وعودة': ['إذن خروج وعودة أثناء الدوام', 'إذن خروج وعودة', 'خروج وعودة'],
-          'خروج مبكر': ['خروج مبكر'],
-          'ورشة تعليمية': ['ورشة تعليمية'],
-          'مهمة رسمية': ['مهمة رسمية']
-        };
-        const aliases = typeAliases[selectedType] || [selectedType];
-        for (const p of paragraphs) {
-          const visible = (p.textContent || '').replace(/\s+/g, ' ').trim();
-          if (!visible || !aliases.some(a => a && visible.includes(a))) continue;
-          if (visible.includes('✓') || visible.includes('✔')) continue;
-          const run = parsed.createElementNS(ns, 'w:r');
-          const rPr = parsed.createElementNS(ns, 'w:rPr');
-          const color = parsed.createElementNS(ns, 'w:color'); color.setAttributeNS(ns, 'w:val', 'FF0000');
-          const bold = parsed.createElementNS(ns, 'w:b'); rPr.appendChild(color); rPr.appendChild(bold); run.appendChild(rPr);
-          const t = parsed.createElementNS(ns, 'w:t'); t.textContent = ' ✓'; run.appendChild(t); p.appendChild(run);
-        }
+        
+        paragraphs.forEach(p => {
+            replaceDocxTokensInParagraph(p, values, null);
+        });
+        addPermissionTypeCheckMark(parsed, data.permissionType || data.type || '');
 
         // 5. إعادة ضغط الملف وتحميله
         zip.file('word/document.xml', new XMLSerializer().serializeToString(parsed));
@@ -1376,23 +1565,22 @@
     const overlay = document.createElement('div');
     overlay.id = 'pdfChoiceOverlay';
     overlay.className = 'modal-overlay';
-    overlay.innerHTML = `<div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="pdfChoiceTitle" dir="rtl">
-      <h3 id="pdfChoiceTitle">تحويل ملف Word إلى PDF يدويًا</h3>
-      <p>تم تنزيل ملف Word. لتحويله إلى PDF باستخدام Microsoft Word على الكمبيوتر، اتبع الخطوات التالية:</p>
+    overlay.innerHTML = `<div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="pdfChoiceTitle" style="max-width:560px;text-align:right;direction:rtl">
+      <h3 id="pdfChoiceTitle">تم تنزيل ملف Word بنجاح</h3>
+      <p>لتحويل الملف إلى PDF باستخدام برنامج Microsoft Word على الكمبيوتر، اتبع الخطوات التالية:</p>
       <ol style="line-height:1.9;padding-right:24px;text-align:right">
-        <li>افتح مجلد <b>Downloads (التنزيلات)</b> وابحث عن ملف ${type === 'leave' ? 'الإجازة' : 'الإذن'} الذي تم تنزيله.</li>
-        <li>افتح الملف باستخدام برنامج <b>Microsoft Word</b>.</li>
-        <li>راجع بيانات الطلب وجدول التغطية والتنسيق.</li>
+        <li>افتح مجلد <b>Downloads (التنزيلات)</b>.</li>
+        <li>افتح ملف Word الذي تم تنزيله باستخدام <b>Microsoft Word</b>.</li>
+        <li>راجع البيانات وجدول البدلاء والتوقيعات.</li>
         <li>من قائمة <b>File (ملف)</b> اختر <b>Save As (حفظ باسم)</b> أو <b>Export (تصدير)</b>.</li>
-        <li>اختر نوع الملف <b>PDF (*.pdf)</b>.</li>
-        <li>حدد مكان الحفظ ثم اضغط <b>Save (حفظ)</b> أو <b>Publish (نشر)</b>.</li>
-        <li>افتح ملف PDF الناتج للتأكد من ظهور جميع البيانات والجدول بصورة صحيحة.</li>
+        <li>اختر نوع الملف <b>PDF (*.pdf)</b> ثم اضغط <b>Save (حفظ)</b> أو <b>Publish (نشر)</b>.</li>
+        <li>افتح ملف PDF الناتج للتأكد من سلامة التنسيق.</li>
       </ol>
-      <p><b>طريقة بديلة:</b> من Word اختر File → Print → Microsoft Print to PDF → Print، ثم حدد مكان حفظ الملف.</p>
-      <div class="pdf-choice-actions"><button type="button" class="btn btn-primary" id="closePdfGuideBtn">فهمت</button></div>
+      <p><b>طريقة بديلة:</b> من Word اختر File ثم Print، وحدد <b>Microsoft Print to PDF</b>، ثم اضغط Print واحفظ الملف.</p>
+      <div class="pdf-choice-actions"><button type="button" class="btn btn-primary" id="closePdfInstructionsBtn">حسنًا، فهمت</button></div>
     </div>`;
     document.body.appendChild(overlay);
-    overlay.querySelector('#closePdfGuideBtn').onclick = () => overlay.remove();
+    overlay.querySelector('#closePdfInstructionsBtn').onclick = () => overlay.remove();
   }
 
   function documentHtmlForPdf(type, data) {
@@ -1459,8 +1647,11 @@
     let rows = [];
     if (!adminMode && data.coverageDetails) {
       try {
-        const arr = typeof data.coverageDetails === 'string' ? JSON.parse(data.coverageDetails) : data.coverageDetails;
-        if (Array.isArray(arr)) rows = arr;
+        const parsedCoverage = typeof data.coverageDetails === 'string' ? JSON.parse(data.coverageDetails || '{}') : data.coverageDetails;
+        if (Array.isArray(parsedCoverage)) rows = parsedCoverage;
+        else if (parsedCoverage && Array.isArray(parsedCoverage.coverageArray)) rows = parsedCoverage.coverageArray;
+        else if (parsedCoverage && Array.isArray(parsedCoverage.leaveCoverage)) rows = parsedCoverage.leaveCoverage;
+        else if (parsedCoverage && Array.isArray(parsedCoverage.rows)) rows = parsedCoverage.rows;
       } catch (_) { }
     }
     if (adminMode && !noCoverage) {
@@ -1829,6 +2020,18 @@
 
   document.getElementById('leaveType')?.addEventListener('change', updateLeaveCoverageVisibility);
   document.getElementById('leaveSubject')?.addEventListener('change', updateLeaveCoverageVisibility);
+
+
+  // Refresh the visible approval and substitute statuses so approvers see decisions
+  // made by substitutes without having to re-enter the request number.
+  setInterval(() => {
+    const details = document.getElementById('requestDetails');
+    const reqInput = document.getElementById('searchReqId');
+    if (!details || details.classList.contains('hidden') || !reqInput || !reqInput.value.trim()) return;
+    if (!['coordinator', 'vp', 'vp_admin', 'principal'].includes(String(currentRole || ''))) return;
+    if (document.visibilityState === 'hidden') return;
+    fetchRequest();
+  }, 15000);
 
   (async function restoreSession() {
     try {
