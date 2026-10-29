@@ -131,7 +131,9 @@
     .pdf-sig-img { max-width: 92%; max-height: 76px; object-fit: contain; position: absolute; bottom: 7px; left: 4%; }
     .pdf-footer { text-align: center; font-size: 0.75rem; color: #777; border-top: 1px solid #ddd; padding-top: 10px; margin-top: 30px; }
 
-    #siteFooter { position:relative; z-index:2; width:100%; text-align:center; margin-top:auto; padding:14px 8px 6px; color:#d1d5db; font-size:12px; letter-spacing:.25px; direction:ltr; }
+    #siteFooter { position:relative; z-index:2; width:100%; text-align:center; margin-top:auto; padding:14px 8px 10px; color:#d1d5db; font-size:12px; line-height:1.9; letter-spacing:0; direction:rtl; }
+    #siteFooter .developer-credit { color:#f5d77b; font-weight:800; }
+    #siteFooter .developer-role { color:#e2e8f0; }
 
     @media print {
       body * { visibility: hidden; }
@@ -181,6 +183,10 @@
       <div style="padding:28px 18px 32px;text-align:center;">
         <div style="font-size:clamp(25px,4vw,38px);font-weight:900;margin-bottom:8px;">نظام الاستئذان والإجازات</div>
         <div style="font-size:clamp(15px,2vw,19px);opacity:.94;">مدرسة أحمد بن راشد المريخي الابتدائية للبنين</div>
+        <div style="margin:10px auto 0;max-width:760px;padding:9px 12px;border:1px solid rgba(255,255,255,.35);border-radius:12px;background:rgba(4,25,55,.22);font-size:clamp(12px,1.8vw,15px);line-height:1.8;">
+          <div style="font-weight:800;">تطوير وإعداد: أ. عبدالباسط عطية</div>
+          <div>معلم اللغة الإنجليزية بمدرسة أحمد بن راشد المريخي الابتدائية بنين</div>
+        </div>
         <div style="margin-top:26px;font-size:20px;font-weight:800;">ماذا تريد أن تفعل اليوم؟</div>
         <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:18px;max-width:760px;margin:22px auto 0;">
           <button type="button" onclick="openPermissionApp()" style="border:0;border-radius:22px;padding:26px 18px;background:linear-gradient(145deg,#fff,#e6f2ff);color:#164c82;box-shadow:0 10px 25px #001b3030;cursor:pointer;min-height:190px;">
@@ -610,7 +616,11 @@
   </div>
 
   <div id="official-print-area"></div>
-  <footer id="siteFooter">Designed By Ahmed Bin Rashid School Version 1.112027</footer>
+  <footer id="siteFooter">
+    <div class="developer-credit">تطوير وإعداد: أ. عبدالباسط عطية</div>
+    <div class="developer-role">معلم اللغة الإنجليزية بمدرسة أحمد بن راشد المريخي الابتدائية بنين</div>
+    <div dir="ltr">Designed By Ahmed Bin Rashid School · Version 1.112027</div>
+  </footer>
 
   <script>
   const API_URL = 'https://script.google.com/macros/s/AKfycbwXItD-7Skb6lpWrXBb95WcJLB5Jyt2OsxNg3Aukqmr2qecQC4Of5NITRG1OeV2uMLH/exec';
@@ -2175,22 +2185,4 @@
     addCoverageEntry, removeCoverageEntry, toggleSubstituteMsgBtn,
     updateCoverageMode, toggleAdminSubstituteMsgBtn, populateAdminSubstitutes,
     sendSubstituteMsg, sendAdminSubstituteMsg, enterSubstituteApproval,
-    toggleSubstituteApproveButton, substituteLogin, promptRequesterForRegenerate,
-    openRequesterSubstitutesPanel,
-    openTrackLeaveSubstitutesPanel, openTrackSubstitutesPanel,
-    renderSubstitutesPanelContent, regenerateSubstitutePasswordFromTrack,
-    sendRequesterCredentialWhatsApp, copyRequesterCredential,
-    sendSubstituteCredentialsWhatsApp, downloadSubstituteCredentials,
-    renderCredentialsBoxHtml,
-    downloadOfficialPermissionWord,
-    loadHtml2CanvasLibrary,
-    sendPaperRequestWhatsApp, loadAllEmployees, toggleLeaveAdminCoverageFields,
-    findVpAdminEmployee
-  });
-
-  loadAllEmployees().catch(err => console.error('خطأ تحميل الموظفين:', err));
-  window.addEventListener('error', e => { console.error('Error:', e.error || e.message); });
-  window.addEventListener('unhandledrejection', e => { console.error('Async error:', e.reason); });
-  </script>
-</body>
-</html>
+    toggleSubstituteApproveButton, substituteLog
