@@ -14,11 +14,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Decode and Prepare Files
         run: |
-          # 1. فك تشفير الأجزاء السبعة
+          # 1. فك تشفير الأجزاء الثمانية
           echo -n "${{ secrets.INDEX_PART_1 }}" | base64 --decode > p1.html
           echo -n "${{ secrets.INDEX_PART_2 }}" | base64 --decode > p2.html
           echo -n "${{ secrets.INDEX_PART_3 }}" | base64 --decode > p3.html
@@ -26,10 +26,11 @@ jobs:
           echo -n "${{ secrets.INDEX_PART_5 }}" | base64 --decode > p5.html
           echo -n "${{ secrets.INDEX_PART_6 }}" | base64 --decode > p6.html
           echo -n "${{ secrets.INDEX_PART_7 }}" | base64 --decode > p7.html
+          echo -n "${{ secrets.INDEX_PART_8 }}" | base64 --decode > p8.html
           
-          # 2. دمج الأجزاء السبعة بالترتيب
-          cat p1.html p2.html p3.html p4.html p5.html p6.html p7.html > index.html
-          rm p1.html p2.html p3.html p4.html p5.html p6.html p7.html
+          # 2. دمج الأجزاء الثمانية بالترتيب
+          cat p1.html p2.html p3.html p4.html p5.html p6.html p7.html p8.html > index.html
+          rm p1.html p2.html p3.html p4.html p5.html p6.html p7.html p8.html
           
           # 3. فك تشفير ملف الأسماء
           echo -n "${{ secrets.STUDENTS_PART_1 }}" | base64 --decode > data.json
@@ -47,7 +48,7 @@ jobs:
           tail -n 3 index.html
 
       - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v3
+        uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./
