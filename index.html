@@ -1,6 +1,14 @@
 <!DOCTYPE html>
 <html dir="rtl" lang="ar">
+
 <head>
+<link rel="manifest" href="./manifest.json">
+<meta name="theme-color" content="#123456">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="الإجازات والأذونات">
+<link rel="apple-touch-icon" href="./icon-192.png">
+
+
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
@@ -605,7 +613,7 @@
   <footer id="siteFooter">Designed By Ahmed Bin Rashid School Version 1.112027</footer>
 
   <script>
-  const API_URL = 'https://script.google.com/macros/s/AKfycbzbufnKQuNFgbXAQh2339rfJ2xtkHZ6ZgwpGuWQFI2XmRBkPVtbYUyuIUKf_qPVgRz8/exec';
+  const API_URL = 'https://script.google.com/macros/s/AKfycbwXItD-7Skb6lpWrXBb95WcJLB5Jyt2OsxNg3Aukqmr2qecQC4Of5NITRG1OeV2uMLH/exec';
   const VP_PHONE = "97433337801";
   const PRINCIPAL_PHONE = "97450711122";
   const SUBJECTS = ["مدير المدرسة", "مساعد مدير المدرسة للشؤون الأكاديمية", "مساعد مدير المدرسة للشؤون الإدارية", "اللغة العربية", "اللغة الإنجليزية", "الرياضيات", "العلوم", "العلوم الاجتماعية", "الفنون البصرية", "التربية الرياضية", "تكنولوجيا المعلومات", "العلوم الشرعية"];
@@ -619,6 +627,7 @@
   let savedReqId = "";
   let coverageCounter = 0;
   let currentTrackedData = null;
+  let currentApprovalRequestData = null; // بيانات الطلب المستخدمة لإشعار مقدم الطلب بعد قرار البديل
   let employeeAdminKey = '';
   let currentBalance = 600;
   let currentLeaveEmp = null;
@@ -1222,6 +1231,7 @@
       const res = await fetch(API_URL, { method: 'POST', body: fd, headers: { 'Content-Type': 'application/x-www-form-urlencoded' } });
       const result = await res.json();
       if(result.success) {
+        currentApprovalRequestData = result.data || null;
         if (msgBeforeSearch) { msgBeforeSearch.textContent = ''; msgBeforeSearch.style.color = ''; }
       document.getElementById('requestDetails').classList.remove('hidden'); document.getElementById('detName').innerText = result.data.name; document.getElementById('detJob').innerText = result.data.jobTitle; document.getElementById('detReason').innerText = result.data.reason; let allCoverageRows = getCoverageArray(result.data);
       if (String(result.data.permissionType || '') === 'طلب إجازة') { try { const leaveDetails = typeof result.data.coverageDetails === 'string' ? JSON.parse(result.data.coverageDetails || '{}') : (result.data.coverageDetails || {}); if (leaveDetails.requestKind === 'leave' && Array.isArray(leaveDetails.leaveCoverage)) { const approvals = Array.isArray(result.data.substituteApprovals) ? result.data.substituteApprovals : []; allCoverageRows = leaveDetails.leaveCoverage.map(row => { const approval = approvals.find(a => String(a.employeeId || '').replace(/\s/g, '') === String(row.substituteEmpId || '').replace(/\s/g, '')); return { ...row, substituteTeacher: row.substituteTeacher || row.teacher || '—', approvalStatus: approval ? approval.status : 'pending' }; }); } } catch (e) { console.error('تعذر قراءة تغطية الإجازة:', e); } }
@@ -1287,6 +1297,10 @@
     if (result && result.code === 'UNAUTHORIZED') { alert('انتهت الجلسة. أعد تسجيل الدخول.'); backToHome(); return; }
     if(result.success) {
       document.getElementById('approveMsg').innerText = currentRole === 'substitute' ? `✅ ${result.message || 'تم تسجيل قرار البديل'}` : `✅ تم تسجيل القرار: ${result.newStatus}`; document.getElementById('approveMsg').style.color = "#28a745";
+      // بعد تسجيل قرار المعلم/الإداري البديل بنجاح، أظهر زر واتساب لإبلاغ مقدم الطلب.
+      if (currentRole === 'substitute') {
+        showSubstituteDecisionWhatsApp(currentApprovalRequestData || {}, reqId, decision, rejectionReason);
+      }
       if (decision === 'approved' && ['coordinator', 'vp', 'vp_admin', 'principal'].includes(currentRole)) {
         const isAdminRequest = requestData && (String(requestData.coverageType) === 'إداري' || String(requestData.subject) === 'كادر إداري');
         let recipientPhone = '', recipientRole = '';
@@ -1302,6 +1316,87 @@
         sendAutoWhatsApp(recipientPhone, reqId, recipientRole, currentRole, requestData || {}, result.newStatus);
       }
     } else alert(result.message || 'تعذر حفظ القرار.');
+  }
+
+
+  function showSubstituteDecisionWhatsApp(data, reqId, decision, rejectionReason) {
+    data = data || {};
+    const cleanPhone = String(data.phone || data.mobile || data.phoneNumber || '').replace(/[^0-9]/g, '');
+    const approved = decision === 'approved';
+    const decisionText = approved ? 'موافقة على التغطية' : 'رفض التغطية';
+    const statusText = approved ? '✅ تمت الموافقة' : '❌ تم رفض التغطية';
+    const isLeave = String(data.permissionType || '') === 'طلب إجازة';
+    const details = parseLeaveData(data);
+    const coverageType = (String(data.coverageType || '') === 'إداري' ||
+      String(data.subject || '') === 'كادر إداري' ||
+      String(details.coverageType || '') === 'إداري') ? 'تغطية إدارية' : 'تغطية حصص';
+    const substituteName = (ALL_EMPLOYEES || []).find(e =>
+      String(e.employeeId || e.empId || '').replace(/\s/g, '') === String(currentSubstituteEmpId || '').replace(/\s/g, '')
+    )?.name || document.getElementById('substituteConfirmName')?.innerText || 'البديل';
+    let coverageText = '';
+    try {
+      const raw = typeof data.coverageDetails === 'string' ? JSON.parse(data.coverageDetails || '{}') : (data.coverageDetails || {});
+      const rows = Array.isArray(raw) ? raw : (Array.isArray(raw.leaveCoverage) ? raw.leaveCoverage : []);
+      if (rows.length) {
+        coverageText = rows.filter(r => {
+          const eid = String(r.substituteEmpId || r.employeeId || '').replace(/\s/g, '');
+          return !eid || eid === String(currentSubstituteEmpId || '').replace(/\s/g, '');
+        }).map(r => [
+          r.className || r.class || r.grade || '',
+          r.subject || r.material || '',
+          r.day || '',
+          r.date || '',
+          r.period || r.lesson || ''
+        ].filter(Boolean).join(' - ')).filter(Boolean).join('\n');
+      }
+    } catch (_) {}
+    const lines = [
+      'السلام عليكم ورحمة الله وبركاته،',
+      '',
+      `إشعار بشأن ${isLeave ? 'طلب الإجازة' : 'طلب الإذن'}`,
+      `رقم الطلب: ${reqId || data.requestId || 'غير متاح'}`,
+      `اسم مقدم الطلب: ${data.name || 'غير متاح'}`,
+      `الرقم الوظيفي: ${data.employeeId || data.empId || 'غير متاح'}`,
+      `الوظيفة: ${data.jobTitle || 'غير متاح'}`,
+      `نوع المعاملة: ${data.permissionType || 'غير متاح'}`,
+      `نوع التغطية: ${coverageType}`,
+      `اسم البديل: ${substituteName}`,
+      `قرار البديل: ${decisionText}`,
+      `الحالة: ${statusText}`,
+      isLeave ? `نوع الإجازة: ${details.leaveType || 'غير محدد'}` : `التاريخ: ${data.date || 'غير محدد'}`,
+      isLeave ? `الفترة: من ${details.startDate || '—'} إلى ${details.endDate || '—'}` : `وقت الإذن: من ${data.exitTime || '—'} إلى ${data.returnTime || '—'}`,
+      `السبب: ${data.reason || details.reason || 'غير مذكور'}`,
+      coverageText ? `تفاصيل التغطية:\n${coverageText}` : `تفاصيل التغطية: ${data.adminCoverage || data.coverage || 'يرجى مراجعة الطلب في النظام.'}`,
+      !approved && rejectionReason ? `سبب الرفض: ${rejectionReason}` : '',
+      '',
+      'هذه رسالة آلية للإحاطة بقرار البديل.'
+    ].filter(Boolean);
+    const message = lines.join('\n');
+    const msgBox = document.getElementById('approveMsg');
+    if (!msgBox) return;
+    let button = document.getElementById('substituteDecisionWhatsAppBtn');
+    if (!button) {
+      button = document.createElement('button');
+      button.id = 'substituteDecisionWhatsAppBtn';
+      button.type = 'button';
+      button.className = 'btn btn-wa';
+      button.style.cssText = 'display:block;width:100%;margin-top:10px;font-weight:800;';
+      msgBox.insertAdjacentElement('afterend', button);
+    }
+    button.textContent = cleanPhone
+      ? `📲 إبلاغ مقدم الطلب عبر واتساب — ${approved ? 'موافقة البديل' : 'رفض البديل'}`
+      : '⚠️ لا يوجد رقم هاتف لمقدم الطلب';
+    button.disabled = !cleanPhone;
+    button.hidden = false;
+    button.classList.remove('hidden');
+    const url = cleanPhone
+      ? `https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`
+      : '';
+    button.onclick = () => {
+      if (!url) return;
+      const opened = window.open(url, '_blank');
+      if (!opened) window.location.href = url;
+    };
   }
 
   function sendAutoWhatsApp(phone, reqId, nextRole, currentRoleName, data, status) {
