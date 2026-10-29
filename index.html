@@ -2185,4 +2185,22 @@
     addCoverageEntry, removeCoverageEntry, toggleSubstituteMsgBtn,
     updateCoverageMode, toggleAdminSubstituteMsgBtn, populateAdminSubstitutes,
     sendSubstituteMsg, sendAdminSubstituteMsg, enterSubstituteApproval,
-    toggleSubstituteApproveButton, substituteLog
+    toggleSubstituteApproveButton, substituteLogin, promptRequesterForRegenerate,
+    openRequesterSubstitutesPanel,
+    openTrackLeaveSubstitutesPanel, openTrackSubstitutesPanel,
+    renderSubstitutesPanelContent, regenerateSubstitutePasswordFromTrack,
+    sendRequesterCredentialWhatsApp, copyRequesterCredential,
+    sendSubstituteCredentialsWhatsApp, downloadSubstituteCredentials,
+    renderCredentialsBoxHtml,
+    downloadOfficialPermissionWord,
+    loadHtml2CanvasLibrary,
+    sendPaperRequestWhatsApp, loadAllEmployees, toggleLeaveAdminCoverageFields,
+    findVpAdminEmployee
+  });
+
+  loadAllEmployees().catch(err => console.error('خطأ تحميل الموظفين:', err));
+  window.addEventListener('error', e => { console.error('Error:', e.error || e.message); });
+  window.addEventListener('unhandledrejection', e => { console.error('Async error:', e.reason); });
+  </script>
+</body>
+</html>
